@@ -132,7 +132,7 @@ export default function ProductCard({ product }: ProductCardProps) {
               src={product.image_url}
               alt={product.name}
               fill
-              className="object-contain p-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500"
+              className="object-contain p-6 group-hover:scale-110 transition-all duration-500"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">

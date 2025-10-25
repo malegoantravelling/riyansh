@@ -12,15 +12,17 @@ import { api } from '@/lib/api'
 const testimonials = [
   {
     id: 1,
-    name: 'Elizabeth Graham',
-    text: 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Vero omnis, vitae sequi culpa libero, mollitia vel quasi consequuntur a impedit accusamus qui sit voluptatem.',
-    avatar: 'https://via.placeholder.com/80x80?text=EG',
+    name: 'Priya Sharma',
+    text: "Excellent service and genuine products! I have been ordering my mother's diabetes medicines from Riyansh for the past 6 months. The medicines are always authentic, well-packaged, and delivered on time. The customer support team is very helpful and knowledgeable.",
+    avatar:
+      'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=200&h=200',
   },
   {
     id: 2,
-    name: 'Jennifer Greive',
-    text: 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Vero omnis, vitae sequi culpa libero, mollitia vel quasi consequuntur a impedit accusamus qui sit voluptatem.',
-    avatar: 'https://via.placeholder.com/80x80?text=JG',
+    name: 'Rajesh Kumar',
+    text: 'Best online pharmacy in India! Their Ayurvedic products are of premium quality and 100% genuine. I ordered Amrit juice and tablets for my family, and we can see real health benefits. Fast delivery and great customer service. Highly recommended!',
+    avatar:
+      'https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=200&h=200',
   },
 ]
 
@@ -108,7 +110,7 @@ export default function Home() {
               <Link href="/store">
                 <Button
                   size="lg"
-                  className="text-lg px-10 py-7 rounded-full shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105"
+                  className="text-base px-8 py-4 rounded-full shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105"
                 >
                   <span className="flex items-center gap-2">
                     Explore Products
@@ -127,7 +129,7 @@ export default function Home() {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="text-lg px-10 py-7 rounded-full border-2 transition-all duration-300"
+                  className="text-base px-8 py-4 rounded-full border-2 transition-all duration-300"
                 >
                   Learn More
                 </Button>
@@ -226,7 +228,7 @@ export default function Home() {
                 </svg>
               </div>
               <div>
-                <p className="text-3xl font-bold text-[#333333]">10,000+</p>
+                <p className="text-3xl font-bold text-[#333333]">5,000+</p>
                 <p className="text-sm text-[#666666]">Happy Customers</p>
               </div>
             </div>
@@ -393,7 +395,7 @@ export default function Home() {
               <Button
                 size="lg"
                 variant="outline"
-                className="group relative overflow-hidden border-2 border-[#8BC34A] text-[#8BC34A] hover:text-white px-12 py-6 text-lg font-semibold rounded-full transition-all duration-300 hover:shadow-xl hover:scale-105"
+                className="group relative overflow-hidden border-2 border-[#8BC34A] text-[#8BC34A] hover:text-white px-8 py-4 text-base font-semibold rounded-full transition-all duration-300 hover:shadow-xl hover:scale-105"
               >
                 <span className="relative z-10 flex items-center gap-2">
                   View All Products
@@ -606,6 +608,7 @@ export default function Home() {
                         alt={testimonial.name}
                         width={56}
                         height={56}
+                        className="w-full h-full object-cover object-center"
                       />
                     </div>
                     <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-[#8BC34A] rounded-full flex items-center justify-center border-2 border-white">
@@ -626,7 +629,6 @@ export default function Home() {
               </div>
             ))}
           </div>
-
         </div>
       </section>
     </div>

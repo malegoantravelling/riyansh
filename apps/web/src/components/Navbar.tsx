@@ -1,15 +1,16 @@
 'use client'
 
 import Link from 'next/link'
-import { ShoppingCart, Search, User, ChevronDown, Menu, X, Phone, Mail } from 'lucide-react'
+import { ShoppingCart, User, ChevronDown, Menu, X, CreditCard, MapPin, LogOut } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useCart } from '@/contexts/CartContext'
 
 export default function Navbar() {
   const pathname = usePathname()
+  const router = useRouter()
   const { cartCount } = useCart()
   const [user, setUser] = useState<any>(null)
   const [showDropdown, setShowDropdown] = useState(false)
@@ -44,6 +45,12 @@ export default function Navbar() {
   const handleLogout = async () => {
     await supabase.auth.signOut()
     setShowDropdown(false)
+    router.push('/')
+  }
+
+  const handleNavigation = (href: string) => {
+    setShowDropdown(false)
+    router.push(href)
   }
 
   const navLinks = [
@@ -61,8 +68,8 @@ export default function Navbar() {
       <nav
         className={`sticky top-0 z-50 transition-all duration-300 ${
           scrolled
-            ? 'bg-white/95 backdrop-blur-lg shadow-lg border-b border-gray-100'
-            : 'bg-white border-b border-gray-100'
+            ? 'bg-white/80 backdrop-blur-lg shadow-lg border-b border-gray-100'
+            : 'bg-white/70 backdrop-blur-md border-b border-gray-100/50'
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -138,36 +145,28 @@ export default function Navbar() {
                           {[
                             { href: '/account/profile', label: 'My Profile', icon: User },
                             { href: '/account/orders', label: 'My Orders', icon: ShoppingCart },
-                            { href: '/account/addresses', label: 'Addresses', icon: Mail },
+                            {
+                              href: '/account/transactions',
+                              label: 'Transactions',
+                              icon: CreditCard,
+                            },
+                            { href: '/account/addresses', label: 'Addresses', icon: MapPin },
                           ].map((item) => (
-                            <Link
+                            <button
                               key={item.href}
-                              href={item.href}
-                              className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-[#2d2d2d] hover:bg-[#8BC34A]/10 hover:text-[#8BC34A] rounded-xl transition-all duration-300"
-                              onClick={() => setShowDropdown(false)}
+                              onClick={() => handleNavigation(item.href)}
+                              className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-[#2d2d2d] hover:bg-[#8BC34A]/10 hover:text-[#8BC34A] rounded-xl transition-all duration-300"
                             >
                               <item.icon className="h-4 w-4" />
                               {item.label}
-                            </Link>
+                            </button>
                           ))}
                           <hr className="my-2 border-gray-100" />
                           <button
                             onClick={handleLogout}
                             className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 rounded-xl transition-all duration-300"
                           >
-                            <svg
-                              className="h-4 w-4"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                              />
-                            </svg>
+                            <LogOut className="h-4 w-4" />
                             Logout
                           </button>
                         </div>
@@ -177,7 +176,7 @@ export default function Navbar() {
                 </div>
               ) : (
                 <Link href="/auth/login" className="hidden sm:block">
-                  <Button className="rounded-xl px-6 font-semibold shadow-lg hover:shadow-xl transition-all duration-300">
+                  <Button className="rounded-xl px-6 font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:text-white">
                     Login
                   </Button>
                 </Link>
@@ -231,16 +230,19 @@ export default function Navbar() {
                   {[
                     { href: '/account/profile', label: 'My Profile' },
                     { href: '/account/orders', label: 'My Orders' },
+                    { href: '/account/transactions', label: 'Transactions' },
                     { href: '/account/addresses', label: 'Addresses' },
                   ].map((item) => (
-                    <Link
+                    <button
                       key={item.href}
-                      href={item.href}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="block px-4 py-3 text-sm font-medium text-[#2d2d2d] hover:bg-[#8BC34A]/10 hover:text-[#8BC34A] rounded-xl transition-all duration-300"
+                      onClick={() => {
+                        setMobileMenuOpen(false)
+                        router.push(item.href)
+                      }}
+                      className="w-full text-left block px-4 py-3 text-sm font-medium text-[#2d2d2d] hover:bg-[#8BC34A]/10 hover:text-[#8BC34A] rounded-xl transition-all duration-300"
                     >
                       {item.label}
-                    </Link>
+                    </button>
                   ))}
                   <button
                     onClick={() => {

@@ -3,6 +3,7 @@ import { api } from '../lib/api'
 import { CreditCard, CheckCircle, XCircle, Clock, Search, Filter } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
+import TransactionModal from '../components/TransactionModal'
 
 interface Transaction {
   id: string
@@ -33,6 +34,8 @@ export default function Transactions() {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
+  const [selectedTransaction, setSelectedTransaction] = useState<TransactionWithUser | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   useEffect(() => {
     fetchTransactions()
@@ -277,7 +280,8 @@ export default function Transactions() {
                         variant="outline"
                         size="sm"
                         onClick={() => {
-                          alert(`Transaction Details:\n\n${JSON.stringify(transaction, null, 2)}`)
+                          setSelectedTransaction(transaction)
+                          setIsModalOpen(true)
                         }}
                       >
                         View Details
@@ -290,6 +294,16 @@ export default function Transactions() {
           </div>
         )}
       </div>
+
+      {/* Transaction Details Modal */}
+      <TransactionModal
+        transaction={selectedTransaction}
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false)
+          setSelectedTransaction(null)
+        }}
+      />
     </div>
   )
 }

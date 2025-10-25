@@ -14,8 +14,6 @@ import {
   Truck,
   Shield,
   Package,
-  X,
-  Heart,
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { formatCurrency } from '@/lib/utils'
@@ -204,7 +202,7 @@ export default function CartPage() {
             </div>
             <h2 className="text-3xl font-bold text-[#2d2d2d] mb-4">Your Cart is Empty</h2>
             <p className="text-gray-600 mb-8 text-lg max-w-md mx-auto leading-relaxed">
-              Looks like you haven't added anything to your cart yet. Start shopping to find amazing
+              Looks like you haven&apos;t added anything to your cart yet. Start shopping to find amazing
               products!
             </p>
             <Link href="/store">
@@ -386,7 +384,7 @@ export default function CartPage() {
                     <Button
                       onClick={handleCheckout}
                       size="lg"
-                      className="w-full h-14 text-lg font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 mt-6"
+                      className="w-full h-14 text-lg font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 hover:text-white mt-6"
                       disabled={loading || cartItems.length === 0}
                     >
                       <ShoppingBag className="h-5 w-5 mr-2" />
