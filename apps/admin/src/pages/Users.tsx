@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Edit, Trash2 } from 'lucide-react'
+import { Edit, Trash2, Search, Filter, User } from 'lucide-react'
+import { Input } from '@/components/ui/input'
 import { api } from '@/lib/api'
 
 interface User {
@@ -112,6 +113,8 @@ export default function Users() {
   const [users, setUsers] = useState<User[]>([])
   const [editingUser, setEditingUser] = useState<User | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [dateFilter, setDateFilter] = useState<string>('all')
 
   useEffect(() => {
     fetchUsers()
@@ -147,60 +150,143 @@ export default function Users() {
     setUsers(users.map((user) => (user.id === updatedUser.id ? updatedUser : user)))
   }
 
+  // Filter users based on search term and filters
+  const filteredUsers = users.filter((user) => {
+    const matchesSearch =
+      user.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchTerm.toLowerCase())
+
+    const matchesDate = (() => {
+      const userDate = new Date(user.created_at)
+      const now = new Date()
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+      const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000)
+      const lastWeek = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000)
+      const lastMonth = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000)
+
+      switch (dateFilter) {
+        case 'today':
+          return userDate >= today
+        case 'yesterday':
+          return userDate >= yesterday && userDate < today
+        case 'last-week':
+          return userDate >= lastWeek
+        case 'last-month':
+          return userDate >= lastMonth
+        default:
+          return true
+      }
+    })()
+
+    return matchesSearch && matchesDate
+  })
+
   return (
     <div>
       <h1 className="text-3xl font-bold text-gray-800 mb-8">Users</h1>
 
+      {/* Search and Filters */}
+      <div className="bg-white rounded-lg shadow p-6 mb-6 border border-gray-200">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Search */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <Input
+              type="text"
+              placeholder="Search by name or email..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+
+          {/* Date Filter */}
+          <div className="relative">
+            <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <select
+              value={dateFilter}
+              onChange={(e) => setDateFilter(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#8BC34A] focus:border-transparent"
+            >
+              <option value="all">All Time</option>
+              <option value="today">Today</option>
+              <option value="yesterday">Yesterday</option>
+              <option value="last-week">Last 7 Days</option>
+              <option value="last-month">Last 30 Days</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Results count */}
+        <div className="mt-4 text-sm text-gray-600">
+          Showing {filteredUsers.length} of {users.length} users
+        </div>
+      </div>
+
       <div className="bg-white rounded-lg shadow border border-gray-200 overflow-hidden">
-        <table className="w-full">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Name
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Email
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Joined
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
-            {users.map((user) => (
-              <tr key={user.id}>
-                <td className="px-6 py-4 text-sm font-medium text-gray-900">
-                  {user.full_name || '-'}
-                </td>
-                <td className="px-6 py-4 text-sm text-gray-500">{user.email}</td>
-                <td className="px-6 py-4 text-sm text-gray-500">
-                  {new Date(user.created_at).toLocaleDateString()}
-                </td>
-                <td className="px-6 py-4 text-sm text-gray-500">
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => handleEdit(user)}
-                      className="text-blue-600 hover:text-blue-800 p-1"
-                      title="Edit user"
-                    >
-                      <Edit className="h-4 w-4" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(user.id)}
-                      className="text-red-600 hover:text-red-800 p-1"
-                      title="Delete user"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
-                </td>
+        {filteredUsers.length === 0 ? (
+          <div className="p-12 text-center">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
+              <User className="h-8 w-8 text-gray-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">No users found</h3>
+            <p className="text-gray-500 mb-6">
+              {searchTerm || dateFilter !== 'all'
+                ? 'No users match your current filters. Try adjusting your search criteria.'
+                : 'No users available. Users will appear here when they register.'}
+            </p>
+          </div>
+        ) : (
+          <table className="w-full">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Name
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Email
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Joined
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Actions
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {filteredUsers.map((user) => (
+                <tr key={user.id}>
+                  <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                    {user.full_name || '-'}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-500">{user.email}</td>
+                  <td className="px-6 py-4 text-sm text-gray-500">
+                    {new Date(user.created_at).toLocaleDateString()}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-500">
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => handleEdit(user)}
+                        className="text-blue-600 hover:text-blue-800 p-1"
+                        title="Edit user"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(user.id)}
+                        className="text-red-600 hover:text-red-800 p-1"
+                        title="Delete user"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
 
       <EditUserModal

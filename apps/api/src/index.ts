@@ -9,6 +9,7 @@ import ordersRoutes from './routes/orders'
 import usersRoutes from './routes/users'
 import transactionsRoutes from './routes/transactions'
 import logsRoutes from './routes/logs'
+import contactRoutes from './routes/contact'
 
 dotenv.config()
 
@@ -33,6 +34,7 @@ app.use('/api/orders', ordersRoutes)
 app.use('/api/users', usersRoutes)
 app.use('/api/transactions', transactionsRoutes)
 app.use('/api/logs', logsRoutes)
+app.use('/api/contact', contactRoutes)
 
 // Error handling
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {

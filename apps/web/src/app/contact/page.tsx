@@ -4,20 +4,10 @@ import React, { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import {
-  MapPin,
-  Phone,
-  Mail,
-  Send,
-  MessageSquare,
-  ChevronDown,
-  Sparkles,
-  Clock,
-  CheckCircle2,
-  Globe,
-} from 'lucide-react'
+import { MapPin, Phone, Mail, Send, MessageSquare, ChevronDown, Sparkles } from 'lucide-react'
 import Link from 'next/link'
 import { useToast } from '@/contexts/ToastContext'
+import { api } from '@/lib/api'
 
 export default function ContactPage() {
   const toast = useToast()
@@ -30,23 +20,52 @@ export default function ContactPage() {
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
-    console.log('Form submitted:', formData)
-    // Simulate submission
-    setTimeout(() => {
-      setIsSubmitting(false)
-      toast.success('Message Sent!', 'Thank you for contacting us. We will respond shortly.')
-      // Reset form
-      setFormData({
-        firstName: '',
-        lastName: '',
-        email: '',
-        subject: '',
-        message: '',
+
+    try {
+      console.log('📝 Submitting contact form:', formData)
+      const response = await api.post('/api/contact/submit', formData)
+      console.log('📧 API Response:', response)
+
+      if (response.success) {
+        toast.success('Message Sent!', response.message)
+        // Reset form
+        setFormData({
+          firstName: '',
+          lastName: '',
+          email: '',
+          subject: '',
+          message: '',
+        })
+      } else {
+        console.error('❌ API Error:', response.error)
+        toast.error('Error', response.error || 'Failed to send message. Please try again.')
+      }
+    } catch (error: any) {
+      console.error('❌ Contact form error:', error)
+      console.error('🔍 Error details:', {
+        message: error.message,
+        stack: error.stack,
+        response: error.response,
       })
-    }, 1500)
+
+      // Try to extract error message from response
+      let errorMessage = 'Failed to send message. Please try again.'
+      if (error.response) {
+        try {
+          const errorData = await error.response.json()
+          errorMessage = errorData.error || errorMessage
+        } catch (parseError) {
+          console.error('Failed to parse error response:', parseError)
+        }
+      }
+
+      toast.error('Error', errorMessage)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -80,7 +99,7 @@ export default function ContactPage() {
             {/* Badge */}
             <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-white/20 backdrop-blur-sm rounded-full border border-white/30">
               <MessageSquare className="h-4 w-4 text-white" />
-              <span className="text-sm font-bold text-white">We're Here to Help</span>
+              <span className="text-sm font-bold text-white">We&apos;re Here to Help</span>
             </div>
 
             <h1 className="text-5xl md:text-6xl font-extrabold text-white mb-4 tracking-tight drop-shadow-2xl">
@@ -88,8 +107,8 @@ export default function ContactPage() {
             </h1>
 
             <p className="text-white/95 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
-              Have a question? We'd love to hear from you. Send us a message and we'll respond as
-              soon as possible.
+              Have a question? We&apos;d love to hear from you. Send us a message and we&apos;ll
+              respond as soon as possible.
             </p>
 
             <div className="flex items-center justify-center space-x-3 text-white/90 mt-4">
@@ -253,9 +272,11 @@ export default function ContactPage() {
               <Sparkles className="h-4 w-4 text-[#8BC34A]" />
               <span className="text-sm font-semibold text-[#8BC34A]">Contact Information</span>
             </div>
-            <h2 className="text-4xl md:text-5xl font-extrabold text-[#2d2d2d]">Let's Connect</h2>
+            <h2 className="text-4xl md:text-5xl font-extrabold text-[#2d2d2d]">
+              Let&apos;s Connect
+            </h2>
             <p className="text-lg text-[#666666] max-w-2xl mx-auto leading-relaxed">
-              We're available 24/7 to assist you with any questions or concerns
+              We&apos;re available 24/7 to assist you with any questions or concerns
             </p>
           </div>
 
