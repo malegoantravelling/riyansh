@@ -3,6 +3,7 @@ import { supabase } from '../config/supabase'
 import { authenticateToken, AuthRequest } from '../middleware/auth'
 import Razorpay from 'razorpay'
 import crypto from 'crypto'
+import { sendOrderConfirmationEmail } from '../services/emailService'
 
 const router = Router()
 
@@ -193,6 +194,87 @@ router.post('/verify-payment', authenticateToken, async (req: AuthRequest, res) 
 
     if (orderError) {
       return res.status(400).json({ error: orderError.message })
+    }
+
+    // Get order items for email
+    const { data: orderItems } = await supabase
+      .from('order_items')
+      .select('*')
+      .eq('order_id', order_id)
+
+    // Get user details for email
+    const { data: userProfile } = await supabase
+      .from('users')
+      .select('full_name, email')
+      .eq('id', userId)
+      .single()
+
+    // Create transaction record
+    try {
+      await supabase.from('transactions').insert({
+        user_id: userId,
+        order_id: order.id,
+        razorpay_payment_id,
+        razorpay_order_id,
+        razorpay_signature,
+        amount: order.total_amount,
+        currency: 'INR',
+        status: 'success',
+        payment_method: 'Razorpay',
+        description: `Payment for Order #${order.id.substring(0, 8)}`,
+        metadata: {
+          order_items_count: orderItems?.length || 0,
+          shipping_address: order.shipping_address,
+        },
+      })
+      console.log('✅ Transaction record created')
+    } catch (txError) {
+      console.error('❌ Failed to create transaction:', txError)
+    }
+
+    // Log activity
+    try {
+      await supabase.from('activity_logs').insert({
+        user_id: userId,
+        action: 'payment_success',
+        entity_type: 'order',
+        entity_id: order.id,
+        description: `Payment successful for order #${order.id.substring(0, 8)} - ₹${
+          order.total_amount
+        }`,
+        metadata: {
+          order_id: order.id,
+          amount: order.total_amount,
+          payment_id: razorpay_payment_id,
+          items_count: orderItems?.length || 0,
+        },
+      })
+      console.log('✅ Activity logged')
+    } catch (logError) {
+      console.error('❌ Failed to log activity:', logError)
+    }
+
+    // Send order confirmation email to admin
+    try {
+      await sendOrderConfirmationEmail({
+        orderId: order.id,
+        orderDate: new Date(order.created_at).toLocaleString('en-IN', {
+          dateStyle: 'medium',
+          timeStyle: 'short',
+        }),
+        totalAmount: order.total_amount,
+        paymentId: razorpay_payment_id,
+        paymentMethod: 'Razorpay',
+        customerName: userProfile?.full_name || 'Customer',
+        customerEmail: userProfile?.email || 'N/A',
+        customerPhone: order.shipping_address?.phone || 'N/A',
+        shippingAddress: order.shipping_address,
+        orderItems: orderItems || [],
+      })
+      console.log('✅ Order confirmation email sent')
+    } catch (emailError) {
+      console.error('❌ Failed to send email:', emailError)
+      // Don't fail the order if email fails
     }
 
     // Clear cart after successful payment

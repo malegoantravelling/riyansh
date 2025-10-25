@@ -60,6 +60,8 @@ export default function ProductDetailsPage() {
 
   const fetchProduct = async (slug: string) => {
     try {
+      console.log('🔍 Fetching product with slug:', slug)
+
       const { data, error } = await supabase
         .from('products')
         .select('*')
@@ -67,7 +69,26 @@ export default function ProductDetailsPage() {
         .eq('is_active', true)
         .single()
 
-      if (error) throw error
+      if (error) {
+        console.error('❌ Error fetching product:', error)
+
+        // Check if product exists but is inactive
+        const { data: inactiveProduct } = await supabase
+          .from('products')
+          .select('*')
+          .eq('slug', slug)
+          .single()
+
+        if (inactiveProduct) {
+          console.warn('⚠️ Product exists but is inactive:', inactiveProduct)
+        } else {
+          console.error('❌ Product not found with slug:', slug)
+        }
+
+        throw error
+      }
+
+      console.log('✅ Product found:', data)
       setProduct(data)
 
       // Fetch related products
@@ -220,7 +241,7 @@ export default function ProductDetailsPage() {
           </div>
           <h1 className="text-3xl font-bold text-gray-800 mb-4">Product Not Found</h1>
           <p className="text-gray-600 mb-8">
-            The product you're looking for doesn't exist or has been removed.
+            The product you&apos;re looking for doesn&apos;t exist or has been removed.
           </p>
           <Link href="/store">
             <Button size="lg" className="px-8">

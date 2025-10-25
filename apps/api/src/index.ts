@@ -7,6 +7,8 @@ import categoriesRoutes from './routes/categories'
 import cartRoutes from './routes/cart'
 import ordersRoutes from './routes/orders'
 import usersRoutes from './routes/users'
+import transactionsRoutes from './routes/transactions'
+import logsRoutes from './routes/logs'
 
 dotenv.config()
 
@@ -29,6 +31,8 @@ app.use('/api/categories', categoriesRoutes)
 app.use('/api/cart', cartRoutes)
 app.use('/api/orders', ordersRoutes)
 app.use('/api/users', usersRoutes)
+app.use('/api/transactions', transactionsRoutes)
+app.use('/api/logs', logsRoutes)
 
 // Error handling
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
