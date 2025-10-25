@@ -46,24 +46,21 @@ export default function AboutPage() {
     {
       name: 'Dr. Priya Sharma',
       role: 'Chief Ayurvedic Consultant',
-      image:
-        'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200"%3E%3Crect width="200" height="200" fill="%238BC34A"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="Arial" font-size="24" fill="white"%3EDr. Priya%3C/text%3E%3C/svg%3E',
+      image: 'https://via.placeholder.com/200x200?text=Dr.+Priya',
       description:
         'With over 15 years of experience in Ayurveda, Dr. Sharma leads our product development.',
     },
     {
       name: 'Rajesh Kumar',
       role: 'Quality Control Manager',
-      image:
-        'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200"%3E%3Crect width="200" height="200" fill="%237CB342"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="Arial" font-size="24" fill="white"%3ERajesh%3C/text%3E%3C/svg%3E',
+      image: 'https://via.placeholder.com/200x200?text=Rajesh',
       description:
         'Ensures every product meets our stringent quality standards before reaching you.',
     },
     {
       name: 'Meera Patel',
       role: 'Customer Care Head',
-      image:
-        'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200"%3E%3Crect width="200" height="200" fill="%238BC34A"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="Arial" font-size="24" fill="white"%3EMeera%3C/text%3E%3C/svg%3E',
+      image: 'https://via.placeholder.com/200x200?text=Meera',
       description: 'Dedicated to providing exceptional customer service and support.',
     },
   ]
@@ -208,7 +205,7 @@ export default function AboutPage() {
                 {/* Image */}
                 <div className="relative h-full rounded-2xl overflow-hidden group-hover:scale-105 transition-transform duration-700">
                   <Image
-                    src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='500' height='500'%3E%3Crect width='500' height='500' fill='%238BC34A'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='32' fill='white'%3EAyurvedic Products%3C/text%3E%3C/svg%3E"
+                    src="https://via.placeholder.com/500x500?text=Ayurvedic+Products"
                     alt="Ayurvedic Products"
                     width={500}
                     height={500}
@@ -317,7 +314,7 @@ export default function AboutPage() {
                   <Users className="h-8 w-8 text-[#8BC34A]" />
                 </div>
                 <div className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#8BC34A] to-[#7CB342] mb-3">
-                  10,000+
+                  5,000+
                 </div>
                 <div className="text-[#666666] font-semibold text-sm">Happy Customers</div>
               </div>
@@ -415,7 +412,7 @@ export default function AboutPage() {
                         alt={member.name}
                         width={144}
                         height={144}
-                        className="object-cover w-full h-full"
+                        className="w-full h-full object-cover object-center"
                       />
                       {/* Overlay on Hover */}
                       <div className="absolute inset-0 bg-gradient-to-t from-[#8BC34A]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />

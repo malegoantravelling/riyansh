@@ -384,7 +384,7 @@ export default function CartPage() {
                     <Button
                       onClick={handleCheckout}
                       size="lg"
-                      className="w-full h-14 text-lg font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 mt-6"
+                      className="w-full h-14 text-lg font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 hover:text-white mt-6"
                       disabled={loading || cartItems.length === 0}
                     >
                       <ShoppingBag className="h-5 w-5 mr-2" />
