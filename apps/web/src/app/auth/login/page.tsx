@@ -21,14 +21,25 @@ export default function LoginPage() {
     setLoading(true)
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
 
-      if (error) throw error
+      if (error) {
+        // Provide user-friendly error messages
+        if (error.message.includes('Invalid login credentials')) {
+          throw new Error('User not registered or incorrect password')
+        } else if (error.message.includes('Email not confirmed')) {
+          throw new Error('Please verify your email before logging in')
+        } else {
+          throw error
+        }
+      }
 
-      router.push('/')
+      if (data.user) {
+        router.push('/')
+      }
     } catch (error: any) {
       setError(error.message)
     } finally {

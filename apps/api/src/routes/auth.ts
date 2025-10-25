@@ -48,6 +48,12 @@ router.post('/login', async (req, res) => {
     })
 
     if (error) {
+      // Provide user-friendly error messages
+      if (error.message.includes('Invalid login credentials')) {
+        return res.status(401).json({ error: 'User not registered or incorrect password' })
+      } else if (error.message.includes('Email not confirmed')) {
+        return res.status(403).json({ error: 'Please verify your email before logging in' })
+      }
       return res.status(400).json({ error: error.message })
     }
 

@@ -86,24 +86,38 @@ export default function Dashboard() {
         })}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+      <div className="mt-8">
         <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
           <h2 className="text-xl font-bold text-gray-800 mb-4">Recent Orders</h2>
-          <p className="text-gray-500">No recent orders to display.</p>
-        </div>
-
-        <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
-          <h2 className="text-xl font-bold text-gray-800 mb-4">Quick Actions</h2>
-          <div className="space-y-2">
-            <button className="w-full text-left px-4 py-2 rounded hover:bg-gray-100 transition-colors">
-              Add New Product
-            </button>
-            <button className="w-full text-left px-4 py-2 rounded hover:bg-gray-100 transition-colors">
-              View All Orders
-            </button>
-            <button className="w-full text-left px-4 py-2 rounded hover:bg-gray-100 transition-colors">
-              Manage Categories
-            </button>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                    Order ID
+                  </th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                    Customer
+                  </th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                    Amount
+                  </th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                    Status
+                  </th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                    Date
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                <tr>
+                  <td colSpan={5} className="px-4 py-8 text-center text-gray-500">
+                    No recent orders to display.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
