@@ -506,7 +506,7 @@ export default function AboutPage() {
             </span>
           </h2>
 
-          <p className="text-white/95 text-xl mb-10 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-white text-xl mb-10 max-w-3xl mx-auto leading-relaxed">
             Join thousands of satisfied customers who have transformed their health with our natural
             products.
           </p>
@@ -516,20 +516,20 @@ export default function AboutPage() {
             <Link href="/store">
               <Button
                 size="lg"
-                className="bg-white text-[#8BC34A] hover:bg-gray-50 font-bold px-10 py-7 rounded-xl shadow-2xl hover:shadow-xl transition-all duration-300 hover:scale-105 text-lg"
+                className="bg-white/20 backdrop-blur-sm text-white border-2 border-white/30 hover:bg-white/30 font-bold px-10 py-7 rounded-xl shadow-2xl hover:shadow-xl transition-all duration-300 hover:scale-105 text-lg"
               >
-                <Leaf className="h-5 w-5 mr-2" />
+                <Leaf className="h-5 w-5 mr-2 text-white" />
                 Shop Now
-                <ChevronDown className="h-5 w-5 ml-2 -rotate-90" />
+                <ChevronDown className="h-5 w-5 ml-2 -rotate-90 text-white" />
               </Button>
             </Link>
             <Link href="/contact">
               <Button
                 variant="outline"
                 size="lg"
-                className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-[#8BC34A] font-bold px-10 py-7 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-lg"
+                className="bg-transparent border-2 border-white text-white hover:bg-white/20 hover:text-white font-bold px-10 py-7 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-lg"
               >
-                <Users className="h-5 w-5 mr-2" />
+                <Users className="h-5 w-5 mr-2 text-white" />
                 Contact Us
               </Button>
             </Link>
