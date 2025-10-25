@@ -22,6 +22,7 @@ import { supabase } from '@/lib/supabase'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useToast } from '@/contexts/ToastContext'
+import { useCart } from '@/contexts/CartContext'
 import ProductCard from '@/components/ProductCard'
 
 interface Product {
@@ -42,6 +43,7 @@ interface Product {
 export default function ProductDetailsPage() {
   const params = useParams()
   const toast = useToast()
+  const { incrementCartCount, refreshCartCount } = useCart()
   const [product, setProduct] = useState<Product | null>(null)
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
@@ -138,6 +140,7 @@ export default function ProductDetailsPage() {
 
       if (!session?.user) {
         toast.warning('Login Required', 'Please login to add items to cart')
+        setAddingToCart(false)
         return
       }
 
@@ -168,10 +171,18 @@ export default function ProductDetailsPage() {
         if (error) throw error
       }
 
+      // Immediately update cart count in UI
+      incrementCartCount(quantity)
+
       toast.success('Added to Cart!', `${quantity} x ${product.name} added to your cart`)
+
+      // Refresh from database to ensure accuracy
+      await refreshCartCount()
     } catch (error) {
       console.error('Error adding to cart:', error)
       toast.error('Failed to Add', 'Could not add product to cart. Please try again.')
+      // Refresh cart count on error to ensure accuracy
+      await refreshCartCount()
     } finally {
       setAddingToCart(false)
     }

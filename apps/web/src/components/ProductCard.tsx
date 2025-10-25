@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { ShoppingCart, Star } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useToast } from '@/contexts/ToastContext'
+import { useCart } from '@/contexts/CartContext'
 
 interface ProductCardProps {
   product: {
@@ -28,6 +29,7 @@ interface ProductCardProps {
 export default function ProductCard({ product }: ProductCardProps) {
   const [addingToCart, setAddingToCart] = useState(false)
   const toast = useToast()
+  const { incrementCartCount, refreshCartCount } = useCart()
 
   // Default values for rating and reviews
   const rating = product.rating || 4.5
@@ -49,6 +51,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
       if (!session?.user) {
         toast.warning('Login Required', 'Please login to add items to cart')
+        setAddingToCart(false)
         return
       }
 
@@ -76,10 +79,18 @@ export default function ProductCard({ product }: ProductCardProps) {
         if (error) throw error
       }
 
+      // Immediately update cart count in UI
+      incrementCartCount(1)
+
       toast.success('Added to Cart!', `${product.name} has been added to your cart`)
+
+      // Refresh from database to ensure accuracy
+      await refreshCartCount()
     } catch (error) {
       console.error('Error adding to cart:', error)
       toast.error('Failed to Add', 'Could not add product to cart. Please try again.')
+      // Refresh cart count on error to ensure accuracy
+      await refreshCartCount()
     } finally {
       setAddingToCart(false)
     }

@@ -21,6 +21,7 @@ import { supabase } from '@/lib/supabase'
 import { formatCurrency } from '@/lib/utils'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useCart } from '@/contexts/CartContext'
 
 interface CartItem {
   id: string
@@ -35,6 +36,7 @@ interface CartItem {
 
 export default function CartPage() {
   const router = useRouter()
+  const { refreshCartCount } = useCart()
   const [cartItems, setCartItems] = useState<CartItem[]>([])
   const [loading, setLoading] = useState(true)
   const [user, setUser] = useState<any>(null)
@@ -89,6 +91,7 @@ export default function CartPage() {
 
       if (error) throw error
       await fetchCartItems()
+      await refreshCartCount()
     } catch (error) {
       console.error('Error updating quantity:', error)
     }
@@ -100,6 +103,7 @@ export default function CartPage() {
 
       if (error) throw error
       await fetchCartItems()
+      await refreshCartCount()
     } catch (error) {
       console.error('Error removing item:', error)
     }

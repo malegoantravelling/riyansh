@@ -6,58 +6,29 @@ import { Button } from '@/components/ui/button'
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { usePathname } from 'next/navigation'
+import { useCart } from '@/contexts/CartContext'
 
 export default function Navbar() {
   const pathname = usePathname()
-  const [cartCount, setCartCount] = useState(0)
+  const { cartCount } = useCart()
   const [user, setUser] = useState<any>(null)
   const [showDropdown, setShowDropdown] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
-    let cartSubscription: any
-
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null)
-      if (session?.user) {
-        fetchCartCount(session.user.id)
-
-        // Subscribe to cart changes
-        cartSubscription = supabase
-          .channel('cart_changes')
-          .on(
-            'postgres_changes',
-            {
-              event: '*',
-              schema: 'public',
-              table: 'cart_items',
-              filter: `user_id=eq.${session.user.id}`,
-            },
-            () => {
-              fetchCartCount(session.user.id)
-            }
-          )
-          .subscribe()
-      }
     })
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null)
-      if (session?.user) {
-        fetchCartCount(session.user.id)
-      } else {
-        setCartCount(0)
-      }
     })
 
     return () => {
       subscription.unsubscribe()
-      if (cartSubscription) {
-        cartSubscription.unsubscribe()
-      }
     }
   }, [])
 
@@ -69,22 +40,6 @@ export default function Navbar() {
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
-
-  const fetchCartCount = async (userId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('cart_items')
-        .select('quantity')
-        .eq('user_id', userId)
-
-      if (!error && data) {
-        const totalCount = data.reduce((sum, item) => sum + item.quantity, 0)
-        setCartCount(totalCount)
-      }
-    } catch (error) {
-      console.error('Error fetching cart count:', error)
-    }
-  }
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
