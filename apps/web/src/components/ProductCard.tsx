@@ -85,45 +85,64 @@ export default function ProductCard({ product }: ProductCardProps) {
     }
   }
 
+  // Calculate discount percentage
+  const discountPercentage =
+    product.compare_at_price && product.price < product.compare_at_price
+      ? Math.round(((product.compare_at_price - product.price) / product.compare_at_price) * 100)
+      : 0
+
   return (
-    <div className="group relative bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100">
-      {/* Bestseller Ribbon Badge */}
-      {isBestseller && (
-        <div className="absolute top-0 left-0 z-10">
-          <div className="relative">
-            {/* Ribbon Shape */}
-            <div className="bg-gradient-to-r from-[#8BC34A] to-[#7CB342] text-white text-xs font-bold px-4 py-2 shadow-md">
-              Bestseller
-            </div>
-            {/* Ribbon Fold Effect */}
-            <div className="absolute bottom-0 left-0 w-0 h-0 border-l-[20px] border-l-transparent border-t-[8px] border-t-[#689F38]" />
-          </div>
-        </div>
-      )}
+    <div className="group relative bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 border-2 border-gray-100 hover:border-[#8BC34A]/30 hover:-translate-y-2">
+      {/* Badges Container */}
+      <div className="absolute top-3 left-3 z-20 flex flex-col gap-2">
+        {isBestseller && (
+          <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1">
+            <Star className="h-3 w-3 fill-white" />
+            Bestseller
+          </span>
+        )}
+        {discountPercentage > 0 && (
+          <span className="bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg">
+            {discountPercentage}% OFF
+          </span>
+        )}
+        {product.stock_quantity && product.stock_quantity < 10 && product.stock_quantity > 0 && (
+          <span className="bg-orange-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg animate-pulse">
+            Only {product.stock_quantity} left!
+          </span>
+        )}
+      </div>
 
       <Link href={`/products/${product.slug}`} className="block">
         {/* Product Image Container */}
-        <div className="relative aspect-square bg-gray-50 overflow-hidden">
+        <div className="relative aspect-square bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
           {product.image_url ? (
             <Image
               src={product.image_url}
               alt={product.name}
               fill
-              className="object-contain p-6 group-hover:scale-105 transition-transform duration-300"
+              className="object-contain p-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
-              <div className="p-6 bg-gray-100 rounded-lg">
+              <div className="p-6 bg-white rounded-2xl shadow-lg">
                 <ShoppingCart className="h-16 w-16 text-gray-300" />
               </div>
             </div>
           )}
+
+          {/* Quick View Button */}
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-4 group-hover:translate-y-0">
+            <span className="px-6 py-2 bg-white/95 backdrop-blur-sm text-[#8BC34A] text-xs font-bold rounded-full shadow-xl hover:bg-[#8BC34A] hover:text-white transition-colors whitespace-nowrap">
+              Quick View
+            </span>
+          </div>
         </div>
 
         {/* Product Info Section */}
         <div className="p-5 space-y-3">
           {/* Product Name */}
-          <h3 className="font-bold text-lg text-[#2d2d2d] line-clamp-2 min-h-[3.5rem] leading-tight">
+          <h3 className="font-bold text-lg text-[#2d2d2d] line-clamp-2 min-h-[3.5rem] leading-tight group-hover:text-[#8BC34A] transition-colors">
             {product.name}
           </h3>
 
@@ -136,7 +155,7 @@ export default function ProductCard({ product }: ProductCardProps) {
               {[...Array(5)].map((_, index) => (
                 <Star
                   key={index}
-                  className={`h-4 w-4 ${
+                  className={`h-4 w-4 transition-all ${
                     index < Math.floor(rating)
                       ? 'fill-yellow-400 text-yellow-400'
                       : index < rating
@@ -146,19 +165,22 @@ export default function ProductCard({ product }: ProductCardProps) {
                 />
               ))}
             </div>
-            <span className="text-sm text-[#2d2d2d]">
-              {reviewCount} Review{reviewCount !== 1 ? 's' : ''}
-            </span>
+            <span className="text-xs text-[#666666] font-medium">({reviewCount})</span>
           </div>
 
           {/* Price */}
-          <div className="flex items-baseline gap-2 pt-1">
-            <span className="text-2xl font-bold text-[#2d2d2d]">
-              ₹ {product.price.toLocaleString()}
+          <div className="flex items-center gap-3 pt-2">
+            <span className="text-2xl font-bold text-[#2d2d2d] group-hover:text-[#8BC34A] transition-colors">
+              ₹{product.price.toLocaleString()}
             </span>
             {product.compare_at_price && (
               <span className="text-sm text-gray-400 line-through">
                 ₹{product.compare_at_price.toLocaleString()}
+              </span>
+            )}
+            {discountPercentage > 0 && (
+              <span className="ml-auto bg-red-50 text-red-600 text-xs font-bold px-2 py-1 rounded-full">
+                Save {discountPercentage}%
               </span>
             )}
           </div>
@@ -171,12 +193,12 @@ export default function ProductCard({ product }: ProductCardProps) {
           onClick={handleAddToCart}
           disabled={addingToCart || product.stock_quantity === 0}
           className={`
-            w-full h-12 font-semibold text-base
-            transition-all duration-200
+            w-full h-12 font-bold text-sm rounded-xl
+            transition-all duration-300 shadow-lg
             ${
               product.stock_quantity === 0
-                ? 'bg-gray-300 cursor-not-allowed text-gray-600'
-                : 'bg-[#2d5016] hover:bg-[#3d6022] text-white'
+                ? 'bg-gray-200 cursor-not-allowed text-gray-500 shadow-none'
+                : 'bg-gradient-to-r from-[#8BC34A] to-[#7CB342] hover:from-[#7CB342] hover:to-[#8BC34A] text-white hover:shadow-xl hover:scale-105'
             }
           `}
         >
@@ -186,12 +208,28 @@ export default function ProductCard({ product }: ProductCardProps) {
               <span>Adding...</span>
             </div>
           ) : product.stock_quantity === 0 ? (
-            'Out of Stock'
+            <div className="flex items-center justify-center gap-2">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+              Out of Stock
+            </div>
           ) : (
-            'Add To Cart'
+            <div className="flex items-center justify-center gap-2">
+              <ShoppingCart className="h-4 w-4" />
+              Add To Cart
+            </div>
           )}
         </Button>
       </div>
+
+      {/* Shine Effect on Hover */}
+      <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/10 to-transparent pointer-events-none" />
     </div>
   )
 }
