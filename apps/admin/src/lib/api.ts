@@ -2,6 +2,16 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000'
 
 const getToken = () => localStorage.getItem('admin_token')
 
+const handleResponse = async (response: Response) => {
+  const data = await response.json()
+
+  if (!response.ok) {
+    throw new Error(data.error || `HTTP error! status: ${response.status}`)
+  }
+
+  return data
+}
+
 export const api = {
   async get(endpoint: string) {
     const response = await fetch(`${API_URL}${endpoint}`, {
@@ -10,7 +20,7 @@ export const api = {
         Authorization: `Bearer ${getToken()}`,
       },
     })
-    return response.json()
+    return handleResponse(response)
   },
 
   async post(endpoint: string, data: any) {
@@ -22,7 +32,7 @@ export const api = {
       },
       body: JSON.stringify(data),
     })
-    return response.json()
+    return handleResponse(response)
   },
 
   async put(endpoint: string, data: any) {
@@ -34,7 +44,7 @@ export const api = {
       },
       body: JSON.stringify(data),
     })
-    return response.json()
+    return handleResponse(response)
   },
 
   async delete(endpoint: string) {
@@ -45,6 +55,6 @@ export const api = {
         Authorization: `Bearer ${getToken()}`,
       },
     })
-    return response.json()
+    return handleResponse(response)
   },
 }
