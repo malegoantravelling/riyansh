@@ -12,14 +12,12 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState({
     full_name: '',
     email: '',
-    phone: '',
   })
   const [editMode, setEditMode] = useState(false)
   const [loading, setLoading] = useState(false)
   const [originalProfile, setOriginalProfile] = useState({
     full_name: '',
     email: '',
-    phone: '',
   })
 
   useEffect(() => {
@@ -28,10 +26,12 @@ export default function ProfilePage() {
 
   const fetchProfile = async () => {
     try {
-      const { data: { session } } = await supabase.auth.getSession()
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
       if (session?.user) {
         setUser(session.user)
-        
+
         // Get user profile from users table
         const { data: userProfile } = await supabase
           .from('users')
@@ -43,7 +43,6 @@ export default function ProfilePage() {
           const profileData = {
             full_name: userProfile.full_name || '',
             email: userProfile.email || session.user.email || '',
-            phone: userProfile.phone || '',
           }
           setProfile(profileData)
           setOriginalProfile(profileData)
@@ -65,7 +64,6 @@ export default function ProfilePage() {
         .from('users')
         .update({
           full_name: profile.full_name,
-          phone: profile.phone,
         })
         .eq('id', user.id)
 
@@ -87,7 +85,7 @@ export default function ProfilePage() {
   }
 
   const handleChange = (field: string, value: string) => {
-    setProfile(prev => ({ ...prev, [field]: value }))
+    setProfile((prev) => ({ ...prev, [field]: value }))
   }
 
   return (
@@ -127,20 +125,6 @@ export default function ProfilePage() {
                 className="mt-1 bg-gray-50"
               />
               <p className="text-xs text-gray-500 mt-1">Email cannot be changed</p>
-            </div>
-          </div>
-
-          <div>
-            <Label htmlFor="phone">Phone</Label>
-            <div className="relative">
-              <Input
-                id="phone"
-                value={profile.phone}
-                onChange={(e) => handleChange('phone', e.target.value)}
-                disabled={!editMode}
-                className="mt-1"
-                placeholder="Enter your phone number"
-              />
             </div>
           </div>
 
