@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Checker</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #8BC34A;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        .active {
+            color: green;
+            font-weight: bold;
+        }
+
+        .inactive {
+            color: red;
+            font-weight: bold;
+        }
+
+        .missing-slug {
+            background-color: #ffebee;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        .info {
+            background-color: #e3f2fd;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .test-link {
+            color: #1976d2;
+            text-decoration: none;
+        }
+
+        .test-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🔍 Product Database Checker</h1>
+
+    <div class="info">
+        <strong>This tool checks:</strong>
+        <ul>
+            <li>All products in the database</li>
+            <li>Which products have slugs</li>
+            <li>Which products are active</li>
+            <li>Test links to product pages</li>
+        </ul>
+    </div>
+
+    <button onclick="checkProducts()"
+        style="padding: 10px 20px; background-color: #8BC34A; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px;">
+        Check Products
+    </button>
+
+    <div id="results"></div>
+
+    <script>
+        const supabaseUrl = 'https://iwvrjjgjxxtlvvbdbytb.supabase.co'
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml3dnJqamdqeHh0bHZ2YmRieXRiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwNDE5NDYsImV4cCI6MjA3NTYxNzk0Nn0.GfdDYw6nfj3RyG6xj50lxhIwTJGouLvO0MxJXaa-LDk'
+
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey)
+
+        async function checkProducts() {
+            const resultsDiv = document.getElementById('results')
+            resultsDiv.innerHTML = '<p>Loading products...</p>'
+
+            try {
+                const { data: products, error } = await supabase
+                    .from('products')
+                    .select('id, name, slug, is_active, price, stock_quantity, created_at')
+                    .order('created_at', { ascending: false })
+
+                if (error) {
+                    resultsDiv.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`
+                    return
+                }
+
+                if (!products || products.length === 0) {
+                    resultsDiv.innerHTML = '<p>No products found in database.</p>'
+                    return
+                }
+
+                let html = `
+                    <h2>Found ${products.length} Products</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Product Name</th>
+                                <th>Slug</th>
+                                <th>Active</th>
+                                <th>Price</th>
+                                <th>Stock</th>
+                                <th>Test Link</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `
+
+                products.forEach(product => {
+                    const hasSlug = product.slug && product.slug.trim() !== ''
+                    const rowClass = !hasSlug ? 'missing-slug' : ''
+                    const activeClass = product.is_active ? 'active' : 'inactive'
+                    const activeText = product.is_active ? '✓ Active' : '✗ Inactive'
+                    const testUrl = hasSlug ? `http://localhost:3000/products/${product.slug}` : '#'
+                    const testLinkText = hasSlug ? 'Test Page' : 'No Slug'
+
+                    html += `
+                        <tr class="${rowClass}">
+                            <td><strong>${product.name}</strong></td>
+                            <td>${product.slug || '<span style="color: red;">MISSING SLUG</span>'}</td>
+                            <td class="${activeClass}">${activeText}</td>
+                            <td>₹${product.price}</td>
+                            <td>${product.stock_quantity || 0}</td>
+                            <td>
+                                ${hasSlug ? `<a href="${testUrl}" target="_blank" class="test-link">${testLinkText}</a>` : testLinkText}
+                            </td>
+                        </tr>
+                    `
+                })
+
+                html += `
+                        </tbody>
+                    </table>
+                    <div style="margin-top: 20px; padding: 15px; background-color: #fff3cd; border-radius: 5px;">
+                        <strong>⚠️ Issues Found:</strong>
+                        <ul>
+                            ${products.filter(p => !p.slug || p.slug.trim() === '').length > 0 ?
+                        `<li><strong style="color: red;">Products without slugs: ${products.filter(p => !p.slug || p.slug.trim() === '').length}</strong> - These will show "Product Not Found"</li>` :
+                        '<li style="color: green;">✓ All products have slugs</li>'
+                    }
+                            ${products.filter(p => !p.is_active).length > 0 ?
+                        `<li><strong style="color: orange;">Inactive products: ${products.filter(p => !p.is_active).length}</strong> - These won't show on product pages</li>` :
+                        '<li style="color: green;">✓ All products are active</li>'
+                    }
+                        </ul>
+                    </div>
+                `
+
+                resultsDiv.innerHTML = html
+            } catch (err) {
+                resultsDiv.innerHTML = `<p style="color: red;">Error: ${err.message}</p>`
+            }
+        }
+
+        // Auto-check on page load
+        window.addEventListener('load', checkProducts)
+    </script>
+</body>
+
+</html>
