@@ -61,8 +61,8 @@ export default function Navbar() {
       <nav
         className={`sticky top-0 z-50 transition-all duration-300 ${
           scrolled
-            ? 'bg-white/95 backdrop-blur-lg shadow-lg border-b border-gray-100'
-            : 'bg-white border-b border-gray-100'
+            ? 'bg-white/80 backdrop-blur-lg shadow-lg border-b border-gray-100'
+            : 'bg-white/70 backdrop-blur-md border-b border-gray-100/50'
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -177,7 +177,7 @@ export default function Navbar() {
                 </div>
               ) : (
                 <Link href="/auth/login" className="hidden sm:block">
-                  <Button className="rounded-xl px-6 font-semibold shadow-lg hover:shadow-xl transition-all duration-300">
+                  <Button className="rounded-xl px-6 font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:text-white">
                     Login
                   </Button>
                 </Link>

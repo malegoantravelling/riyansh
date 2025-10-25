@@ -50,21 +50,24 @@ export default function AboutPage() {
     {
       name: 'Dr. Priya Sharma',
       role: 'Chief Ayurvedic Consultant',
-      image: 'https://via.placeholder.com/200x200?text=Dr.+Priya',
+      image:
+        'https://images.pexels.com/photos/1130626/pexels-photo-1130626.jpeg?auto=compress&cs=tinysrgb&w=400&h=400',
       description:
         'With over 15 years of experience in Ayurveda, Dr. Sharma leads our product development.',
     },
     {
       name: 'Rajesh Kumar',
       role: 'Quality Control Manager',
-      image: 'https://via.placeholder.com/200x200?text=Rajesh',
+      image:
+        'https://images.pexels.com/photos/2182970/pexels-photo-2182970.jpeg?auto=compress&cs=tinysrgb&w=400&h=400',
       description:
         'Ensures every product meets our stringent quality standards before reaching you.',
     },
     {
       name: 'Meera Patel',
       role: 'Customer Care Head',
-      image: 'https://via.placeholder.com/200x200?text=Meera',
+      image:
+        'https://images.pexels.com/photos/3756679/pexels-photo-3756679.jpeg?auto=compress&cs=tinysrgb&w=400&h=400',
       description: 'Dedicated to providing exceptional customer service and support.',
     },
   ]
@@ -209,7 +212,7 @@ export default function AboutPage() {
                 {/* Image */}
                 <div className="relative h-full rounded-2xl overflow-hidden group-hover:scale-105 transition-transform duration-700">
                   <Image
-                    src="https://via.placeholder.com/500x500?text=Ayurvedic+Products"
+                    src="https://images.pexels.com/photos/4021808/pexels-photo-4021808.jpeg?auto=compress&cs=tinysrgb&w=800"
                     alt="Ayurvedic Products"
                     width={500}
                     height={500}
@@ -320,7 +323,7 @@ export default function AboutPage() {
                   <Users className="h-8 w-8 text-[#8BC34A]" />
                 </div>
                 <div className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#8BC34A] to-[#7CB342] mb-3">
-                  10,000+
+                  5,000+
                 </div>
                 <div className="text-[#666666] font-semibold text-sm">Happy Customers</div>
               </div>
@@ -420,7 +423,7 @@ export default function AboutPage() {
                         alt={member.name}
                         width={144}
                         height={144}
-                        className="object-cover w-full h-full"
+                        className="w-full h-full object-cover object-center"
                       />
                       {/* Overlay on Hover */}
                       <div className="absolute inset-0 bg-gradient-to-t from-[#8BC34A]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
