@@ -97,6 +97,15 @@ export default function Products() {
     }
   }
 
+  const generateSlug = (name: string): string => {
+    return name
+      .toLowerCase()
+      .trim()
+      .replace(/[^\w\s-]/g, '') // Remove special characters
+      .replace(/\s+/g, '-') // Replace spaces with hyphens
+      .replace(/-+/g, '-') // Replace multiple hyphens with single hyphen
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -111,8 +120,12 @@ export default function Products() {
       imageUrl = uploadedUrl
     }
 
+    // Auto-generate slug if empty
+    const slug = formData.slug || generateSlug(formData.name)
+
     const productData = {
       ...formData,
+      slug,
       image_url: imageUrl || null,
       category_id: formData.category_id || null,
       price: parseFloat(formData.price),
@@ -207,18 +220,26 @@ export default function Products() {
               <Input
                 id="name"
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onChange={(e) => {
+                  const newName = e.target.value
+                  setFormData({
+                    ...formData,
+                    name: newName,
+                    slug: !editingProduct ? generateSlug(newName) : formData.slug,
+                  })
+                }}
                 required
               />
             </div>
             <div>
-              <Label htmlFor="slug">Slug</Label>
+              <Label htmlFor="slug">Slug (URL-friendly name)</Label>
               <Input
                 id="slug"
                 value={formData.slug}
                 onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                required
+                placeholder="Auto-generated from product name"
               />
+              <p className="text-xs text-gray-500 mt-1">Leave empty to auto-generate from name</p>
             </div>
             <div className="col-span-2">
               <Label htmlFor="description">Description</Label>

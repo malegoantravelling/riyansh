@@ -6,6 +6,8 @@ import Products from './pages/Products'
 import Categories from './pages/Categories'
 import Orders from './pages/Orders'
 import Users from './pages/Users'
+import Transactions from './pages/Transactions'
+import Logs from './pages/Logs'
 import Layout from './components/Layout'
 
 function App() {
@@ -37,6 +39,8 @@ function App() {
         <Route path="/categories" element={<Categories />} />
         <Route path="/orders" element={<Orders />} />
         <Route path="/users" element={<Users />} />
+        <Route path="/transactions" element={<Transactions />} />
+        <Route path="/logs" element={<Logs />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Layout>
