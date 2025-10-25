@@ -4,7 +4,19 @@ import React, { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { MapPin, Phone, Mail } from 'lucide-react'
+import {
+  MapPin,
+  Phone,
+  Mail,
+  Send,
+  MessageSquare,
+  ChevronDown,
+  Sparkles,
+  Clock,
+  CheckCircle2,
+  Globe,
+} from 'lucide-react'
+import Link from 'next/link'
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -14,11 +26,17 @@ export default function ContactPage() {
     subject: '',
     message: '',
   })
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    setIsSubmitting(true)
     console.log('Form submitted:', formData)
-    // Handle form submission
+    // Simulate submission
+    setTimeout(() => {
+      setIsSubmitting(false)
+      alert('Message sent successfully!')
+    }, 1500)
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -29,142 +47,342 @@ export default function ContactPage() {
   }
 
   return (
-    <div>
-      {/* Breadcrumb */}
-      <div className="bg-gray-50 py-8 border-b border-[#EEEEEE]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-3xl font-bold text-[#333333]">Contact</h1>
-          <p className="text-[#666666] mt-2">Home / Contact</p>
-        </div>
-      </div>
+    <div className="bg-gradient-to-b from-white via-gray-50 to-white">
+      {/* Enhanced Modern Hero Header */}
+      <div className="relative bg-gradient-to-r from-[#8BC34A] via-[#7CB342] to-[#8BC34A] py-20 overflow-hidden">
+        {/* Dotted Pattern Background */}
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: 'radial-gradient(circle, rgba(0, 0, 0, 0.08) 1px, transparent 1px)',
+            backgroundSize: '12px 12px',
+          }}
+        />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        {/* Contact Form */}
-        <div className="max-w-3xl mx-auto mb-16">
-          <h2 className="text-3xl font-bold text-[#333333] text-center mb-8">Get In Touch</h2>
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <Label htmlFor="firstName">
-                  First Name <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  id="firstName"
-                  name="firstName"
-                  value={formData.firstName}
-                  onChange={handleChange}
-                  required
-                  className="mt-1"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="lastName">
-                  Last Name <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  id="lastName"
-                  name="lastName"
-                  value={formData.lastName}
-                  onChange={handleChange}
-                  required
-                  className="mt-1"
-                />
-              </div>
-            </div>
-
-            <div>
-              <Label htmlFor="email">
-                Email <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-                className="mt-1"
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="subject">Subject</Label>
-              <Input
-                id="subject"
-                name="subject"
-                value={formData.subject}
-                onChange={handleChange}
-                className="mt-1"
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="message">Message</Label>
-              <textarea
-                id="message"
-                name="message"
-                value={formData.message}
-                onChange={handleChange}
-                rows={6}
-                className="mt-1 flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              />
-            </div>
-
-            <Button type="submit" size="lg" className="w-full">
-              SEND MESSAGE
-            </Button>
-          </form>
+        {/* Floating Orbs */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-0 left-0 w-96 h-96 bg-white/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 animate-float" />
+          <div className="absolute bottom-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl translate-x-1/2 translate-y-1/2" />
         </div>
 
-        {/* Offices */}
-        <div>
-          <h2 className="text-3xl font-bold text-[#333333] text-center mb-8">Offices</h2>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="text-center space-y-6">
+            {/* Badge */}
+            <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-white/20 backdrop-blur-sm rounded-full border border-white/30">
+              <MessageSquare className="h-4 w-4 text-white" />
+              <span className="text-sm font-bold text-white">We're Here to Help</span>
+            </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {['NEW YORK', 'LONDON', 'CANADA'].map((city) => (
-              <div key={city} className="bg-gray-50 rounded-lg p-6">
-                <h3 className="font-bold text-lg mb-4 text-[#333333]">{city}</h3>
-                <p className="text-[#666666] text-sm mb-4">
-                  203 Fake St. Mountain View, San Francisco, California, USA
-                </p>
-              </div>
-            ))}
+            <h1 className="text-5xl md:text-6xl font-extrabold text-white mb-4 tracking-tight drop-shadow-2xl">
+              Contact Us
+            </h1>
+
+            <p className="text-white/95 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
+              Have a question? We'd love to hear from you. Send us a message and we'll respond as
+              soon as possible.
+            </p>
+
+            <div className="flex items-center justify-center space-x-3 text-white/90 mt-4">
+              <Link href="/" className="hover:text-white transition-colors cursor-pointer">
+                Home
+              </Link>
+              <ChevronDown className="h-4 w-4 rotate-[-90deg]" />
+              <span className="text-white font-bold">Contact</span>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Contact Info Section */}
-      <section className="py-16 bg-[#A5D6A7]/20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Enhanced Contact Form Section */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 relative overflow-hidden">
+        {/* Background Decoration */}
+        <div className="absolute top-20 right-0 w-96 h-96 bg-[#8BC34A]/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-20 left-0 w-96 h-96 bg-[#7CB342]/5 rounded-full blur-3xl" />
+
+        <div className="max-w-4xl mx-auto relative z-10">
+          {/* Section Header */}
+          <div className="text-center mb-12 space-y-4">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#8BC34A]/10 rounded-full border border-[#8BC34A]/20 mb-4">
+              <Send className="h-4 w-4 text-[#8BC34A]" />
+              <span className="text-sm font-semibold text-[#8BC34A]">Send Us a Message</span>
+            </div>
+            <h2 className="text-4xl md:text-5xl font-extrabold text-[#2d2d2d]">Get In Touch</h2>
+            <p className="text-lg text-[#666666] max-w-2xl mx-auto leading-relaxed">
+              Fill out the form below and our team will get back to you within 24 hours
+            </p>
+          </div>
+
+          {/* Enhanced Form Card */}
+          <div className="relative bg-white rounded-3xl p-8 md:p-10 shadow-2xl border-2 border-gray-100 hover:border-[#8BC34A]/30 transition-all duration-500">
+            {/* Decorative Corner */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[#8BC34A]/5 to-transparent rounded-bl-full" />
+
+            <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label htmlFor="firstName" className="text-base font-semibold text-[#2d2d2d]">
+                    First Name <span className="text-[#8BC34A]">*</span>
+                  </Label>
+                  <div className="relative">
+                    <Input
+                      id="firstName"
+                      name="firstName"
+                      value={formData.firstName}
+                      onChange={handleChange}
+                      required
+                      placeholder="Enter your first name"
+                      className="h-12 px-4 rounded-xl border-2 border-gray-200 focus:border-[#8BC34A] focus:ring-2 focus:ring-[#8BC34A]/20 transition-all duration-300"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="lastName" className="text-base font-semibold text-[#2d2d2d]">
+                    Last Name <span className="text-[#8BC34A]">*</span>
+                  </Label>
+                  <Input
+                    id="lastName"
+                    name="lastName"
+                    value={formData.lastName}
+                    onChange={handleChange}
+                    required
+                    placeholder="Enter your last name"
+                    className="h-12 px-4 rounded-xl border-2 border-gray-200 focus:border-[#8BC34A] focus:ring-2 focus:ring-[#8BC34A]/20 transition-all duration-300"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-base font-semibold text-[#2d2d2d]">
+                  Email Address <span className="text-[#8BC34A]">*</span>
+                </Label>
+                <div className="relative">
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                    placeholder="your.email@example.com"
+                    className="h-12 pl-12 pr-4 rounded-xl border-2 border-gray-200 focus:border-[#8BC34A] focus:ring-2 focus:ring-[#8BC34A]/20 transition-all duration-300"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="subject" className="text-base font-semibold text-[#2d2d2d]">
+                  Subject
+                </Label>
+                <Input
+                  id="subject"
+                  name="subject"
+                  value={formData.subject}
+                  onChange={handleChange}
+                  placeholder="What is this regarding?"
+                  className="h-12 px-4 rounded-xl border-2 border-gray-200 focus:border-[#8BC34A] focus:ring-2 focus:ring-[#8BC34A]/20 transition-all duration-300"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="message" className="text-base font-semibold text-[#2d2d2d]">
+                  Message
+                </Label>
+                <textarea
+                  id="message"
+                  name="message"
+                  value={formData.message}
+                  onChange={handleChange}
+                  rows={6}
+                  placeholder="Tell us more about your inquiry..."
+                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#8BC34A] focus:ring-2 focus:ring-[#8BC34A]/20 transition-all duration-300 resize-none"
+                />
+              </div>
+
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full h-14 text-lg font-bold bg-gradient-to-r from-[#8BC34A] to-[#7CB342] hover:from-[#7CB342] hover:to-[#8BC34A] rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isSubmitting ? (
+                  <div className="flex items-center gap-2">
+                    <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Sending...
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <Send className="h-5 w-5" />
+                    SEND MESSAGE
+                  </div>
+                )}
+              </Button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      {/* Enhanced Office Locations Section */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 relative overflow-hidden">
+        {/* Background Elements */}
+        <div className="absolute inset-0 opacity-30">
+          <div className="absolute top-10 left-10 w-64 h-64 bg-[#8BC34A]/20 rounded-full blur-3xl" />
+          <div className="absolute bottom-10 right-10 w-64 h-64 bg-[#7CB342]/20 rounded-full blur-3xl" />
+        </div>
+
+        <div className="relative z-10">
+          {/* Section Header */}
+          <div className="text-center mb-16 space-y-4">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#8BC34A]/10 rounded-full border border-[#8BC34A]/20 mb-4">
+              <Globe className="h-4 w-4 text-[#8BC34A]" />
+              <span className="text-sm font-semibold text-[#8BC34A]">Global Presence</span>
+            </div>
+            <h2 className="text-4xl md:text-5xl font-extrabold text-[#2d2d2d]">Our Offices</h2>
+            <p className="text-lg text-[#666666] max-w-2xl mx-auto leading-relaxed">
+              Visit us at any of our locations worldwide
+            </p>
+          </div>
+
+          {/* Office Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-[#8BC34A] rounded-full mb-4">
-                <MapPin className="h-8 w-8 text-white" />
+            {[
+              { city: 'NEW YORK', icon: '🗽', timezone: 'EST (GMT-5)' },
+              { city: 'LONDON', icon: '🇬🇧', timezone: 'GMT (GMT+0)' },
+              { city: 'CANADA', icon: '🇨🇦', timezone: 'EST (GMT-5)' },
+            ].map((office, index) => (
+              <div
+                key={office.city}
+                className="group relative bg-white rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all duration-500 border-2 border-gray-100 hover:border-[#8BC34A]/30 transform hover:-translate-y-2"
+                style={{ animationDelay: `${index * 100}ms` }}
+              >
+                {/* Decorative Corner */}
+                <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-[#8BC34A]/5 to-transparent rounded-bl-full" />
+
+                {/* Icon Badge */}
+                <div className="relative mb-6">
+                  <div className="w-16 h-16 bg-gradient-to-br from-[#8BC34A] to-[#7CB342] rounded-2xl flex items-center justify-center text-3xl shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
+                    {office.icon}
+                  </div>
+                </div>
+
+                {/* Content */}
+                <h3 className="text-2xl font-bold text-[#2d2d2d] mb-2 group-hover:text-[#8BC34A] transition-colors duration-300">
+                  {office.city}
+                </h3>
+
+                <div className="flex items-center gap-2 mb-4">
+                  <Clock className="h-4 w-4 text-[#8BC34A]" />
+                  <span className="text-sm text-[#666666] font-medium">{office.timezone}</span>
+                </div>
+
+                <p className="text-[#666666] leading-relaxed mb-4">
+                  203 Fake St. Mountain View, San Francisco, California, USA
+                </p>
+
+                {/* Button */}
+                <button className="text-[#8BC34A] font-semibold text-sm flex items-center gap-2 group-hover:gap-3 transition-all duration-300">
+                  Get Directions
+                  <ChevronDown className="h-4 w-4 -rotate-90" />
+                </button>
+
+                {/* Bottom Indicator */}
+                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-[#8BC34A] to-[#7CB342] rounded-b-3xl transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />
               </div>
-              <h3 className="font-bold text-lg mb-2">Address</h3>
-              <p className="text-[#666666]">
-                Riyansh Ayurvedic Center,
-                <br />
-                Mumbai, Maharashtra, India
-              </p>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Enhanced Contact Info Section */}
+      <section className="py-20 bg-gradient-to-b from-gray-50 to-white relative overflow-hidden">
+        {/* Decorative Background */}
+        <div className="absolute inset-0 opacity-5">
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage:
+                'radial-gradient(circle, rgba(139, 195, 74, 0.3) 1px, transparent 1px)',
+              backgroundSize: '30px 30px',
+            }}
+          />
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          {/* Section Header */}
+          <div className="text-center mb-16 space-y-4">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#8BC34A]/10 rounded-full border border-[#8BC34A]/20 mb-4">
+              <Sparkles className="h-4 w-4 text-[#8BC34A]" />
+              <span className="text-sm font-semibold text-[#8BC34A]">Contact Information</span>
+            </div>
+            <h2 className="text-4xl md:text-5xl font-extrabold text-[#2d2d2d]">Let's Connect</h2>
+            <p className="text-lg text-[#666666] max-w-2xl mx-auto leading-relaxed">
+              We're available 24/7 to assist you with any questions or concerns
+            </p>
+          </div>
+
+          {/* Contact Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Address Card */}
+            <div className="group relative bg-white rounded-3xl p-8 text-center shadow-lg hover:shadow-2xl transition-all duration-500 border-2 border-gray-100 hover:border-[#8BC34A]/30 transform hover:-translate-y-2">
+              <div className="absolute inset-0 bg-gradient-to-br from-[#8BC34A]/5 to-transparent rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+              <div className="relative">
+                <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-[#8BC34A] to-[#7CB342] rounded-2xl mb-6 shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
+                  <MapPin className="h-10 w-10 text-white" />
+                </div>
+                <h3 className="text-xl font-bold text-[#2d2d2d] mb-4 group-hover:text-[#8BC34A] transition-colors duration-300">
+                  Visit Us
+                </h3>
+                <p className="text-[#666666] leading-relaxed">
+                  Riyansh Ayurvedic Center,
+                  <br />
+                  Mumbai, Maharashtra,
+                  <br />
+                  India
+                </p>
+              </div>
             </div>
 
-            <div className="text-center">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-[#8BC34A] rounded-full mb-4">
-                <Phone className="h-8 w-8 text-white" />
+            {/* Phone Card */}
+            <div className="group relative bg-white rounded-3xl p-8 text-center shadow-lg hover:shadow-2xl transition-all duration-500 border-2 border-gray-100 hover:border-[#8BC34A]/30 transform hover:-translate-y-2">
+              <div className="absolute inset-0 bg-gradient-to-br from-[#8BC34A]/5 to-transparent rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+              <div className="relative">
+                <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-[#8BC34A] to-[#7CB342] rounded-2xl mb-6 shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
+                  <Phone className="h-10 w-10 text-white" />
+                </div>
+                <h3 className="text-xl font-bold text-[#2d2d2d] mb-4 group-hover:text-[#8BC34A] transition-colors duration-300">
+                  Call Us
+                </h3>
+                <a
+                  href="tel:+919370646279"
+                  className="text-[#666666] hover:text-[#8BC34A] transition-colors font-medium"
+                >
+                  +91 9370646279
+                </a>
+                <p className="text-sm text-gray-400 mt-2">Mon-Sat, 9AM-6PM IST</p>
               </div>
-              <h3 className="font-bold text-lg mb-2">Phone</h3>
-              <p className="text-[#666666]">+91 9370646279</p>
             </div>
 
-            <div className="text-center">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-[#8BC34A] rounded-full mb-4">
-                <Mail className="h-8 w-8 text-white" />
+            {/* Email Card */}
+            <div className="group relative bg-white rounded-3xl p-8 text-center shadow-lg hover:shadow-2xl transition-all duration-500 border-2 border-gray-100 hover:border-[#8BC34A]/30 transform hover:-translate-y-2">
+              <div className="absolute inset-0 bg-gradient-to-br from-[#8BC34A]/5 to-transparent rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+              <div className="relative">
+                <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-[#8BC34A] to-[#7CB342] rounded-2xl mb-6 shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
+                  <Mail className="h-10 w-10 text-white" />
+                </div>
+                <h3 className="text-xl font-bold text-[#2d2d2d] mb-4 group-hover:text-[#8BC34A] transition-colors duration-300">
+                  Email Us
+                </h3>
+                <a
+                  href="mailto:riyanshamrit106@gmail.com"
+                  className="text-[#666666] hover:text-[#8BC34A] transition-colors font-medium break-all"
+                >
+                  riyanshamrit106@gmail.com
+                </a>
+                <p className="text-sm text-gray-400 mt-2">24/7 Support</p>
               </div>
-              <h3 className="font-bold text-lg mb-2">Email</h3>
-              <p className="text-[#666666]">riyanshamrit106@gmail.com</p>
             </div>
           </div>
         </div>
