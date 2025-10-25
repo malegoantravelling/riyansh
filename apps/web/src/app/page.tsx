@@ -14,13 +14,15 @@ const testimonials = [
     id: 1,
     name: 'Elizabeth Graham',
     text: 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Vero omnis, vitae sequi culpa libero, mollitia vel quasi consequuntur a impedit accusamus qui sit voluptatem.',
-    avatar: 'https://via.placeholder.com/80x80?text=EG',
+    avatar:
+      'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="80" height="80"%3E%3Ccircle cx="40" cy="40" r="40" fill="%238BC34A"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="Arial" font-size="28" font-weight="bold" fill="white"%3EEG%3C/text%3E%3C/svg%3E',
   },
   {
     id: 2,
     name: 'Jennifer Greive',
     text: 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Vero omnis, vitae sequi culpa libero, mollitia vel quasi consequuntur a impedit accusamus qui sit voluptatem.',
-    avatar: 'https://via.placeholder.com/80x80?text=JG',
+    avatar:
+      'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="80" height="80"%3E%3Ccircle cx="40" cy="40" r="40" fill="%237CB342"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="Arial" font-size="28" font-weight="bold" fill="white"%3EJG%3C/text%3E%3C/svg%3E',
   },
 ]
 
@@ -626,7 +628,6 @@ export default function Home() {
               </div>
             ))}
           </div>
-
         </div>
       </section>
     </div>

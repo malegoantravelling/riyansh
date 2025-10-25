@@ -13,12 +13,8 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { useState } from 'react'
 
 export default function AboutPage() {
-  const [hoveredValue, setHoveredValue] = useState<number | null>(null)
-  const [hoveredTeam, setHoveredTeam] = useState<number | null>(null)
-
   const values = [
     {
       icon: Leaf,
@@ -50,21 +46,24 @@ export default function AboutPage() {
     {
       name: 'Dr. Priya Sharma',
       role: 'Chief Ayurvedic Consultant',
-      image: 'https://via.placeholder.com/200x200?text=Dr.+Priya',
+      image:
+        'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200"%3E%3Crect width="200" height="200" fill="%238BC34A"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="Arial" font-size="24" fill="white"%3EDr. Priya%3C/text%3E%3C/svg%3E',
       description:
         'With over 15 years of experience in Ayurveda, Dr. Sharma leads our product development.',
     },
     {
       name: 'Rajesh Kumar',
       role: 'Quality Control Manager',
-      image: 'https://via.placeholder.com/200x200?text=Rajesh',
+      image:
+        'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200"%3E%3Crect width="200" height="200" fill="%237CB342"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="Arial" font-size="24" fill="white"%3ERajesh%3C/text%3E%3C/svg%3E',
       description:
         'Ensures every product meets our stringent quality standards before reaching you.',
     },
     {
       name: 'Meera Patel',
       role: 'Customer Care Head',
-      image: 'https://via.placeholder.com/200x200?text=Meera',
+      image:
+        'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200"%3E%3Crect width="200" height="200" fill="%238BC34A"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="Arial" font-size="24" fill="white"%3EMeera%3C/text%3E%3C/svg%3E',
       description: 'Dedicated to providing exceptional customer service and support.',
     },
   ]
@@ -209,7 +208,7 @@ export default function AboutPage() {
                 {/* Image */}
                 <div className="relative h-full rounded-2xl overflow-hidden group-hover:scale-105 transition-transform duration-700">
                   <Image
-                    src="https://via.placeholder.com/500x500?text=Ayurvedic+Products"
+                    src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='500' height='500'%3E%3Crect width='500' height='500' fill='%238BC34A'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='32' fill='white'%3EAyurvedic Products%3C/text%3E%3C/svg%3E"
                     alt="Ayurvedic Products"
                     width={500}
                     height={500}
@@ -268,8 +267,6 @@ export default function AboutPage() {
                 <div
                   key={index}
                   className="group relative bg-white rounded-2xl p-8 text-center shadow-lg hover:shadow-2xl transition-all duration-500 border-2 border-gray-100 hover:border-[#8BC34A]/30 transform hover:-translate-y-2"
-                  onMouseEnter={() => setHoveredValue(index)}
-                  onMouseLeave={() => setHoveredValue(null)}
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
                   {/* Background Glow on Hover */}
@@ -398,8 +395,6 @@ export default function AboutPage() {
               <div
                 key={index}
                 className="group relative bg-white rounded-3xl p-8 text-center shadow-lg hover:shadow-2xl transition-all duration-500 border-2 border-gray-100 hover:border-[#8BC34A]/30 transform hover:-translate-y-3"
-                onMouseEnter={() => setHoveredTeam(index)}
-                onMouseLeave={() => setHoveredTeam(null)}
               >
                 {/* Background Glow */}
                 <div className="absolute inset-0 bg-gradient-to-br from-[#8BC34A]/5 to-transparent rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
