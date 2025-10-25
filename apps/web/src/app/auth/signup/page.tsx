@@ -52,20 +52,7 @@ export default function SignupPage() {
       if (error) throw error
 
       if (data.user) {
-        // Create user profile in database
-        const { error: profileError } = await supabase.from('users').insert({
-          id: data.user.id,
-          email: formData.email,
-          full_name: formData.fullName,
-        })
-
-        if (profileError) {
-          console.error('Profile creation error:', profileError)
-          setError('Registration successful but profile creation failed. Please try logging in.')
-          setLoading(false)
-          return
-        }
-
+        // Profile is automatically created by database trigger
         // Sign out the user immediately after signup
         await supabase.auth.signOut()
 
