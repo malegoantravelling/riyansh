@@ -1,8 +1,24 @@
 import { Router } from 'express'
+import multer from 'multer'
 import { supabase } from '../config/supabase'
 import { authenticateToken, AuthRequest } from '../middleware/auth'
 
 const router = Router()
+
+// Configure multer for memory storage
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    // Accept images only
+    if (!file.mimetype.startsWith('image/')) {
+      return cb(new Error('Only image files are allowed!'))
+    }
+    cb(null, true)
+  },
+})
 
 // Get all products
 router.get('/', async (req, res) => {
@@ -75,6 +91,42 @@ router.get('/slug/:slug', async (req, res) => {
 
     res.json(data)
   } catch (error: any) {
+    res.status(500).json({ error: error.message })
+  }
+})
+
+// Upload product image
+router.post('/upload-image', upload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No image file provided' })
+    }
+
+    const file = req.file
+    const fileExt = file.originalname.split('.').pop()
+    const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
+    const filePath = `products/${fileName}`
+
+    // Upload to Supabase Storage
+    const { data, error } = await supabase.storage.from('products').upload(filePath, file.buffer, {
+      contentType: file.mimetype,
+      cacheControl: '3600',
+      upsert: false,
+    })
+
+    if (error) {
+      console.error('Storage upload error:', error)
+      return res.status(500).json({ error: 'Failed to upload image to storage' })
+    }
+
+    // Get public URL
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from('products').getPublicUrl(filePath)
+
+    res.json({ imageUrl: publicUrl })
+  } catch (error: any) {
+    console.error('Upload error:', error)
     res.status(500).json({ error: error.message })
   }
 })

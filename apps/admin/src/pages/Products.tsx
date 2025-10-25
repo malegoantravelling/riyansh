@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Plus, Pencil, Trash2 } from 'lucide-react'
+import { Plus, Pencil, Trash2, Upload, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -11,6 +11,9 @@ export default function Products() {
   const [categories, setCategories] = useState<any[]>([])
   const [showForm, setShowForm] = useState(false)
   const [editingProduct, setEditingProduct] = useState<any>(null)
+  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [imagePreview, setImagePreview] = useState<string>('')
+  const [uploading, setUploading] = useState(false)
   const [formData, setFormData] = useState({
     name: '',
     slug: '',
@@ -47,11 +50,71 @@ export default function Products() {
     }
   }
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setImageFile(file)
+      // Create preview
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const handleRemoveImage = () => {
+    setImageFile(null)
+    setImagePreview('')
+    setFormData({ ...formData, image_url: '' })
+  }
+
+  const uploadImage = async (): Promise<string | null> => {
+    if (!imageFile) return formData.image_url || null
+
+    setUploading(true)
+    try {
+      const formDataToSend = new FormData()
+      formDataToSend.append('image', imageFile)
+
+      const response = await fetch('http://localhost:4000/api/products/upload-image', {
+        method: 'POST',
+        body: formDataToSend,
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to upload image')
+      }
+
+      const data = await response.json()
+      return data.imageUrl
+    } catch (error) {
+      console.error('Error uploading image:', error)
+      alert('Failed to upload image')
+      return null
+    } finally {
+      setUploading(false)
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
+    // Upload image first if there's a new image
+    let imageUrl = formData.image_url
+    if (imageFile) {
+      const uploadedUrl = await uploadImage()
+      if (!uploadedUrl) {
+        alert('Failed to upload image. Please try again.')
+        return
+      }
+      imageUrl = uploadedUrl
+    }
+
     const productData = {
       ...formData,
+      image_url: imageUrl || null,
+      category_id: formData.category_id || null,
       price: parseFloat(formData.price),
       compare_at_price: formData.compare_at_price ? parseFloat(formData.compare_at_price) : null,
       stock_quantity: parseInt(formData.stock_quantity) || 0,
@@ -60,16 +123,19 @@ export default function Products() {
     try {
       if (editingProduct) {
         await api.put(`/api/products/${editingProduct.id}`, productData)
+        alert('Product updated successfully!')
       } else {
         await api.post('/api/products', productData)
+        alert('Product created successfully!')
       }
 
       setShowForm(false)
       setEditingProduct(null)
       resetForm()
       fetchProducts()
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving product:', error)
+      alert(`Failed to save product: ${error.message || 'Unknown error'}`)
     }
   }
 
@@ -98,6 +164,8 @@ export default function Products() {
       is_featured: product.is_featured,
       is_active: product.is_active,
     })
+    setImagePreview(product.image_url || '')
+    setImageFile(null)
     setShowForm(true)
   }
 
@@ -114,6 +182,8 @@ export default function Products() {
       is_featured: false,
       is_active: true,
     })
+    setImageFile(null)
+    setImagePreview('')
   }
 
   return (
@@ -208,15 +278,52 @@ export default function Products() {
               />
             </div>
             <div className="col-span-2">
-              <Label htmlFor="image_url">Image URL</Label>
-              <Input
-                id="image_url"
-                value={formData.image_url}
-                onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-              />
+              <Label>Product Image</Label>
+              <div className="mt-2">
+                {imagePreview || formData.image_url ? (
+                  <div className="relative inline-block">
+                    <img
+                      src={imagePreview || formData.image_url}
+                      alt="Product preview"
+                      className="w-32 h-32 object-cover rounded-lg border-2 border-gray-300"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleRemoveImage}
+                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center w-full">
+                    <label
+                      htmlFor="image-upload"
+                      className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100"
+                    >
+                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                        <Upload className="w-8 h-8 mb-2 text-gray-500" />
+                        <p className="mb-2 text-sm text-gray-500">
+                          <span className="font-semibold">Click to upload</span> or drag and drop
+                        </p>
+                        <p className="text-xs text-gray-500">PNG, JPG, WEBP (MAX. 5MB)</p>
+                      </div>
+                      <input
+                        id="image-upload"
+                        type="file"
+                        className="hidden"
+                        accept="image/*"
+                        onChange={handleImageChange}
+                      />
+                    </label>
+                  </div>
+                )}
+              </div>
             </div>
             <div className="col-span-2 flex gap-4">
-              <Button type="submit">{editingProduct ? 'Update' : 'Create'} Product</Button>
+              <Button type="submit" disabled={uploading}>
+                {uploading ? 'Uploading...' : editingProduct ? 'Update' : 'Create'} Product
+              </Button>
               <Button
                 type="button"
                 variant="outline"
@@ -225,6 +332,7 @@ export default function Products() {
                   setEditingProduct(null)
                   resetForm()
                 }}
+                disabled={uploading}
               >
                 Cancel
               </Button>
