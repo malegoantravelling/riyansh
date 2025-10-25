@@ -101,7 +101,7 @@ This will create:
 ### 3. Configure Environment Variables
 
 Create a `.env` file in the root directory:
-
+`
 ```bash
 cp .env.example .env
 ```
@@ -300,3 +300,4 @@ If you encounter any issues:
 5. Add more features as needed
 
 Enjoy building with Riyansh E-Commerce! 🛍️
+ 

@@ -50,9 +50,9 @@ export default function Home() {
       {/* Hero Section */}
       <section className="relative h-[600px] bg-gradient-to-r from-gray-100 to-gray-200">
         <div
-          className="absolute inset-0 bg-cover bg-center"
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
-            backgroundImage: 'url(https://via.placeholder.com/1920x600?text=Hero+Background)',
+            backgroundImage: 'url(/apps/web/public/image/hero_bg_2.jpg)',
           }}
         >
           <div className="absolute inset-0 bg-white/70" />
