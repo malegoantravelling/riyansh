@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Minus, Plus, Trash2, ShoppingBag } from 'lucide-react'
@@ -21,22 +22,9 @@ interface CartItem {
   }
 }
 
-interface Address {
-  id: string
-  address_line_1: string
-  address_line_2?: string
-  street_address: string
-  city: string
-  state: string
-  zip_code: string
-  is_default: boolean
-}
-
 export default function CartPage() {
-  const toast = useToast()
+  const router = useRouter()
   const [cartItems, setCartItems] = useState<CartItem[]>([])
-  const [addresses, setAddresses] = useState<Address[]>([])
-  const [selectedAddress, setSelectedAddress] = useState<string>('')
   const [loading, setLoading] = useState(true)
   const [user, setUser] = useState<any>(null)
 
@@ -50,7 +38,7 @@ export default function CartPage() {
     } = await supabase.auth.getSession()
     if (session?.user) {
       setUser(session.user)
-      await Promise.all([fetchCartItems(), fetchAddresses()])
+      await fetchCartItems()
     }
     setLoading(false)
   }
@@ -76,32 +64,6 @@ export default function CartPage() {
       }
     } catch (error) {
       console.error('Error fetching cart items:', error)
-    }
-  }
-
-  const fetchAddresses = async () => {
-    try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
-      if (session?.user) {
-        const { data, error } = await supabase
-          .from('user_addresses')
-          .select('*')
-          .eq('user_id', session.user.id)
-          .order('is_default', { ascending: false })
-
-        if (error) throw error
-        setAddresses(data || [])
-
-        // Auto-select default address
-        const defaultAddress = data?.find((addr) => addr.is_default)
-        if (defaultAddress) {
-          setSelectedAddress(defaultAddress.id)
-        }
-      }
-    } catch (error) {
-      console.error('Error fetching addresses:', error)
     }
   }
 
@@ -136,39 +98,15 @@ export default function CartPage() {
     return cartItems.reduce((total, item) => total + item.product.price * item.quantity, 0)
   }
 
-  const handleCheckout = async () => {
-    if (!selectedAddress) {
-      toast.warning('Address Required', 'Please select a delivery address to proceed')
+
+  const handleCheckout = () => {
+    if (cartItems.length === 0) {
+      alert('Your cart is empty')
       return
     }
 
-    try {
-      // Here you would integrate with Razorpay for payment
-      // For now, we'll just create the order
-      const selectedAddr = addresses.find((addr) => addr.id === selectedAddress)
-
-      const response = await fetch('/api/orders', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
-        },
-        body: JSON.stringify({
-          shipping_address: selectedAddr,
-          billing_address: selectedAddr,
-        }),
-      })
-
-      if (response.ok) {
-        toast.success('Order Placed!', 'Your order has been placed successfully')
-        await fetchCartItems() // Cart will be empty after order
-      } else {
-        throw new Error('Failed to place order')
-      }
-    } catch (error) {
-      console.error('Error placing order:', error)
-      toast.error('Order Failed', 'Failed to place order. Please try again.')
-    }
+    // Redirect to checkout page
+    router.push('/checkout')
   }
 
   if (loading) {
@@ -293,57 +231,7 @@ export default function CartPage() {
             </div>
 
             {/* Order Summary */}
-            <div className="space-y-6">
-              {/* Address Selection */}
-              <div className="bg-white rounded-lg shadow p-6">
-                <h3 className="text-lg font-bold mb-4">Delivery Address</h3>
-
-                {addresses.length === 0 ? (
-                  <div className="text-center py-4">
-                    <p className="text-gray-600 mb-4">No addresses found</p>
-                    <Link href="/account/addresses">
-                      <Button variant="outline" size="sm">
-                        Add Address
-                      </Button>
-                    </Link>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {addresses.map((address) => (
-                      <label key={address.id} className="flex items-start space-x-3 cursor-pointer">
-                        <input
-                          type="radio"
-                          name="address"
-                          value={address.id}
-                          checked={selectedAddress === address.id}
-                          onChange={(e) => setSelectedAddress(e.target.value)}
-                          className="mt-1"
-                        />
-                        <div className="flex-1 text-sm">
-                          <p className="font-medium">{address.address_line_1}</p>
-                          {address.address_line_2 && <p>{address.address_line_2}</p>}
-                          <p>{address.street_address}</p>
-                          <p>
-                            {address.city}, {address.state} {address.zip_code}
-                          </p>
-                          {address.is_default && (
-                            <span className="inline-block bg-[#8BC34A] text-white text-xs px-2 py-1 rounded mt-1">
-                              Default
-                            </span>
-                          )}
-                        </div>
-                      </label>
-                    ))}
-                    <Link href="/account/addresses">
-                      <Button variant="outline" size="sm" className="w-full mt-3">
-                        Manage Addresses
-                      </Button>
-                    </Link>
-                  </div>
-                )}
-              </div>
-
-              {/* Order Summary */}
+            <div>
               <div className="bg-white rounded-lg shadow p-6">
                 <h3 className="text-lg font-bold mb-4">Order Summary</h3>
 
@@ -364,8 +252,8 @@ export default function CartPage() {
 
                 <Button
                   onClick={handleCheckout}
-                  className="w-full"
-                  disabled={!selectedAddress || cartItems.length === 0}
+                  className="w-full bg-[#8BC34A] hover:bg-[#7CB342] text-white"
+                  disabled={loading || cartItems.length === 0}
                 >
                   Proceed to Checkout
                 </Button>
