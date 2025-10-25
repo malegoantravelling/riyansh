@@ -13,12 +13,8 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { useState } from 'react'
 
 export default function AboutPage() {
-  const [hoveredValue, setHoveredValue] = useState<number | null>(null)
-  const [hoveredTeam, setHoveredTeam] = useState<number | null>(null)
-
   const values = [
     {
       icon: Leaf,
@@ -50,24 +46,21 @@ export default function AboutPage() {
     {
       name: 'Dr. Priya Sharma',
       role: 'Chief Ayurvedic Consultant',
-      image:
-        'https://images.pexels.com/photos/1130626/pexels-photo-1130626.jpeg?auto=compress&cs=tinysrgb&w=400&h=400',
+      image: 'https://via.placeholder.com/200x200?text=Dr.+Priya',
       description:
         'With over 15 years of experience in Ayurveda, Dr. Sharma leads our product development.',
     },
     {
       name: 'Rajesh Kumar',
       role: 'Quality Control Manager',
-      image:
-        'https://images.pexels.com/photos/2182970/pexels-photo-2182970.jpeg?auto=compress&cs=tinysrgb&w=400&h=400',
+      image: 'https://via.placeholder.com/200x200?text=Rajesh',
       description:
         'Ensures every product meets our stringent quality standards before reaching you.',
     },
     {
       name: 'Meera Patel',
       role: 'Customer Care Head',
-      image:
-        'https://images.pexels.com/photos/3756679/pexels-photo-3756679.jpeg?auto=compress&cs=tinysrgb&w=400&h=400',
+      image: 'https://via.placeholder.com/200x200?text=Meera',
       description: 'Dedicated to providing exceptional customer service and support.',
     },
   ]
@@ -212,7 +205,7 @@ export default function AboutPage() {
                 {/* Image */}
                 <div className="relative h-full rounded-2xl overflow-hidden group-hover:scale-105 transition-transform duration-700">
                   <Image
-                    src="https://images.pexels.com/photos/4021808/pexels-photo-4021808.jpeg?auto=compress&cs=tinysrgb&w=800"
+                    src="https://via.placeholder.com/500x500?text=Ayurvedic+Products"
                     alt="Ayurvedic Products"
                     width={500}
                     height={500}
@@ -271,8 +264,6 @@ export default function AboutPage() {
                 <div
                   key={index}
                   className="group relative bg-white rounded-2xl p-8 text-center shadow-lg hover:shadow-2xl transition-all duration-500 border-2 border-gray-100 hover:border-[#8BC34A]/30 transform hover:-translate-y-2"
-                  onMouseEnter={() => setHoveredValue(index)}
-                  onMouseLeave={() => setHoveredValue(null)}
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
                   {/* Background Glow on Hover */}
@@ -401,8 +392,6 @@ export default function AboutPage() {
               <div
                 key={index}
                 className="group relative bg-white rounded-3xl p-8 text-center shadow-lg hover:shadow-2xl transition-all duration-500 border-2 border-gray-100 hover:border-[#8BC34A]/30 transform hover:-translate-y-3"
-                onMouseEnter={() => setHoveredTeam(index)}
-                onMouseLeave={() => setHoveredTeam(null)}
               >
                 {/* Background Glow */}
                 <div className="absolute inset-0 bg-gradient-to-br from-[#8BC34A]/5 to-transparent rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
