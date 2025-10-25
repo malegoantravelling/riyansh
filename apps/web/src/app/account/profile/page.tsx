@@ -6,8 +6,10 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Edit, Save, X } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import { useToast } from '@/contexts/ToastContext'
 
 export default function ProfilePage() {
+  const toast = useToast()
   const [user, setUser] = useState<any>(null)
   const [profile, setProfile] = useState({
     full_name: '',
@@ -71,9 +73,10 @@ export default function ProfilePage() {
 
       setOriginalProfile(profile)
       setEditMode(false)
+      toast.success('Profile Updated!', 'Your profile has been updated successfully')
     } catch (error: any) {
       console.error('Error updating profile:', error)
-      alert('Error updating profile: ' + error.message)
+      toast.error('Update Failed', error.message || 'Could not update profile. Please try again.')
     } finally {
       setLoading(false)
     }

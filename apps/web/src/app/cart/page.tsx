@@ -8,6 +8,7 @@ import { supabase } from '@/lib/supabase'
 import { formatCurrency } from '@/lib/utils'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useToast } from '@/contexts/ToastContext'
 
 interface CartItem {
   id: string
@@ -32,6 +33,7 @@ interface Address {
 }
 
 export default function CartPage() {
+  const toast = useToast()
   const [cartItems, setCartItems] = useState<CartItem[]>([])
   const [addresses, setAddresses] = useState<Address[]>([])
   const [selectedAddress, setSelectedAddress] = useState<string>('')
@@ -136,7 +138,7 @@ export default function CartPage() {
 
   const handleCheckout = async () => {
     if (!selectedAddress) {
-      alert('Please select a delivery address')
+      toast.warning('Address Required', 'Please select a delivery address to proceed')
       return
     }
 
@@ -158,14 +160,14 @@ export default function CartPage() {
       })
 
       if (response.ok) {
-        alert('Order placed successfully!')
+        toast.success('Order Placed!', 'Your order has been placed successfully')
         await fetchCartItems() // Cart will be empty after order
       } else {
         throw new Error('Failed to place order')
       }
     } catch (error) {
       console.error('Error placing order:', error)
-      alert('Failed to place order. Please try again.')
+      toast.error('Order Failed', 'Failed to place order. Please try again.')
     }
   }
 
