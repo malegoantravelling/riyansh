@@ -9,6 +9,7 @@ import { supabase } from '@/lib/supabase'
 import { formatCurrency } from '@/lib/utils'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useToast } from '@/contexts/ToastContext'
 
 interface CartItem {
   id: string
@@ -96,6 +97,7 @@ export default function CartPage() {
   const calculateTotal = () => {
     return cartItems.reduce((total, item) => total + item.product.price * item.quantity, 0)
   }
+
 
   const handleCheckout = () => {
     if (cartItems.length === 0) {

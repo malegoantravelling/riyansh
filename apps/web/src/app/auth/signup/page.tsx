@@ -8,9 +8,11 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Eye, EyeOff } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import { useToast } from '@/contexts/ToastContext'
 
 export default function SignupPage() {
   const router = useRouter()
+  const toast = useToast()
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -56,7 +58,7 @@ export default function SignupPage() {
         // Sign out the user immediately after signup
         await supabase.auth.signOut()
 
-        alert('Registration successful! Please login with your credentials.')
+        toast.success('Registration Successful!', 'Please login with your credentials.')
         router.push('/auth/login')
       }
     } catch (error: any) {

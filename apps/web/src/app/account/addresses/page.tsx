@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Plus, Edit, Trash2, MapPin } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import { useToast } from '@/contexts/ToastContext'
 
 interface Address {
   id: string
@@ -19,6 +20,7 @@ interface Address {
 }
 
 export default function AddressesPage() {
+  const toast = useToast()
   const [addresses, setAddresses] = useState<Address[]>([])
   const [showForm, setShowForm] = useState(false)
   const [editingAddress, setEditingAddress] = useState<Address | null>(null)
@@ -86,10 +88,14 @@ export default function AddressesPage() {
       }
 
       await fetchAddresses()
+      toast.success(
+        editingAddress ? 'Address Updated!' : 'Address Added!',
+        'Your address has been saved successfully'
+      )
       resetForm()
     } catch (error: any) {
       console.error('Error saving address:', error)
-      alert('Error saving address: ' + error.message)
+      toast.error('Save Failed', error.message || 'Could not save address. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -117,9 +123,10 @@ export default function AddressesPage() {
 
       if (error) throw error
       await fetchAddresses()
+      toast.success('Address Deleted', 'The address has been removed successfully')
     } catch (error: any) {
       console.error('Error deleting address:', error)
-      alert('Error deleting address: ' + error.message)
+      toast.error('Delete Failed', error.message || 'Could not delete address. Please try again.')
     }
   }
 

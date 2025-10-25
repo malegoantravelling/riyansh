@@ -8,6 +8,7 @@ import { Minus, Plus, ShoppingCart, Heart } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useToast } from '@/contexts/ToastContext'
 
 interface Product {
   id: string
@@ -25,6 +26,7 @@ interface Product {
 
 export default function ProductDetailsPage() {
   const params = useParams()
+  const toast = useToast()
   const [product, setProduct] = useState<Product | null>(null)
   const [loading, setLoading] = useState(true)
   const [quantity, setQuantity] = useState(1)
@@ -65,7 +67,7 @@ export default function ProductDetailsPage() {
       } = await supabase.auth.getSession()
 
       if (!session?.user) {
-        alert('Please login to add items to cart')
+        toast.warning('Login Required', 'Please login to add items to cart')
         return
       }
 
@@ -96,10 +98,10 @@ export default function ProductDetailsPage() {
         if (error) throw error
       }
 
-      alert('Product added to cart!')
+      toast.success('Added to Cart!', `${quantity} x ${product.name} added to your cart`)
     } catch (error) {
       console.error('Error adding to cart:', error)
-      alert('Failed to add product to cart')
+      toast.error('Failed to Add', 'Could not add product to cart. Please try again.')
     } finally {
       setAddingToCart(false)
     }

@@ -17,8 +17,10 @@ import {
   Globe,
 } from 'lucide-react'
 import Link from 'next/link'
+import { useToast } from '@/contexts/ToastContext'
 
 export default function ContactPage() {
+  const toast = useToast()
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -35,7 +37,15 @@ export default function ContactPage() {
     // Simulate submission
     setTimeout(() => {
       setIsSubmitting(false)
-      alert('Message sent successfully!')
+      toast.success('Message Sent!', 'Thank you for contacting us. We will respond shortly.')
+      // Reset form
+      setFormData({
+        firstName: '',
+        lastName: '',
+        email: '',
+        subject: '',
+        message: '',
+      })
     }, 1500)
   }
 
