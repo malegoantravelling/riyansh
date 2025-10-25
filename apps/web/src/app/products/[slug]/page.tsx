@@ -41,6 +41,8 @@ export default function ProductDetailsPage() {
 
   const fetchProduct = async (slug: string) => {
     try {
+      console.log('🔍 Fetching product with slug:', slug)
+
       const { data, error } = await supabase
         .from('products')
         .select('*')
@@ -48,7 +50,26 @@ export default function ProductDetailsPage() {
         .eq('is_active', true)
         .single()
 
-      if (error) throw error
+      if (error) {
+        console.error('❌ Error fetching product:', error)
+
+        // Check if product exists but is inactive
+        const { data: inactiveProduct } = await supabase
+          .from('products')
+          .select('*')
+          .eq('slug', slug)
+          .single()
+
+        if (inactiveProduct) {
+          console.warn('⚠️ Product exists but is inactive:', inactiveProduct)
+        } else {
+          console.error('❌ Product not found with slug:', slug)
+        }
+
+        throw error
+      }
+
+      console.log('✅ Product found:', data)
       setProduct(data)
     } catch (error) {
       console.error('Error fetching product:', error)

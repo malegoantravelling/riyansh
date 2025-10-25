@@ -1,5 +1,14 @@
 import { Link, useLocation } from 'react-router-dom'
-import { LayoutDashboard, Package, FolderTree, ShoppingCart, Users, LogOut } from 'lucide-react'
+import {
+  LayoutDashboard,
+  Package,
+  FolderTree,
+  ShoppingCart,
+  Users,
+  CreditCard,
+  Activity,
+  LogOut,
+} from 'lucide-react'
 
 interface LayoutProps {
   children: React.ReactNode
@@ -12,6 +21,8 @@ const menuItems = [
   { path: '/categories', label: 'Categories', icon: FolderTree },
   { path: '/orders', label: 'Orders', icon: ShoppingCart },
   { path: '/users', label: 'Users', icon: Users },
+  { path: '/transactions', label: 'Transactions', icon: CreditCard },
+  { path: '/logs', label: 'Activity Logs', icon: Activity },
 ]
 
 export default function Layout({ children, onLogout }: LayoutProps) {
