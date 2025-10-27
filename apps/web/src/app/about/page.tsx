@@ -42,29 +42,6 @@ export default function AboutPage() {
     },
   ]
 
-  const team = [
-    {
-      name: 'Dr. Priya Sharma',
-      role: 'Chief Ayurvedic Consultant',
-      image: 'https://via.placeholder.com/200x200?text=Dr.+Priya',
-      description:
-        'With over 15 years of experience in Ayurveda, Dr. Sharma leads our product development.',
-    },
-    {
-      name: 'Rajesh Kumar',
-      role: 'Quality Control Manager',
-      image: 'https://via.placeholder.com/200x200?text=Rajesh',
-      description:
-        'Ensures every product meets our stringent quality standards before reaching you.',
-    },
-    {
-      name: 'Meera Patel',
-      role: 'Customer Care Head',
-      image: 'https://via.placeholder.com/200x200?text=Meera',
-      description: 'Dedicated to providing exceptional customer service and support.',
-    },
-  ]
-
   return (
     <div className="bg-gradient-to-b from-white via-gray-50 to-white">
       {/* Enhanced Modern Hero Header */}
@@ -205,7 +182,7 @@ export default function AboutPage() {
                 {/* Image */}
                 <div className="relative h-full rounded-2xl overflow-hidden group-hover:scale-105 transition-transform duration-700">
                   <Image
-                    src="https://via.placeholder.com/500x500?text=Ayurvedic+Products"
+                    src="https://images.pexels.com/photos/4021808/pexels-photo-4021808.jpeg?auto=compress&cs=tinysrgb&w=800"
                     alt="Ayurvedic Products"
                     width={500}
                     height={500}
@@ -231,63 +208,6 @@ export default function AboutPage() {
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Enhanced Core Values Section */}
-      <section className="py-20 bg-gradient-to-b from-gray-50 to-white relative overflow-hidden">
-        {/* Background Decoration */}
-        <div className="absolute inset-0 opacity-30">
-          <div className="absolute top-10 left-10 w-64 h-64 bg-[#8BC34A]/20 rounded-full blur-3xl" />
-          <div className="absolute bottom-10 right-10 w-64 h-64 bg-[#7CB342]/20 rounded-full blur-3xl" />
-        </div>
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          {/* Section Header */}
-          <div className="text-center mb-16 space-y-4">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#8BC34A]/10 rounded-full border border-[#8BC34A]/20 mb-4">
-              <Heart className="h-4 w-4 text-[#8BC34A]" />
-              <span className="text-sm font-semibold text-[#8BC34A]">What We Stand For</span>
-            </div>
-            <h2 className="text-4xl md:text-5xl font-extrabold text-[#2d2d2d]">Our Core Values</h2>
-            <p className="text-lg text-[#666666] max-w-2xl mx-auto leading-relaxed">
-              These principles guide everything we do, from product selection to customer service.
-            </p>
-          </div>
-
-          {/* Values Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {values.map((value, index) => {
-              const Icon = value.icon
-              return (
-                <div
-                  key={index}
-                  className="group relative bg-white rounded-2xl p-8 text-center shadow-lg hover:shadow-2xl transition-all duration-500 border-2 border-gray-100 hover:border-[#8BC34A]/30 transform hover:-translate-y-2"
-                  style={{ animationDelay: `${index * 100}ms` }}
-                >
-                  {/* Background Glow on Hover */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-[#8BC34A]/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
-                  {/* Icon Container */}
-                  <div className="relative mb-6">
-                    <div className="absolute inset-0 bg-[#8BC34A]/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                    <div className="relative inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-[#8BC34A] to-[#7CB342] rounded-2xl shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
-                      <Icon className="h-10 w-10 text-white" />
-                    </div>
-                  </div>
-
-                  {/* Content */}
-                  <h3 className="text-xl font-bold text-[#2d2d2d] mb-3 group-hover:text-[#8BC34A] transition-colors duration-300">
-                    {value.title}
-                  </h3>
-                  <p className="text-[#666666] leading-relaxed text-sm">{value.description}</p>
-
-                  {/* Hover Indicator */}
-                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-[#8BC34A] to-[#7CB342] rounded-b-2xl transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />
-                </div>
-              )
-            })}
           </div>
         </div>
       </section>
@@ -361,92 +281,6 @@ export default function AboutPage() {
                 <div className="text-[#666666] font-semibold text-sm">Customer Satisfaction</div>
               </div>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Enhanced Team Section */}
-      <section className="py-20 bg-gradient-to-b from-white to-gray-50 relative overflow-hidden">
-        {/* Background Decoration */}
-        <div className="absolute inset-0 opacity-30">
-          <div className="absolute top-20 left-20 w-64 h-64 bg-[#8BC34A]/10 rounded-full blur-3xl" />
-          <div className="absolute bottom-20 right-20 w-64 h-64 bg-[#7CB342]/10 rounded-full blur-3xl" />
-        </div>
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          {/* Section Header */}
-          <div className="text-center mb-16 space-y-4">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#8BC34A]/10 rounded-full border border-[#8BC34A]/20 mb-4">
-              <Users className="h-4 w-4 text-[#8BC34A]" />
-              <span className="text-sm font-semibold text-[#8BC34A]">Expert Team</span>
-            </div>
-            <h2 className="text-4xl md:text-5xl font-extrabold text-[#2d2d2d]">Meet Our Team</h2>
-            <p className="text-lg text-[#666666] max-w-2xl mx-auto leading-relaxed">
-              Our dedicated team of experts is committed to bringing you the best in natural health.
-            </p>
-          </div>
-
-          {/* Team Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {team.map((member, index) => (
-              <div
-                key={index}
-                className="group relative bg-white rounded-3xl p-8 text-center shadow-lg hover:shadow-2xl transition-all duration-500 border-2 border-gray-100 hover:border-[#8BC34A]/30 transform hover:-translate-y-3"
-              >
-                {/* Background Glow */}
-                <div className="absolute inset-0 bg-gradient-to-br from-[#8BC34A]/5 to-transparent rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
-                {/* Decorative Top Bar */}
-                <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-[#8BC34A] to-[#7CB342] rounded-t-3xl transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />
-
-                <div className="relative">
-                  {/* Avatar Container */}
-                  <div className="relative inline-block mb-6">
-                    {/* Glow Effect */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-[#8BC34A]/30 to-[#7CB342]/30 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
-                    {/* Avatar */}
-                    <div className="relative w-36 h-36 rounded-full overflow-hidden border-4 border-white shadow-xl group-hover:scale-110 group-hover:border-[#8BC34A]/30 transition-all duration-500">
-                      <Image
-                        src={member.image}
-                        alt={member.name}
-                        width={144}
-                        height={144}
-                        className="w-full h-full object-cover object-center"
-                      />
-                      {/* Overlay on Hover */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-[#8BC34A]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    </div>
-
-                    {/* Status Badge */}
-                    <div className="absolute bottom-2 right-2 w-8 h-8 bg-[#8BC34A] rounded-full border-4 border-white flex items-center justify-center shadow-lg">
-                      <CheckCircle2 className="h-4 w-4 text-white" />
-                    </div>
-                  </div>
-
-                  {/* Content */}
-                  <h3 className="text-2xl font-bold text-[#2d2d2d] mb-2 group-hover:text-[#8BC34A] transition-colors duration-300">
-                    {member.name}
-                  </h3>
-
-                  <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-[#8BC34A]/10 rounded-full mb-4">
-                    <span className="text-sm font-semibold text-[#8BC34A]">{member.role}</span>
-                  </div>
-
-                  <p className="text-[#666666] leading-relaxed text-sm">{member.description}</p>
-
-                  {/* Social Links Placeholder */}
-                  <div className="flex justify-center gap-3 mt-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <div className="w-10 h-10 bg-[#8BC34A]/10 rounded-full flex items-center justify-center hover:bg-[#8BC34A] hover:text-white transition-colors cursor-pointer">
-                      <span className="text-xs font-bold">LI</span>
-                    </div>
-                    <div className="w-10 h-10 bg-[#8BC34A]/10 rounded-full flex items-center justify-center hover:bg-[#8BC34A] hover:text-white transition-colors cursor-pointer">
-                      <span className="text-xs font-bold">✉</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
           </div>
         </div>
       </section>

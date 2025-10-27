@@ -25,18 +25,27 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-white">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#8BC34A]"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
+          <div className="relative inline-flex">
+            <div className="w-32 h-32 border-8 border-[#8BC34A]/20 border-t-[#8BC34A] rounded-full animate-spin"></div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-16 h-16 bg-gradient-to-br from-[#8BC34A] to-[#7CB342] rounded-2xl flex items-center justify-center shadow-2xl">
+                <div className="w-8 h-8 bg-white rounded-full"></div>
+              </div>
+            </div>
+          </div>
+          <p className="mt-6 text-lg font-semibold text-gray-600 animate-pulse">
+            Loading your account...
+          </p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">{children}</div>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
+      {children}
     </div>
   )
 }

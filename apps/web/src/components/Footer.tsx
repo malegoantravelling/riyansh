@@ -86,8 +86,7 @@ export default function Footer() {
                 { href: '/store', label: 'Shop' },
                 { href: '/about', label: 'About Us' },
                 { href: '/contact', label: 'Contact' },
-                { href: '#', label: 'Blog' },
-                { href: '#', label: 'FAQs' },
+
               ].map((link) => (
                 <li key={link.label}>
                   <Link
@@ -107,12 +106,9 @@ export default function Footer() {
             <h3 className="font-bold text-lg mb-6 text-white">Customer Service</h3>
             <ul className="space-y-3">
               {[
-                { href: '#', label: 'Track Order' },
-                { href: '#', label: 'Returns & Refunds' },
-                { href: '#', label: 'Shipping Info' },
-                { href: '#', label: 'Terms & Conditions' },
-                { href: '#', label: 'Privacy Policy' },
-                { href: '#', label: 'Support Center' },
+                { href: '/account/orders', label: 'Shipping Info' },
+                { href: '/about', label: 'Privacy Policy' },
+                { href: '/contact', label: 'Support Center' },
               ].map((link) => (
                 <li key={link.label}>
                   <Link
@@ -137,7 +133,8 @@ export default function Footer() {
                     <MapPin className="h-4 w-4 text-[#8BC34A] group-hover:text-white" />
                   </div>
                   <span className="text-gray-400 leading-relaxed flex-1">
-                    Riyansh Ayurvedic Center, Mumbai, Maharashtra, India
+                    Malegaon, Nashik District, Maharashtra, 423200, ...
+
                   </span>
                 </li>
                 <li className="flex items-center gap-3 text-sm group">

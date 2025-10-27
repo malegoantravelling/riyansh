@@ -118,9 +118,12 @@ The Contact page had an "Our Offices" section showing three fake office location
 3. **~~Our Offices Section~~** ❌ **REMOVED**
 
 4. **Contact Info Section** ✅
+
    - "Let's Connect" heading
    - Three cards:
-     - **Visit Us**: Riyansh Ayurvedic Center, Mumbai, Maharashtra, India
+
+     - **Visit Us**: Malegaon, Nashik District, Maharashtra, 423200, ...
+
      - **Call Us**: +91 9370646279 (Mon-Sat, 9AM-6PM IST)
      - **Email Us**: riyanshamrit106@gmail.com (24/7 Support)
 

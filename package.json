@@ -15,10 +15,14 @@
     "install:all": "npm install && cd apps/web && npm install && cd ../admin && npm install && cd ../api && npm install && cd ../../packages/db && npm install && cd ../config && npm install && cd ../ui && npm install && cd ../utils && npm install"
   },
   "devDependencies": {
+    "@types/nodemailer": "^7.0.3",
     "concurrently": "^8.2.2"
   },
   "workspaces": [
     "apps/*",
     "packages/*"
-  ]
+  ],
+  "dependencies": {
+    "nodemailer": "^7.0.10"
+  }
 }
