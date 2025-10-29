@@ -6,13 +6,10 @@ import {
   FolderTree,
   ShoppingCart,
   Users,
+  CreditCard,
   LogOut,
-  Search,
-  Bell,
-  Settings,
   Menu,
   X,
-  ChevronDown,
 } from 'lucide-react'
 
 interface LayoutProps {
@@ -26,14 +23,12 @@ const menuItems = [
   { path: '/categories', label: 'Categories', icon: FolderTree },
   { path: '/orders', label: 'Orders', icon: ShoppingCart },
   { path: '/users', label: 'Users', icon: Users },
+  { path: '/transactions', label: 'Transactions', icon: CreditCard },
 ]
 
 export default function Layout({ children, onLogout }: LayoutProps) {
   const location = useLocation()
   const [sidebarOpen, setSidebarOpen] = useState(true)
-  const [profileOpen, setProfileOpen] = useState(false)
-  const [notificationsOpen, setNotificationsOpen] = useState(false)
-  const [searchQuery, setSearchQuery] = useState('')
 
   return (
     <div className="flex h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -106,23 +101,8 @@ export default function Layout({ children, onLogout }: LayoutProps) {
           })}
         </nav>
 
-        {/* Settings & Logout */}
+        {/* Logout */}
         <div className="p-4 border-t border-gray-200 space-y-2">
-          <Link
-            to="/settings"
-            className={`flex items-center ${
-              sidebarOpen ? 'space-x-3 px-4' : 'justify-center px-2'
-            } py-3 rounded-xl text-gray-600 hover:bg-gray-100 w-full transition-all duration-200 group relative`}
-          >
-            <Settings className={`${sidebarOpen ? 'h-5 w-5' : 'h-6 w-6'}`} />
-            {sidebarOpen && <span className="font-medium">Settings</span>}
-            {!sidebarOpen && (
-              <span className="absolute left-full ml-6 px-2 py-1 bg-gray-900 text-white text-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50">
-                Settings
-              </span>
-            )}
-          </Link>
-
           <button
             onClick={onLogout}
             className={`flex items-center ${
@@ -144,112 +124,18 @@ export default function Layout({ children, onLogout }: LayoutProps) {
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top Header */}
         <header className="bg-white border-b border-gray-200 shadow-sm">
-          <div className="flex items-center justify-between px-8 py-4">
-            {/* Search Bar */}
-            <div className="flex-1 max-w-2xl">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Search products, orders, users..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && searchQuery.trim()) {
-                      // Navigate to search results or filter current view
-                      console.log('Searching for:', searchQuery)
-                      // You can implement navigation here if needed
-                    }
-                  }}
-                  className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#27AE60] focus:border-transparent transition-all"
-                />
-              </div>
-            </div>
-
+          <div className="flex items-center justify-end px-8 py-4">
             {/* Right Side Actions */}
-            <div className="flex items-center space-x-4 ml-6">
-              {/* Notifications */}
-              {/* <div className="relative">
-                <button
-                  onClick={() => setNotificationsOpen(!notificationsOpen)}
-                  className="relative p-2 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
-                >
-                  <Bell className="h-6 w-6" />
-                  <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-                </button>
-
-                {notificationsOpen && (
-                  <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50">
-                    <div className="px-4 py-3 border-b border-gray-100">
-                      <p className="text-sm font-semibold text-gray-800">Notifications</p>
-                    </div>
-                    <div className="max-h-96 overflow-y-auto">
-                      <div className="px-4 py-3 hover:bg-gray-50 transition-colors cursor-pointer">
-                        <p className="text-sm font-medium text-gray-900">New order received</p>
-                        <p className="text-xs text-gray-500 mt-1">Order #12345 - ₹2,499.00</p>
-                        <p className="text-xs text-gray-400 mt-1">2 minutes ago</p>
-                      </div>
-                      <div className="px-4 py-3 hover:bg-gray-50 transition-colors cursor-pointer">
-                        <p className="text-sm font-medium text-gray-900">Product out of stock</p>
-                        <p className="text-xs text-gray-500 mt-1">Organic Vegetables Pack</p>
-                        <p className="text-xs text-gray-400 mt-1">1 hour ago</p>
-                      </div>
-                      <div className="px-4 py-3 hover:bg-gray-50 transition-colors cursor-pointer">
-                        <p className="text-sm font-medium text-gray-900">New user registered</p>
-                        <p className="text-xs text-gray-500 mt-1">john.doe@example.com</p>
-                        <p className="text-xs text-gray-400 mt-1">3 hours ago</p>
-                      </div>
-                    </div>
-                    <div className="px-4 py-3 border-t border-gray-100">
-                      <button className="text-sm text-[#27AE60] hover:text-[#229954] font-medium">
-                        View all notifications
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div> */}
-
-              {/* Profile Dropdown */}
-              <div className="relative">
-                <button
-                  onClick={() => setProfileOpen(!profileOpen)}
-                  className="flex items-center space-x-3 px-4 py-2 hover:bg-gray-100 rounded-xl transition-colors"
-                >
-                  <div className="w-9 h-9 bg-gradient-to-br from-[#27AE60] to-[#229954] rounded-full flex items-center justify-center text-white font-semibold">
-                    A
-                  </div>
-                  <div className="text-left hidden md:block">
-                    <p className="text-sm font-semibold text-gray-800">Admin User</p>
-                    <p className="text-xs text-gray-500">admin@riyansh.com</p>
-                  </div>
-                  <ChevronDown
-                    className={`h-4 w-4 text-gray-400 transition-transform ${
-                      profileOpen ? 'rotate-180' : ''
-                    }`}
-                  />
-                </button>
-                {profileOpen && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50">
-                    <div className="px-4 py-3 border-b border-gray-100">
-                      <p className="text-sm font-semibold text-gray-800">Admin User</p>
-                      <p className="text-xs text-gray-500">admin@riyansh.com</p>
-                    </div>
-                    <button className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                      Profile Settings
-                    </button>
-                    <button className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                      Preferences
-                    </button>
-                    <div className="border-t border-gray-100 mt-2 pt-2">
-                      <button
-                        onClick={onLogout}
-                        className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 transition-colors"
-                      >
-                        Sign Out
-                      </button>
-                    </div>
-                  </div>
-                )}
+            <div className="flex items-center space-x-4">
+              {/* Admin User */}
+              <div className="flex items-center space-x-3 px-4 py-2">
+                <div className="w-9 h-9 bg-gradient-to-br from-[#27AE60] to-[#229954] rounded-full flex items-center justify-center text-white font-semibold">
+                  A
+                </div>
+                <div className="text-left hidden md:block">
+                  <p className="text-sm font-semibold text-gray-800">Admin User</p>
+                  <p className="text-xs text-gray-500">admin@riyansh.com</p>
+                </div>
               </div>
             </div>
           </div>
