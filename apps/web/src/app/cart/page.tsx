@@ -246,7 +246,7 @@ export default function CartPage() {
                         {/* Product Image */}
                         <Link
                           href={`/products/${item.product.id}`}
-                          className="relative w-32 h-32 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl flex-shrink-0 overflow-hidden group-hover:scale-105 transition-transform duration-300"
+                          className="relative w-32 h-32 bg-white rounded-xl flex-shrink-0 overflow-hidden group-hover:scale-105 transition-transform duration-300"
                         >
                           {item.product.image_url ? (
                             <Image

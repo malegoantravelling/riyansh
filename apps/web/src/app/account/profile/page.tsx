@@ -125,10 +125,10 @@ export default function ProfilePage() {
                 <Button
                   onClick={handleEdit}
                   variant="outline"
-                  className="bg-white/20 hover:bg-white/30 border-2 border-white text-white backdrop-blur-sm"
+                  className="bg-white/20 hover:bg-white/30 border-2 border-white text-white backdrop-blur-sm px-3 md:px-4"
                 >
-                  <Edit className="h-5 w-5 mr-2" />
-                  Edit Profile
+                  <Edit className="h-5 w-5" />
+                  <span className="hidden md:inline ml-2">Edit Profile</span>
                 </Button>
               ) : (
                 <div className="flex items-center gap-2">

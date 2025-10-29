@@ -4,11 +4,33 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { api } from '@/lib/api'
+import DeleteConfirmationModal from '@/components/DeleteConfirmationModal.tsx'
+import Toast, { ToastType } from '@/components/SuccessToast'
 
 export default function Categories() {
   const [categories, setCategories] = useState<any[]>([])
   const [showForm, setShowForm] = useState(false)
   const [editingCategory, setEditingCategory] = useState<any>(null)
+  const [deleteModal, setDeleteModal] = useState<{
+    isOpen: boolean
+    categoryId: string | null
+    categoryName: string
+  }>({
+    isOpen: false,
+    categoryId: null,
+    categoryName: '',
+  })
+  const [toast, setToast] = useState<{
+    isOpen: boolean
+    type: ToastType
+    title: string
+    message: string
+  }>({
+    isOpen: false,
+    type: 'success',
+    title: '',
+    message: '',
+  })
   const [formData, setFormData] = useState({
     name: '',
     slug: '',
@@ -29,14 +51,20 @@ export default function Categories() {
     }
   }
 
+  const showToast = (type: ToastType, title: string, message: string) => {
+    setToast({ isOpen: true, type, title, message })
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
     try {
       if (editingCategory) {
         await api.put(`/api/categories/${editingCategory.id}`, formData)
+        showToast('success', 'Success!', 'Category updated successfully!')
       } else {
         await api.post('/api/categories', formData)
+        showToast('success', 'Success!', 'Category created successfully!')
       }
 
       setShowForm(false)
@@ -45,17 +73,32 @@ export default function Categories() {
       fetchCategories()
     } catch (error) {
       console.error('Error saving category:', error)
+      showToast('error', 'Error', 'Failed to save category')
     }
   }
 
   const handleDelete = async (id: string) => {
-    if (confirm('Are you sure you want to delete this category?')) {
-      try {
-        await api.delete(`/api/categories/${id}`)
-        fetchCategories()
-      } catch (error) {
-        console.error('Error deleting category:', error)
-      }
+    const category = categories.find((c) => c.id === id)
+    if (category) {
+      setDeleteModal({
+        isOpen: true,
+        categoryId: id,
+        categoryName: category.name,
+      })
+    }
+  }
+
+  const confirmDelete = async () => {
+    if (!deleteModal.categoryId) return
+
+    try {
+      await api.delete(`/api/categories/${deleteModal.categoryId}`)
+      fetchCategories()
+      setDeleteModal({ isOpen: false, categoryId: null, categoryName: '' })
+      showToast('success', 'Success!', 'Category deleted successfully!')
+    } catch (error) {
+      console.error('Error deleting category:', error)
+      showToast('error', 'Error', 'Failed to delete category')
     }
   }
 
@@ -197,6 +240,26 @@ export default function Categories() {
           ))
         )}
       </div>
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={deleteModal.isOpen}
+        onClose={() => setDeleteModal({ isOpen: false, categoryId: null, categoryName: '' })}
+        onConfirm={confirmDelete}
+        title="Delete Category"
+        message="Are you sure you want to delete this category? This action cannot be undone."
+        itemName={deleteModal.categoryName}
+      />
+
+      {/* Toast Notification */}
+      <Toast
+        isOpen={toast.isOpen}
+        onClose={() => setToast({ ...toast, isOpen: false })}
+        type={toast.type}
+        title={toast.title}
+        message={toast.message}
+        duration={toast.type === 'success' ? 3000 : 4000}
+      />
     </div>
   )
 }

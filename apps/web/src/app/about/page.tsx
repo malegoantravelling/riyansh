@@ -364,7 +364,7 @@ export default function AboutPage() {
           {/* Stats Bar */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-16 max-w-3xl mx-auto">
             <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
-              <div className="text-3xl font-extrabold text-white mb-1">10,000+</div>
+              <div className="text-3xl font-extrabold text-white mb-1">5,000+</div>
               <div className="text-white/90 text-sm font-medium">Happy Customers</div>
             </div>
             <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">

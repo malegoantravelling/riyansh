@@ -131,7 +131,7 @@ export default function Layout({ children, onLogout }: LayoutProps) {
           >
             <LogOut className={`${sidebarOpen ? 'h-5 w-5' : 'h-6 w-6'}`} />
             {sidebarOpen && <span className="font-medium">Logout</span>}
-            {!sidebarOpen && (  
+            {!sidebarOpen && (
               <span className="absolute left-full ml-6 px-2 py-1 bg-red-600 text-white text-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50">
                 Logout
               </span>
@@ -169,7 +169,7 @@ export default function Layout({ children, onLogout }: LayoutProps) {
             {/* Right Side Actions */}
             <div className="flex items-center space-x-4 ml-6">
               {/* Notifications */}
-              <div className="relative">
+              {/* <div className="relative">
                 <button
                   onClick={() => setNotificationsOpen(!notificationsOpen)}
                   className="relative p-2 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
@@ -207,7 +207,7 @@ export default function Layout({ children, onLogout }: LayoutProps) {
                     </div>
                   </div>
                 )}
-              </div>
+              </div> */}
 
               {/* Profile Dropdown */}
               <div className="relative">
@@ -228,7 +228,6 @@ export default function Layout({ children, onLogout }: LayoutProps) {
                     }`}
                   />
                 </button>
-
                 {profileOpen && (
                   <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50">
                     <div className="px-4 py-3 border-b border-gray-100">

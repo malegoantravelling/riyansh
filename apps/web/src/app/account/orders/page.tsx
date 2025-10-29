@@ -89,7 +89,7 @@ export default function OrdersPage() {
     const deliveryStart = new Date(date)
     deliveryStart.setDate(date.getDate() + 3)
     const deliveryEnd = new Date(date)
-    deliveryEnd.setDate(date.getDate() + 5)
+    deliveryEnd.setDate(date.getDate() + 10)
 
     return `${deliveryStart.toLocaleDateString()} - ${deliveryEnd.toLocaleDateString()}`
   }

@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { Edit, Trash2, Search, Filter, User } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { api } from '@/lib/api'
+import DeleteConfirmationModal from '@/components/DeleteConfirmationModal.tsx'
+import Toast, { ToastType } from '@/components/SuccessToast'
 
 interface User {
   id: string
@@ -15,9 +17,10 @@ interface EditUserModalProps {
   isOpen: boolean
   onClose: () => void
   onSave: (user: User) => void
+  onError: (message: string) => void
 }
 
-function EditUserModal({ user, isOpen, onClose, onSave }: EditUserModalProps) {
+function EditUserModal({ user, isOpen, onClose, onSave, onError }: EditUserModalProps) {
   const [formData, setFormData] = useState({
     full_name: '',
     email: '',
@@ -44,7 +47,7 @@ function EditUserModal({ user, isOpen, onClose, onSave }: EditUserModalProps) {
       onClose()
     } catch (error) {
       console.error('Error updating user:', error)
-      alert('Failed to update user')
+      onError('Failed to update user')
     } finally {
       setLoading(false)
     }
@@ -115,10 +118,34 @@ export default function Users() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [dateFilter, setDateFilter] = useState<string>('all')
+  const [deleteModal, setDeleteModal] = useState<{
+    isOpen: boolean
+    userId: string | null
+    userName: string
+  }>({
+    isOpen: false,
+    userId: null,
+    userName: '',
+  })
+  const [toast, setToast] = useState<{
+    isOpen: boolean
+    type: ToastType
+    title: string
+    message: string
+  }>({
+    isOpen: false,
+    type: 'success',
+    title: '',
+    message: '',
+  })
 
   useEffect(() => {
     fetchUsers()
   }, [])
+
+  const showToast = (type: ToastType, title: string, message: string) => {
+    setToast({ isOpen: true, type, title, message })
+  }
 
   const fetchUsers = async () => {
     try {
@@ -135,19 +162,37 @@ export default function Users() {
   }
 
   const handleDelete = async (userId: string) => {
-    if (!confirm('Are you sure you want to delete this user?')) return
+    const user = users.find((u) => u.id === userId)
+    if (user) {
+      setDeleteModal({
+        isOpen: true,
+        userId,
+        userName: user.full_name || user.email,
+      })
+    }
+  }
+
+  const confirmDelete = async () => {
+    if (!deleteModal.userId) return
 
     try {
-      await api.delete(`/api/users/${userId}`)
-      setUsers(users.filter((user) => user.id !== userId))
+      await api.delete(`/api/users/${deleteModal.userId}`)
+      setUsers(users.filter((user) => user.id !== deleteModal.userId))
+      setDeleteModal({ isOpen: false, userId: null, userName: '' })
+      showToast('success', 'Success!', 'User deleted successfully!')
     } catch (error) {
       console.error('Error deleting user:', error)
-      alert('Failed to delete user')
+      showToast('error', 'Error', 'Failed to delete user')
     }
   }
 
   const handleSaveUser = (updatedUser: User) => {
     setUsers(users.map((user) => (user.id === updatedUser.id ? updatedUser : user)))
+    showToast('success', 'Success!', 'User updated successfully!')
+  }
+
+  const handleUserError = (message: string) => {
+    showToast('error', 'Error', message)
   }
 
   // Filter users based on search term and filters
@@ -297,6 +342,27 @@ export default function Users() {
           setEditingUser(null)
         }}
         onSave={handleSaveUser}
+        onError={handleUserError}
+      />
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={deleteModal.isOpen}
+        onClose={() => setDeleteModal({ isOpen: false, userId: null, userName: '' })}
+        onConfirm={confirmDelete}
+        title="Delete User"
+        message="Are you sure you want to delete this user? This action cannot be undone."
+        itemName={deleteModal.userName}
+      />
+
+      {/* Toast Notification */}
+      <Toast
+        isOpen={toast.isOpen}
+        onClose={() => setToast({ ...toast, isOpen: false })}
+        type={toast.type}
+        title={toast.title}
+        message={toast.message}
+        duration={toast.type === 'success' ? 3000 : 4000}
       />
     </div>
   )

@@ -174,14 +174,14 @@ export default function AddressesPage() {
       {/* Enhanced Breadcrumb Header */}
       <div className="bg-white border-b border-gray-100 shadow-sm">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
               <h1 className="text-4xl font-bold text-[#2d2d2d] mb-2">My Addresses</h1>
               <p className="text-sm text-gray-500">Manage your delivery addresses</p>
             </div>
             <Button
               onClick={() => setShowForm(true)}
-              className="rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+              className="rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 mt-[2vh] md:mt-0 px-6 py-4"
               size="lg"
             >
               <Plus className="h-5 w-5 mr-2" />
@@ -228,7 +228,7 @@ export default function AddressesPage() {
                 {/* Card Header */}
                 <div className="bg-gradient-to-r from-[#8BC34A]/5 to-[#7CB342]/5 p-4 border-b-2 border-gray-100">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center md:gap-72 gap-56">
                       <div className="w-12 h-12 bg-gradient-to-br from-[#8BC34A] to-[#7CB342] rounded-xl flex items-center justify-center shadow-lg">
                         <MapPin className="h-6 w-6 text-white" />
                       </div>
@@ -261,7 +261,7 @@ export default function AddressesPage() {
                   <Button
                     onClick={() => handleEdit(address)}
                     variant="outline"
-                    className="flex-1 rounded-xl border-2 hover:border-[#8BC34A] hover:text-[#8BC34A] transition-all"
+                    className="flex-1 rounded-xl border-2 hover:border-[#8BC34A] hover:text-[#ffffff] transition-all"
                   >
                     <Edit className="h-4 w-4 mr-2" />
                     Edit
