@@ -30,7 +30,7 @@ export default function Footer() {
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
           {/* About Section */}
-          <div className="space-y-6">
+          <div className="space-y-6 text-center md:text-left">
             <div>
               <h3 className="text-3xl font-extrabold mb-2">
                 <span className="text-white">RIY</span>
@@ -43,7 +43,7 @@ export default function Footer() {
             </div>
 
             {/* Trust Badges */}
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-3 justify-center md:justify-start">
               <div className="flex items-center gap-2 px-3 py-2 bg-white/5 rounded-lg border border-white/10">
                 <Shield className="h-4 w-4 text-[#8BC34A]" />
                 <span className="text-xs font-semibold">100% Secure</span>
@@ -57,7 +57,7 @@ export default function Footer() {
             {/* Social Links */}
             <div>
               <h4 className="font-bold text-sm mb-3 text-gray-300">Follow Us</h4>
-              <div className="flex gap-3">
+              <div className="flex gap-3 justify-center md:justify-start">
                 {[
                   { icon: Facebook, href: '#', label: 'Facebook' },
                   { icon: Twitter, href: '#', label: 'Twitter' },
@@ -78,16 +78,14 @@ export default function Footer() {
           </div>
 
           {/* Quick Links */}
-          <div>
+          <div className="text-center md:text-left">
             <h3 className="font-bold text-lg mb-6 text-white">Quick Links</h3>
-            <ul className="space-y-3">
+            <ul className="space-y-3 flex flex-col items-center md:items-start">
               {[
                 { href: '/', label: 'Home' },
                 { href: '/store', label: 'Shop' },
                 { href: '/about', label: 'About Us' },
                 { href: '/contact', label: 'Contact' },
-                { href: '#', label: 'Blog' },
-                { href: '#', label: 'FAQs' },
               ].map((link) => (
                 <li key={link.label}>
                   <Link
@@ -103,16 +101,13 @@ export default function Footer() {
           </div>
 
           {/* Customer Service */}
-          <div>
+          <div className="text-center md:text-left">
             <h3 className="font-bold text-lg mb-6 text-white">Customer Service</h3>
-            <ul className="space-y-3">
+            <ul className="space-y-3 flex flex-col items-center md:items-start">
               {[
-                { href: '#', label: 'Track Order' },
-                { href: '#', label: 'Returns & Refunds' },
-                { href: '#', label: 'Shipping Info' },
-                { href: '#', label: 'Terms & Conditions' },
-                { href: '#', label: 'Privacy Policy' },
-                { href: '#', label: 'Support Center' },
+                { href: '/account/orders', label: 'Shipping Info' },
+                { href: '/about', label: 'Privacy Policy' },
+                { href: '/contact', label: 'Support Center' },
               ].map((link) => (
                 <li key={link.label}>
                   <Link
@@ -128,19 +123,19 @@ export default function Footer() {
           </div>
 
           {/* Contact & Newsletter */}
-          <div className="space-y-6">
+          <div className="space-y-6 text-center md:text-left">
             <div>
               <h3 className="font-bold text-lg mb-6 text-white">Contact Us</h3>
-              <ul className="space-y-4">
-                <li className="flex items-start gap-3 text-sm group">
+              <ul className="space-y-4 flex flex-col items-center md:items-start">
+                <li className="flex items-start gap-3 text-sm group w-full md:w-auto justify-center md:justify-start">
                   <div className="p-2 bg-[#8BC34A]/10 rounded-lg group-hover:bg-[#8BC34A] transition-colors">
                     <MapPin className="h-4 w-4 text-[#8BC34A] group-hover:text-white" />
                   </div>
                   <span className="text-gray-400 leading-relaxed flex-1">
-                    Riyansh Ayurvedic Center, Mumbai, Maharashtra, India
+                    Malegaon, Nashik District, Maharashtra, 423200, ...
                   </span>
                 </li>
-                <li className="flex items-center gap-3 text-sm group">
+                <li className="flex items-center gap-3 text-sm group justify-center md:justify-start">
                   <div className="p-2 bg-[#8BC34A]/10 rounded-lg group-hover:bg-[#8BC34A] transition-colors">
                     <Phone className="h-4 w-4 text-[#8BC34A] group-hover:text-white" />
                   </div>
@@ -151,7 +146,7 @@ export default function Footer() {
                     +91 9370646279
                   </a>
                 </li>
-                <li className="flex items-center gap-3 text-sm group">
+                <li className="flex items-center gap-3 text-sm group justify-center md:justify-start">
                   <div className="p-2 bg-[#8BC34A]/10 rounded-lg group-hover:bg-[#8BC34A] transition-colors">
                     <Mail className="h-4 w-4 text-[#8BC34A] group-hover:text-white" />
                   </div>
@@ -162,7 +157,7 @@ export default function Footer() {
                     riyanshamrit106@gmail.com
                   </a>
                 </li>
-                <li className="flex items-center gap-3 text-sm">
+                <li className="flex items-center gap-3 text-sm justify-center md:justify-start">
                   <div className="p-2 bg-[#8BC34A]/10 rounded-lg">
                     <Clock className="h-4 w-4 text-[#8BC34A]" />
                   </div>

@@ -5,6 +5,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { api } from '@/lib/api'
 import { formatCurrency } from '@/lib/utils'
+import DeleteConfirmationModal from '@/components/DeleteConfirmationModal.tsx'
+import Toast, { ToastType } from '@/components/SuccessToast'
 
 export default function Products() {
   const [products, setProducts] = useState<any[]>([])
@@ -18,6 +20,26 @@ export default function Products() {
   const [categoryFilter, setCategoryFilter] = useState<string>('all')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [priceRangeFilter, setPriceRangeFilter] = useState<string>('all')
+  const [deleteModal, setDeleteModal] = useState<{
+    isOpen: boolean
+    productId: string | null
+    productName: string
+  }>({
+    isOpen: false,
+    productId: null,
+    productName: '',
+  })
+  const [toast, setToast] = useState<{
+    isOpen: boolean
+    type: ToastType
+    title: string
+    message: string
+  }>({
+    isOpen: false,
+    type: 'success',
+    title: '',
+    message: '',
+  })
   const [formData, setFormData] = useState({
     name: '',
     slug: '',
@@ -73,6 +95,10 @@ export default function Products() {
     setFormData({ ...formData, image_url: '' })
   }
 
+  const showToast = (type: ToastType, title: string, message: string) => {
+    setToast({ isOpen: true, type, title, message })
+  }
+
   const uploadImage = async (): Promise<string | null> => {
     if (!imageFile) return formData.image_url || null
 
@@ -94,7 +120,7 @@ export default function Products() {
       return data.imageUrl
     } catch (error) {
       console.error('Error uploading image:', error)
-      alert('Failed to upload image')
+      showToast('error', 'Upload Failed', 'Failed to upload image. Please try again.')
       return null
     } finally {
       setUploading(false)
@@ -118,7 +144,7 @@ export default function Products() {
     if (imageFile) {
       const uploadedUrl = await uploadImage()
       if (!uploadedUrl) {
-        alert('Failed to upload image. Please try again.')
+        // Toast already shown in uploadImage function
         return
       }
       imageUrl = uploadedUrl
@@ -140,10 +166,10 @@ export default function Products() {
     try {
       if (editingProduct) {
         await api.put(`/api/products/${editingProduct.id}`, productData)
-        alert('Product updated successfully!')
+        showToast('success', 'Success!', 'Product updated successfully!')
       } else {
         await api.post('/api/products', productData)
-        alert('Product created successfully!')
+        showToast('success', 'Success!', 'Product created successfully!')
       }
 
       setShowForm(false)
@@ -152,18 +178,32 @@ export default function Products() {
       fetchProducts()
     } catch (error: any) {
       console.error('Error saving product:', error)
-      alert(`Failed to save product: ${error.message || 'Unknown error'}`)
+      showToast('error', 'Error', `Failed to save product: ${error.message || 'Unknown error'}`)
     }
   }
 
   const handleDelete = async (id: string) => {
-    if (confirm('Are you sure you want to delete this product?')) {
-      try {
-        await api.delete(`/api/products/${id}`)
-        fetchProducts()
-      } catch (error) {
-        console.error('Error deleting product:', error)
-      }
+    const product = products.find((p) => p.id === id)
+    if (product) {
+      setDeleteModal({
+        isOpen: true,
+        productId: id,
+        productName: product.name,
+      })
+    }
+  }
+
+  const confirmDelete = async () => {
+    if (!deleteModal.productId) return
+
+    try {
+      await api.delete(`/api/products/${deleteModal.productId}`)
+      fetchProducts()
+      setDeleteModal({ isOpen: false, productId: null, productName: '' })
+      showToast('success', 'Success!', 'Product deleted successfully!')
+    } catch (error) {
+      console.error('Error deleting product:', error)
+      showToast('error', 'Error', 'Failed to delete product')
     }
   }
 
@@ -559,6 +599,26 @@ export default function Products() {
           </table>
         )}
       </div>
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={deleteModal.isOpen}
+        onClose={() => setDeleteModal({ isOpen: false, productId: null, productName: '' })}
+        onConfirm={confirmDelete}
+        title="Delete Product"
+        message="Are you sure you want to delete this product? This action cannot be undone."
+        itemName={deleteModal.productName}
+      />
+
+      {/* Toast Notification */}
+      <Toast
+        isOpen={toast.isOpen}
+        onClose={() => setToast({ ...toast, isOpen: false })}
+        type={toast.type}
+        title={toast.title}
+        message={toast.message}
+        duration={toast.type === 'success' ? 3000 : 4000}
+      />
     </div>
   )
 }

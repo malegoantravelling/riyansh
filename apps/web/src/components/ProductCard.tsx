@@ -126,7 +126,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
       <Link href={`/products/${product.slug}`} className="block">
         {/* Product Image Container */}
-        <div className="relative aspect-square bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
+        <div className="relative aspect-square bg-white overflow-hidden">
           {product.image_url ? (
             <Image
               src={product.image_url}
@@ -153,7 +153,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         {/* Product Info Section */}
         <div className="p-5 space-y-3">
           {/* Product Name */}
-          <h3 className="font-bold text-lg text-[#2d2d2d] line-clamp-2 min-h-[3.5rem] leading-tight group-hover:text-[#8BC34A] transition-colors">
+          <h3 className="font-bold text-lg text-[#2d2d2d] line-clamp-3 min-h-[4.5rem] leading-tight group-hover:text-[#8BC34A] transition-colors">
             {product.name}
           </h3>
 

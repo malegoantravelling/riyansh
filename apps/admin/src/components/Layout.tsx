@@ -6,8 +6,6 @@ import {
   FolderTree,
   ShoppingCart,
   Users,
-  CreditCard,
-  Activity,
   LogOut,
   Search,
   Bell,
@@ -28,8 +26,6 @@ const menuItems = [
   { path: '/categories', label: 'Categories', icon: FolderTree },
   { path: '/orders', label: 'Orders', icon: ShoppingCart },
   { path: '/users', label: 'Users', icon: Users },
-  { path: '/transactions', label: 'Transactions', icon: CreditCard },
-  { path: '/logs', label: 'Activity Logs', icon: Activity },
 ]
 
 export default function Layout({ children, onLogout }: LayoutProps) {
@@ -173,7 +169,7 @@ export default function Layout({ children, onLogout }: LayoutProps) {
             {/* Right Side Actions */}
             <div className="flex items-center space-x-4 ml-6">
               {/* Notifications */}
-              <div className="relative">
+              {/* <div className="relative">
                 <button
                   onClick={() => setNotificationsOpen(!notificationsOpen)}
                   className="relative p-2 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
@@ -211,7 +207,7 @@ export default function Layout({ children, onLogout }: LayoutProps) {
                     </div>
                   </div>
                 )}
-              </div>
+              </div> */}
 
               {/* Profile Dropdown */}
               <div className="relative">
@@ -232,7 +228,6 @@ export default function Layout({ children, onLogout }: LayoutProps) {
                     }`}
                   />
                 </button>
-
                 {profileOpen && (
                   <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50">
                     <div className="px-4 py-3 border-b border-gray-100">

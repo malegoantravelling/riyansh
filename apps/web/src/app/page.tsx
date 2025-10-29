@@ -474,7 +474,7 @@ export default function Home() {
 
           {/* Enhanced Email Form */}
           <div className="max-w-xl mx-auto mb-8">
-            <div className="bg-white/95 backdrop-blur-lg rounded-2xl p-2 shadow-2xl">
+            <div className="bg-white/95 backdrop-blur-lg rounded-2xl p-2 shadow-2xl hidden">
               <div className="flex flex-col sm:flex-row gap-2">
                 <div className="relative flex-1">
                   <svg

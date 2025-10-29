@@ -282,7 +282,7 @@ export default function ProductDetailsPage() {
         {/* Main Product Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 mb-16">
           {/* Product Image */}
-          <div className="space-y-4">
+          <div className="space-y-4 lg:sticky lg:top-8 lg:self-start">
             <div className="relative aspect-square bg-white rounded-3xl overflow-hidden border-2 border-gray-100 shadow-xl group">
               {/* Badges */}
               <div className="absolute top-6 left-6 z-10 flex flex-col gap-2">
@@ -363,15 +363,15 @@ export default function ProductDetailsPage() {
               )}
             </div>
 
-            {/* Stock Status */}
-            {product.stock_quantity !== undefined && (
+            {/* Stock Status - Hidden */}
+            {/* {product.stock_quantity !== undefined && (
               <div className="flex items-center gap-3 p-4 bg-white rounded-xl border-2 border-gray-100">
                 {product.stock_quantity > 0 ? (
                   <>
                     <CheckCircle2 className="h-6 w-6 text-green-500 flex-shrink-0" />
                     <div>
                       <p className="font-bold text-green-600">In Stock</p>
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm gainedgray-600">
                         {product.stock_quantity} units available
                       </p>
                     </div>
@@ -388,7 +388,7 @@ export default function ProductDetailsPage() {
                   </>
                 )}
               </div>
-            )}
+            )} */}
 
             {/* Quantity Selector */}
             <div className="space-y-4">
@@ -450,8 +450,8 @@ export default function ProductDetailsPage() {
                 onClick={handleWishlist}
                 className={`h-14 w-14 sm:w-auto sm:px-6 rounded-xl border-2 transition-all duration-300 ${
                   isWishlisted
-                    ? 'bg-pink-50 border-pink-300 hover:bg-pink-100'
-                    : 'border-gray-300 hover:border-[#8BC34A] hover:bg-[#8BC34A]/5'
+                    ? 'bg-pink-50 border-pink-300'
+                    : 'border-gray-300 hover:border-[#8BC34A]'
                 }`}
               >
                 <Heart
@@ -465,7 +465,7 @@ export default function ProductDetailsPage() {
                 variant="outline"
                 size="lg"
                 onClick={handleShare}
-                className="h-14 w-14 sm:w-auto sm:px-6 rounded-xl border-2 border-gray-300 hover:border-[#8BC34A] hover:bg-[#8BC34A]/5 transition-all duration-300"
+                className="h-14 w-14 sm:w-auto sm:px-6 rounded-xl border-2 border-gray-300 hover:border-[#8BC34A] transition-all duration-300"
               >
                 <Share2 className="h-5 w-5" />
               </Button>
