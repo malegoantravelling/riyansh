@@ -126,13 +126,67 @@ VITE_SUPABASE_URL=https://your-project.supabase.co
 VITE_SUPABASE_ANON_KEY=your-anon-key
 ```
 
-**IMPORTANT**: Notice the `VITE_API_URL` uses your actual domain, not localhost!
+**CRITICAL**:
 
-## Step 5: Rebuild Admin with New Base Path
+- `NEXT_PUBLIC_API_URL` in web app MUST use your production domain (e.g., `https://riyanshamrit.com/api`)
+- `VITE_API_URL` in admin panel MUST use your production domain (e.g., `https://riyanshamrit.com/api`)
+- **NEVER use `localhost` in production environment variables!**
 
-Since we changed the Vite config, you need to rebuild:
+### How to Create Environment Files on Cloudways via SSH:
 
 ```bash
+# SSH into your Cloudways server
+# Navigate to your project directory
+cd /home/1542906.cloudwaysapps.com/awxrfzsrma/public_html
+
+# Create web app env file
+cat > apps/web/.env.local << 'EOF'
+NODE_ENV=production
+NEXT_PUBLIC_API_URL=https://riyanshamrit.com/api
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+EOF
+
+# Create API env file
+cat > apps/api/.env << 'EOF'
+NODE_ENV=production
+PORT=4000
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_KEY=your-service-role-key
+JWT_SECRET=your-jwt-secret
+EMAIL_USER=your-email@gmail.com
+EMAIL_PASSWORD=your-app-password
+RAZORPAY_KEY_ID=your-razorpay-key
+RAZORPAY_KEY_SECRET=your-razorpay-secret
+EOF
+
+# Create admin env file
+cat > apps/admin/.env << 'EOF'
+NODE_ENV=production
+VITE_API_URL=https://riyanshamrit.com/api
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key
+EOF
+```
+
+**Remember**: Replace all placeholder values with your actual credentials!
+
+## Step 5: Rebuild ALL Applications
+
+Since we changed environment variables and admin config, you need to rebuild:
+
+```bash
+# Build API
+cd apps/api
+npm run build
+cd ../..
+
+# Build Web App
+cd apps/web
+npm run build
+cd ../..
+
+# Build Admin Panel
 cd apps/admin
 npm run build
 cd ../..
