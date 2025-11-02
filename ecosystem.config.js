@@ -10,6 +10,8 @@ module.exports = {
       env: {
         NODE_ENV: 'production',
         PORT: 4000,
+        RAZORPAY_KEY_ID: 'rzp_test_RamROqs2QkoEYq',
+        RAZORPAY_KEY_SECRET: 'JJSQXyYUxWSFg24opv4i1pfm',
       },
       instances: 1,
       exec_mode: 'fork',
@@ -51,7 +53,7 @@ module.exports = {
     {
       name: 'riyansh-admin',
       script: 'node_modules/.bin/vite',
-      args: 'preview --port 3001 --host',
+      args: 'preview --port 3001 --host --base /admin/',
       cwd: './apps/admin',
       env: {
         NODE_ENV: 'production',

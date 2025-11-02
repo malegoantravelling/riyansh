@@ -9,8 +9,8 @@ const router = Router()
 
 // Initialize Razorpay
 const razorpay = new Razorpay({
-  key_id: 'rzp_test_RWufQ0XTi0n1NL',
-  key_secret: 'CExnEL5MY2ITzYUs4nonVsvg',
+  key_id: process.env.RAZORPAY_KEY_ID || 'rzp_test_RamROqs2QkoEYq',
+  key_secret: process.env.RAZORPAY_KEY_SECRET || 'JJSQXyYUxWSFg24opv4i1pfm',
 })
 
 // User order routes require authentication
@@ -145,12 +145,15 @@ router.post('/create-razorpay-order', authenticateToken, async (req: AuthRequest
     // Update order with razorpay_order_id
     await supabase.from('orders').update({ razorpay_order_id: razorpayOrder.id }).eq('id', order.id)
 
+    const razorpayKeyId = process.env.RAZORPAY_KEY_ID || 'rzp_test_RamROqs2QkoEYq'
+    console.log('📋 Razorpay Key ID:', razorpayKeyId)
+
     res.status(201).json({
       order_id: order.id,
       razorpay_order_id: razorpayOrder.id,
       amount: totalAmount,
       currency: 'INR',
-      key_id: process.env.RAZORPAY_KEY_ID,
+      key_id: razorpayKeyId,
       contact_info,
     })
   } catch (error: any) {
@@ -168,7 +171,7 @@ router.post('/verify-payment', authenticateToken, async (req: AuthRequest, res) 
     // Verify signature
     const body = razorpay_order_id + '|' + razorpay_payment_id
     const expectedSignature = crypto
-      .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET || '')
+      .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET || 'JJSQXyYUxWSFg24opv4i1pfm')
       .update(body.toString())
       .digest('hex')
 
