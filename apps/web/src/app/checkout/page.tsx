@@ -285,7 +285,7 @@ export default function CheckoutPage() {
         process.env.NEXT_PUBLIC_API_URL ||
         (process.env.NODE_ENV === 'production'
           ? 'https://riyanshamrit.com/api'
-          : 'http://localhost:4000')
+          : 'http://0.0.0.0:4000')
       const response = await fetch(`${API_URL}/api/orders/create-razorpay-order`, {
         method: 'POST',
         headers: {

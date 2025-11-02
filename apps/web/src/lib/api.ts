@@ -3,7 +3,7 @@
 // Production: NEXT_PUBLIC_API_URL=https://riyanshamrit.com/api
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL ||
-  (process.env.NODE_ENV === 'production' ? 'https://riyanshamrit.com/api' : 'http://localhost:4000')
+  (process.env.NODE_ENV === 'production' ? 'https://riyanshamrit.com/api' : 'http://0.0.0.0:4000')
 
 type HeadersInit = Headers | string[][] | Record<string, string>
 

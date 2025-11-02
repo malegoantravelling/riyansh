@@ -107,7 +107,7 @@ export default function Products() {
       const formDataToSend = new FormData()
       formDataToSend.append('image', imageFile)
 
-      const response = await fetch('https://riyanshamrit.com/api/products/upload-image', {
+      const response = await fetch('http://0.0.0.0:4000/api/products/upload-image', {
         method: 'POST',
         body: formDataToSend,
       })
