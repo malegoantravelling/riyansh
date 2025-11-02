@@ -268,10 +268,52 @@ export default function CheckoutPage() {
       }
 
       // Get all product names from cart
-      const productNames = cartItems.map((item) => item.product.name).join(', ')
+      const productNames = cartItems.map((item) => item.product.name)
 
-      // Create WhatsApp message
-      const whatsappMessage = `can you have the following products in stock = ${productNames}`
+      // Build full address string
+      const fullAddress = `${formData.address_line_1}${
+        formData.address_line_2 ? ', ' + formData.address_line_2 : ''
+      }, ${formData.street_address}, ${formData.city}, ${formData.state} ${formData.zip_code}`
+
+      // Send email notification
+      try {
+        const apiUrl =
+          process.env.NEXT_PUBLIC_API_URL ||
+          (process.env.NODE_ENV === 'production'
+            ? 'https://riyanshamrit.com'
+            : 'http://0.0.0.0:4000')
+
+        await fetch(`${apiUrl}/api/orders/whatsapp-notify`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({
+            productNames,
+            customerName: formData.full_name,
+            customerEmail: formData.email,
+            customerPhone: formData.phone,
+            customerAddress: fullAddress,
+            orderType: 'checkout',
+          }),
+        })
+      } catch (emailError) {
+        console.error('Failed to send email notification:', emailError)
+        // Don't block the checkout if email fails
+      }
+
+      // Create WhatsApp message with customer details
+      const whatsappMessage = `can you have the following products in stock = ${productNames.join(
+        ', '
+      )}
+
+Customer Details:
+Name: ${formData.full_name}
+Email: ${formData.email}
+Phone: ${formData.phone}
+Address: ${fullAddress}`
+
       const encodedMessage = encodeURIComponent(whatsappMessage)
       const whatsappUrl = `https://wa.me/9370646279?text=${encodedMessage}`
 
