@@ -9,8 +9,8 @@ const router = Router()
 
 // Initialize Razorpay
 const razorpay = new Razorpay({
-  key_id: 'rzp_test_RWufQ0XTi0n1NL',
-  key_secret: 'CExnEL5MY2ITzYUs4nonVsvg',
+  key_id: process.env.RAZORPAY_KEY_ID || 'rzp_test_RamROqs2QkoEYq',
+  key_secret: process.env.RAZORPAY_KEY_SECRET || 'JJSQXyYUxWSFg24opv4i1pfm',
 })
 
 // User order routes require authentication
