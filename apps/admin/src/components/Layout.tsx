@@ -23,7 +23,6 @@ const menuItems = [
   { path: '/categories', label: 'Categories', icon: FolderTree },
   { path: '/orders', label: 'Orders', icon: ShoppingCart },
   { path: '/users', label: 'Users', icon: Users },
-  { path: '/transactions', label: 'Transactions', icon: CreditCard },
 ]
 
 export default function Layout({ children, onLogout }: LayoutProps) {
