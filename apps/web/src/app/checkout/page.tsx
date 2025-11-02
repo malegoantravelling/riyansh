@@ -281,7 +281,11 @@ export default function CheckoutPage() {
       }
 
       // Create Razorpay order via API
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'
+      const API_URL =
+        process.env.NEXT_PUBLIC_API_URL ||
+        (process.env.NODE_ENV === 'production'
+          ? 'https://riyanshamrit.com/api'
+          : 'http://localhost:4000')
       const response = await fetch(`${API_URL}/api/orders/create-razorpay-order`, {
         method: 'POST',
         headers: {

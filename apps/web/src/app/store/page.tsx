@@ -315,7 +315,7 @@ export default function StorePage() {
                     </div>
                     <h3 className="text-3xl font-bold text-[#2d2d2d] mb-3">No Products Found</h3>
                     <p className="text-gray-500 text-lg mb-8 max-w-md mx-auto leading-relaxed">
-                      We couldn't find any products matching your criteria. Try adjusting your
+                      We couldn&apos;t find any products matching your criteria. Try adjusting your
                       filters or browse our full collection.
                     </p>
                     <Button
