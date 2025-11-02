@@ -135,7 +135,7 @@ export default function ProfilePage() {
                   <Button
                     onClick={handleSave}
                     disabled={loading}
-                    className="bg-white text-[#8BC34A] hover:bg-gray-50 shadow-lg"
+                    className="bg-white text-[#ffffff] hover:bg-gray-50 shadow-lg"
                   >
                     <Save className="h-5 w-5 mr-2" />
                     {loading ? 'Saving...' : 'Save Changes'}
@@ -237,39 +237,6 @@ export default function ProfilePage() {
         </div>
 
         {/* Additional Information Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-          <div className="bg-white rounded-xl border-2 border-gray-100 p-6 shadow-lg hover:shadow-xl transition-all duration-300">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-12 h-12 bg-[#8BC34A]/10 rounded-xl flex items-center justify-center">
-                <User className="h-6 w-6 text-[#8BC34A]" />
-              </div>
-              <div>
-                <h3 className="font-bold text-[#2d2d2d]">Account Status</h3>
-                <p className="text-xs text-gray-500">Profile verification</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 text-sm">
-              <CheckCircle className="h-4 w-4 text-green-500" />
-              <span className="text-gray-600">Verified Account</span>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl border-2 border-gray-100 p-6 shadow-lg hover:shadow-xl transition-all duration-300">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                <Mail className="h-6 w-6 text-blue-600" />
-              </div>
-              <div>
-                <h3 className="font-bold text-[#2d2d2d]">Email Status</h3>
-                <p className="text-xs text-gray-500">Communication preferences</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 text-sm">
-              <CheckCircle className="h-4 w-4 text-green-500" />
-              <span className="text-gray-600">Email Verified</span>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   )
