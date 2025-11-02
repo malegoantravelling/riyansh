@@ -1,9 +1,9 @@
 // Get API URL from environment variables
-// Development: NEXT_PUBLIC_API_URL=http://localhost:4000
-// Production: NEXT_PUBLIC_API_URL=https://riyanshamrit.com/api
+// Development: NEXT_PUBLIC_API_URL=http://0.0.0.0:4000
+// Production: NEXT_PUBLIC_API_URL=https://riyanshamrit.com
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL ||
-  (process.env.NODE_ENV === 'production' ? 'https://riyanshamrit.com/api' : 'http://0.0.0.0:4000')
+  (process.env.NODE_ENV === 'production' ? 'https://riyanshamrit.com' : 'http://0.0.0.0:4000')
 
 type HeadersInit = Headers | string[][] | Record<string, string>
 

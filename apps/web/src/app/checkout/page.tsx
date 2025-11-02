@@ -280,13 +280,9 @@ export default function CheckoutPage() {
         is_default: false,
       }
 
-      // Create Razorpay order via API
-      const API_URL =
-        process.env.NEXT_PUBLIC_API_URL ||
-        (process.env.NODE_ENV === 'production'
-          ? 'https://riyanshamrit.com/api'
-          : 'http://0.0.0.0:4000')
-      const response = await fetch(`${API_URL}/api/orders/create-razorpay-order`, {
+      // Create Razorpay order via API (use relative path in production)
+      const apiUrl = process.env.NODE_ENV === 'production' ? '' : (process.env.NEXT_PUBLIC_API_URL || 'http://0.0.0.0:4000')
+      const response = await fetch(`${apiUrl}/api/orders/create-razorpay-order`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -320,7 +316,7 @@ export default function CheckoutPage() {
         handler: async function (response: any) {
           try {
             // Verify payment
-            const verifyResponse = await fetch(`${API_URL}/api/orders/verify-payment`, {
+            const verifyResponse = await fetch(`${apiUrl}/api/orders/verify-payment`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',

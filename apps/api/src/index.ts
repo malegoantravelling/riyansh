@@ -14,7 +14,7 @@ import contactRoutes from './routes/contact'
 dotenv.config()
 
 const app = express()
-const PORT = process.env.PORT || 4000
+const PORT = Number(process.env.PORT) || 4000
 
 // Middleware
 app.use(cors())
@@ -43,8 +43,10 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 })
 
 app
-  .listen(PORT, () => {
-    console.log(`🚀 API server running on http://localhost:${PORT}`)
+  .listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 API server running on http://0.0.0.0:${PORT}`)
+    console.log(`🌐 API accessible at http://localhost:${PORT} (local)`)
+    console.log(`🌍 API accessible externally on port ${PORT}`)
   })
   .on('error', (err: any) => {
     console.error('Server error:', err)
