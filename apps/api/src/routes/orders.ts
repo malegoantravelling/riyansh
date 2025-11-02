@@ -145,12 +145,15 @@ router.post('/create-razorpay-order', authenticateToken, async (req: AuthRequest
     // Update order with razorpay_order_id
     await supabase.from('orders').update({ razorpay_order_id: razorpayOrder.id }).eq('id', order.id)
 
+    const razorpayKeyId = process.env.RAZORPAY_KEY_ID || 'rzp_test_RamROqs2QkoEYq'
+    console.log('📋 Razorpay Key ID:', razorpayKeyId)
+
     res.status(201).json({
       order_id: order.id,
       razorpay_order_id: razorpayOrder.id,
       amount: totalAmount,
       currency: 'INR',
-      key_id: process.env.RAZORPAY_KEY_ID,
+      key_id: razorpayKeyId,
       contact_info,
     })
   } catch (error: any) {
