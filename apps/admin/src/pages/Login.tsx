@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Eye, EyeOff, Shield, Lock, User, Loader2, AlertCircle } from 'lucide-react'
+import { api } from '@/lib/api'
 
 interface LoginProps {
   onLogin: () => void
@@ -21,13 +22,7 @@ export default function Login({ onLogin }: LoginProps) {
     setLoading(true)
 
     try {
-      const response = await fetch('http://localhost:4000/api/auth/admin/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
-      })
-
-      const data = await response.json()
+      const data = await api.post('/api/auth/admin/login', { username, password })
 
       if (data.token) {
         localStorage.setItem('admin_token', data.token)
