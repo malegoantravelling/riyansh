@@ -3,14 +3,14 @@ import { supabase } from '../config/supabase'
 import { authenticateToken, AuthRequest } from '../middleware/auth'
 import Razorpay from 'razorpay'
 import crypto from 'crypto'
-import { sendOrderConfirmationEmail } from '../services/emailService'
+import { sendOrderConfirmationEmail, sendWhatsAppOrderEmail } from '../services/emailService'
 
 const router = Router()
 
 // Initialize Razorpay
 const razorpay = new Razorpay({
-  key_id: 'rzp_test_RWufQ0XTi0n1NL',
-  key_secret: 'CExnEL5MY2ITzYUs4nonVsvg',
+  key_id: process.env.RAZORPAY_KEY_ID || 'rzp_test_RamROqs2QkoEYq',
+  key_secret: process.env.RAZORPAY_KEY_SECRET || 'JJSQXyYUxWSFg24opv4i1pfm',
 })
 
 // User order routes require authentication
@@ -145,12 +145,15 @@ router.post('/create-razorpay-order', authenticateToken, async (req: AuthRequest
     // Update order with razorpay_order_id
     await supabase.from('orders').update({ razorpay_order_id: razorpayOrder.id }).eq('id', order.id)
 
+    const razorpayKeyId = process.env.RAZORPAY_KEY_ID || 'rzp_test_RamROqs2QkoEYq'
+    console.log('📋 Razorpay Key ID:', razorpayKeyId)
+
     res.status(201).json({
       order_id: order.id,
       razorpay_order_id: razorpayOrder.id,
       amount: totalAmount,
       currency: 'INR',
-      key_id: process.env.RAZORPAY_KEY_ID,
+      key_id: razorpayKeyId,
       contact_info,
     })
   } catch (error: any) {
@@ -168,7 +171,7 @@ router.post('/verify-payment', authenticateToken, async (req: AuthRequest, res) 
     // Verify signature
     const body = razorpay_order_id + '|' + razorpay_payment_id
     const expectedSignature = crypto
-      .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET || '')
+      .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET || 'JJSQXyYUxWSFg24opv4i1pfm')
       .update(body.toString())
       .digest('hex')
 
@@ -375,6 +378,49 @@ router.put('/:id', async (req: AuthRequest, res) => {
 
     res.json(data)
   } catch (error: any) {
+    res.status(500).json({ error: error.message })
+  }
+})
+
+// Send WhatsApp order notification email
+router.post('/whatsapp-notify', authenticateToken, async (req: AuthRequest, res) => {
+  try {
+    const userId = req.user?.id
+    const { productNames, customerName, customerEmail, customerPhone, customerAddress, orderType } =
+      req.body
+
+    // Validate required fields
+    if (!productNames || !Array.isArray(productNames) || productNames.length === 0) {
+      return res.status(400).json({ error: 'Product names are required' })
+    }
+
+    if (!customerName || !customerEmail || !customerPhone || !customerAddress) {
+      return res.status(400).json({ error: 'All customer details are required' })
+    }
+
+    if (!orderType || !['buy_now', 'checkout'].includes(orderType)) {
+      return res.status(400).json({ error: 'Valid order type is required (buy_now or checkout)' })
+    }
+
+    // Send email notification
+    try {
+      await sendWhatsAppOrderEmail({
+        productNames,
+        customerName,
+        customerEmail,
+        customerPhone,
+        customerAddress,
+        orderType,
+      })
+      console.log('✅ WhatsApp order email sent successfully')
+    } catch (emailError) {
+      console.error('❌ Failed to send email:', emailError)
+      // Don't fail the request if email fails
+    }
+
+    res.json({ success: true, message: 'Notification sent successfully' })
+  } catch (error: any) {
+    console.error('Error sending WhatsApp notification:', error)
     res.status(500).json({ error: error.message })
   }
 })

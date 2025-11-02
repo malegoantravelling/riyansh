@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Plus, Edit, Trash2, MapPin } from 'lucide-react'
+import { Plus, Edit, Trash2, MapPin, X, Save, Loader2 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useToast } from '@/contexts/ToastContext'
 
@@ -25,6 +25,7 @@ export default function AddressesPage() {
   const [showForm, setShowForm] = useState(false)
   const [editingAddress, setEditingAddress] = useState<Address | null>(null)
   const [loading, setLoading] = useState(false)
+  const [pageLoading, setPageLoading] = useState(true)
   const [formData, setFormData] = useState({
     address_line_1: '',
     address_line_2: '',
@@ -56,6 +57,8 @@ export default function AddressesPage() {
       }
     } catch (error) {
       console.error('Error fetching addresses:', error)
+    } finally {
+      setPageLoading(false)
     }
   }
 
@@ -148,125 +151,232 @@ export default function AddressesPage() {
     setFormData((prev) => ({ ...prev, [field]: value }))
   }
 
-  return (
-    <div>
-      <div className="bg-white rounded-lg shadow p-6">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-[#333333]">Addresses</h1>
-          <Button onClick={() => setShowForm(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            New Address
-          </Button>
+  if (pageLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-white">
+        <div className="text-center">
+          <div className="relative inline-flex">
+            <div className="w-32 h-32 border-8 border-[#8BC34A]/20 border-t-[#8BC34A] rounded-full animate-spin"></div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <MapPin className="w-12 h-12 text-[#8BC34A]" />
+            </div>
+          </div>
+          <p className="mt-6 text-lg font-semibold text-gray-600 animate-pulse">
+            Loading your addresses...
+          </p>
         </div>
+      </div>
+    )
+  }
 
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
+      {/* Enhanced Breadcrumb Header */}
+      <div className="bg-white border-b border-gray-100 shadow-sm">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <h1 className="text-4xl font-bold text-[#2d2d2d] mb-2">My Addresses</h1>
+              <p className="text-sm text-gray-500">Manage your delivery addresses</p>
+            </div>
+            <Button
+              onClick={() => setShowForm(true)}
+              className="rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 mt-[2vh] md:mt-0 px-6 py-4"
+              size="lg"
+            >
+              <Plus className="h-5 w-5 mr-2" />
+              New Address
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Address List */}
-        <div className="space-y-4 mb-6">
-          {addresses.map((address) => (
-            <div key={address.id} className="border border-gray-200 rounded-lg p-4">
-              <div className="flex justify-between items-start">
-                <div className="flex-1">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <MapPin className="h-4 w-4 text-[#8BC34A]" />
-                    {address.is_default && (
-                      <span className="bg-[#8BC34A] text-white text-xs px-2 py-1 rounded">
-                        Default
-                      </span>
-                    )}
-                  </div>
-                  <p className="font-medium">{address.address_line_1}</p>
-                  {address.address_line_2 && (
-                    <p className="text-gray-600">{address.address_line_2}</p>
-                  )}
-                  <p className="text-gray-600">{address.street_address}</p>
-                  <p className="text-gray-600">
-                    {address.city}, {address.state} {address.zip_code}
-                  </p>
+        {addresses.length === 0 ? (
+          /* Enhanced Empty State */
+          <div className="bg-white rounded-2xl border-2 border-gray-100 shadow-xl p-12">
+            <div className="text-center">
+              <div className="relative inline-flex mb-8">
+                <div className="absolute inset-0 bg-gradient-to-br from-[#8BC34A]/20 to-[#7CB342]/20 rounded-full blur-3xl" />
+                <div className="relative w-32 h-32 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center border-4 border-white shadow-2xl">
+                  <MapPin className="h-16 w-16 text-gray-400" />
                 </div>
-                <div className="flex space-x-2">
-                  <Button onClick={() => handleEdit(address)} variant="outline" size="sm">
-                    <Edit className="h-4 w-4" />
+              </div>
+              <h2 className="text-3xl font-bold text-[#2d2d2d] mb-4">No Addresses Yet</h2>
+              <p className="text-gray-600 mb-8 text-lg max-w-md mx-auto leading-relaxed">
+                Add your first delivery address to get started with seamless order fulfillment!
+              </p>
+              <Button
+                onClick={() => setShowForm(true)}
+                size="lg"
+                className="rounded-xl shadow-lg hover:shadow-xl"
+              >
+                <Plus className="h-5 w-5 mr-2" />
+                Add Your First Address
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {addresses.map((address, index) => (
+              <div
+                key={address.id}
+                className="group bg-white rounded-2xl border-2 border-gray-100 shadow-lg overflow-hidden transition-all duration-300 hover:shadow-2xl hover:border-[#8BC34A]/30"
+                style={{ animationDelay: `${index * 100}ms` }}
+              >
+                {/* Card Header */}
+                <div className="bg-gradient-to-r from-[#8BC34A]/5 to-[#7CB342]/5 p-4 border-b-2 border-gray-100">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center md:gap-72 gap-56">
+                      <div className="w-12 h-12 bg-gradient-to-br from-[#8BC34A] to-[#7CB342] rounded-xl flex items-center justify-center shadow-lg">
+                        <MapPin className="h-6 w-6 text-white" />
+                      </div>
+                      {address.is_default && (
+                        <span className="px-3 py-1 bg-gradient-to-r from-[#8BC34A] to-[#7CB342] text-white text-sm font-bold rounded-full shadow-md flex items-center gap-1">
+                          <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
+                          Default
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Address Details */}
+                <div className="p-6">
+                  <div className="space-y-2">
+                    <p className="font-semibold text-[#2d2d2d] text-lg">{address.address_line_1}</p>
+                    {address.address_line_2 && (
+                      <p className="text-gray-600">{address.address_line_2}</p>
+                    )}
+                    <p className="text-gray-600">{address.street_address}</p>
+                    <p className="text-gray-600 font-medium">
+                      {address.city}, {address.state} {address.zip_code}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="px-6 pb-6 flex gap-2">
+                  <Button
+                    onClick={() => handleEdit(address)}
+                    variant="outline"
+                    className="flex-1 rounded-xl border-2 hover:border-[#8BC34A] hover:text-[#ffffff] transition-all"
+                  >
+                    <Edit className="h-4 w-4 mr-2" />
+                    Edit
                   </Button>
                   <Button
                     onClick={() => handleDelete(address.id)}
                     variant="outline"
-                    size="sm"
-                    className="text-red-600 hover:text-red-700"
+                    className="rounded-xl border-2 border-red-200 text-red-600 hover:bg-red-50 transition-all"
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
+        )}
 
-          {addresses.length === 0 && (
-            <div className="text-center py-8 text-gray-500">
-              <MapPin className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-              <p>No addresses found. Add your first address to get started.</p>
-            </div>
-          )}
-        </div>
-
-        {/* Address Form Modal */}
+        {/* Enhanced Address Form Modal */}
         {showForm && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-              <h2 className="text-xl font-bold mb-4">
-                {editingAddress ? 'Edit Address' : 'Add New Address'}
-              </h2>
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border-2 border-gray-100">
+              {/* Modal Header */}
+              <div className="sticky top-0 z-10 bg-gradient-to-r from-[#8BC34A] to-[#7CB342] p-6 flex items-center justify-between shadow-lg">
+                <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+                  <MapPin className="h-6 w-6" />
+                  {editingAddress ? 'Edit Address' : 'Add New Address'}
+                </h2>
+                <Button
+                  onClick={resetForm}
+                  variant="outline"
+                  className="bg-white/20 hover:bg-white/30 border-2 border-white text-white backdrop-blur-sm"
+                  size="icon"
+                >
+                  <X className="h-5 w-5" />
+                </Button>
+              </div>
 
-              <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Modal Form */}
+              <form onSubmit={handleSubmit} className="p-6 space-y-6">
                 <div>
-                  <Label htmlFor="address_line_1">Address *</Label>
+                  <Label
+                    htmlFor="address_line_1"
+                    className="text-sm font-semibold text-[#2d2d2d] mb-2 flex items-center gap-2"
+                  >
+                    <MapPin className="h-4 w-4 text-[#8BC34A]" />
+                    Address *
+                  </Label>
                   <Input
                     id="address_line_1"
                     value={formData.address_line_1}
                     onChange={(e) => handleChange('address_line_1', e.target.value)}
                     required
-                    className="mt-1"
+                    className="h-12 border-2 focus:border-[#8BC34A] focus:ring-2 focus:ring-[#8BC34A]/20"
+                    placeholder="Enter street address"
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="street_address">Street Address *</Label>
+                  <Label
+                    htmlFor="street_address"
+                    className="text-sm font-semibold text-[#2d2d2d] mb-2"
+                  >
+                    Street Address *
+                  </Label>
                   <Input
                     id="street_address"
                     value={formData.street_address}
                     onChange={(e) => handleChange('street_address', e.target.value)}
                     required
-                    className="mt-1"
+                    className="h-12 border-2 focus:border-[#8BC34A] focus:ring-2 focus:ring-[#8BC34A]/20"
+                    placeholder="Apt, suite, etc."
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="address_line_2">Address Line 2</Label>
+                  <Label
+                    htmlFor="address_line_2"
+                    className="text-sm font-semibold text-[#2d2d2d] mb-2"
+                  >
+                    Address Line 2
+                    <span className="ml-2 text-xs text-gray-500 font-normal">(Optional)</span>
+                  </Label>
                   <Input
                     id="address_line_2"
                     value={formData.address_line_2}
                     onChange={(e) => handleChange('address_line_2', e.target.value)}
-                    className="mt-1"
+                    className="h-12 border-2 focus:border-[#8BC34A] focus:ring-2 focus:ring-[#8BC34A]/20"
+                    placeholder="Additional address details"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="city">City *</Label>
+                    <Label htmlFor="city" className="text-sm font-semibold text-[#2d2d2d] mb-2">
+                      City *
+                    </Label>
                     <Input
                       id="city"
                       value={formData.city}
                       onChange={(e) => handleChange('city', e.target.value)}
                       required
-                      className="mt-1"
+                      className="h-12 border-2 focus:border-[#8BC34A] focus:ring-2 focus:ring-[#8BC34A]/20"
+                      placeholder="City name"
                     />
                   </div>
                   <div>
-                    <Label htmlFor="state">State *</Label>
+                    <Label htmlFor="state" className="text-sm font-semibold text-[#2d2d2d] mb-2">
+                      State *
+                    </Label>
                     <select
                       id="state"
                       value={formData.state}
                       onChange={(e) => handleChange('state', e.target.value)}
                       required
-                      className="mt-1 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                      className="h-12 w-full rounded-md border-2 border-gray-200 bg-background px-3 py-2 text-sm focus:border-[#8BC34A] focus:ring-2 focus:ring-[#8BC34A]/20 transition-all"
                     >
                       <option value="">Select State</option>
                       <option value="Maharashtra">Maharashtra</option>
@@ -282,33 +392,62 @@ export default function AddressesPage() {
                 </div>
 
                 <div>
-                  <Label htmlFor="zip_code">ZIP Code *</Label>
+                  <Label htmlFor="zip_code" className="text-sm font-semibold text-[#2d2d2d] mb-2">
+                    ZIP Code *
+                  </Label>
                   <Input
                     id="zip_code"
                     value={formData.zip_code}
                     onChange={(e) => handleChange('zip_code', e.target.value)}
                     required
-                    className="mt-1"
+                    className="h-12 border-2 focus:border-[#8BC34A] focus:ring-2 focus:ring-[#8BC34A]/20"
+                    placeholder="Postal code"
                   />
                 </div>
 
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl border-2 border-gray-200">
                   <input
                     type="checkbox"
                     id="is_default"
                     checked={formData.is_default}
                     onChange={(e) => handleChange('is_default', e.target.checked)}
-                    className="rounded"
+                    className="w-5 h-5 rounded border-2 border-gray-300 text-[#8BC34A] focus:ring-[#8BC34A] cursor-pointer"
                   />
-                  <Label htmlFor="is_default">Set as default address</Label>
+                  <Label
+                    htmlFor="is_default"
+                    className="text-sm font-medium text-[#2d2d2d] cursor-pointer"
+                  >
+                    Set as default address
+                  </Label>
                 </div>
 
-                <div className="flex space-x-4 pt-4">
-                  <Button type="submit" disabled={loading}>
-                    {loading ? 'Saving...' : editingAddress ? 'Update Address' : 'Add Address'}
-                  </Button>
-                  <Button type="button" onClick={resetForm} variant="outline">
+                <div className="flex gap-3 pt-4">
+                  <Button
+                    type="button"
+                    onClick={resetForm}
+                    variant="outline"
+                    className="flex-1 rounded-xl border-2 h-12"
+                    disabled={loading}
+                  >
+                    <X className="h-4 w-4 mr-2" />
                     Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={loading}
+                    className="flex-1 rounded-xl h-12 shadow-lg hover:shadow-xl transition-all"
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      <>
+                        <Save className="h-4 w-4 mr-2" />
+                        {editingAddress ? 'Update Address' : 'Add Address'}
+                      </>
+                    )}
                   </Button>
                 </div>
               </form>

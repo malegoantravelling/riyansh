@@ -42,3 +42,9 @@ next-env.d.ts
 *.swo
 *~
 
+# PM2 Logs
+logs/
+*.log
+*.pid
+*.lock
+

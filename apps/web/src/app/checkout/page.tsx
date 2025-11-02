@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { supabase } from '@/lib/supabase'
 import { formatCurrency } from '@/lib/utils'
-import { ShoppingBag, MapPin, User, Mail, Phone, CreditCard, ChevronRight } from 'lucide-react'
+import { ShoppingBag, MapPin, User, Mail, Phone, ChevronRight } from 'lucide-react'
 
 interface CartItem {
   id: string
@@ -68,17 +68,17 @@ export default function CheckoutPage() {
       return
     }
 
-    await Promise.all([fetchCartItems(), fetchUserProfile(), fetchAddresses()])
+    // Cache session and fetch all data in parallel
+    await Promise.all([
+      fetchCartItems(session.user.id),
+      fetchUserProfile(session.user.id, session.user.email || ''),
+      fetchAddresses(session.user.id),
+    ])
     setLoading(false)
   }
 
-  const fetchCartItems = async () => {
+  const fetchCartItems = async (userId: string) => {
     try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
-      if (!session?.user) return
-
       const { data, error } = await supabase
         .from('cart_items')
         .select(
@@ -93,7 +93,7 @@ export default function CheckoutPage() {
           )
         `
         )
-        .eq('user_id', session.user.id)
+        .eq('user_id', userId)
 
       if (error) throw error
 
@@ -110,17 +110,12 @@ export default function CheckoutPage() {
     }
   }
 
-  const fetchUserProfile = async () => {
+  const fetchUserProfile = async (userId: string, userEmail: string) => {
     try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
-      if (!session?.user) return
-
       const { data, error } = await supabase
         .from('users')
         .select('full_name, email')
-        .eq('id', session.user.id)
+        .eq('id', userId)
         .single()
 
       if (error) throw error
@@ -129,7 +124,7 @@ export default function CheckoutPage() {
         setFormData((prev) => ({
           ...prev,
           full_name: data.full_name || '',
-          email: data.email || session.user.email || '',
+          email: data.email || userEmail || '',
         }))
       }
     } catch (error) {
@@ -137,17 +132,12 @@ export default function CheckoutPage() {
     }
   }
 
-  const fetchAddresses = async () => {
+  const fetchAddresses = async (userId: string) => {
     try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
-      if (!session?.user) return
-
       const { data, error } = await supabase
         .from('user_addresses')
         .select('*')
-        .eq('user_id', session.user.id)
+        .eq('user_id', userId)
         .order('is_default', { ascending: false })
 
       if (error) throw error
@@ -193,8 +183,29 @@ export default function CheckoutPage() {
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
+  // Calculate price based on quantity discounts
+  const getItemPrice = (basePrice: number, quantity: number): number => {
+    // 3-5 quantity: ₹1300 per unit
+    // 6+ quantity: ₹1200 per unit
+    // Default: base price
+    if (quantity >= 6) {
+      return 1200
+    } else if (quantity >= 3) {
+      return 1300
+    }
+    return basePrice
+  }
+
+  // Calculate item total with quantity discounts
+  const getItemTotal = (basePrice: number, quantity: number): number => {
+    return getItemPrice(basePrice, quantity) * quantity
+  }
+
   const calculateTotal = () => {
-    return cartItems.reduce((total, item) => total + item.product.price * item.quantity, 0)
+    return cartItems.reduce(
+      (total, item) => total + getItemTotal(item.product.price, item.quantity),
+      0
+    )
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -267,114 +278,58 @@ export default function CheckoutPage() {
         if (updateError) throw updateError
       }
 
-      // Get the full address object
-      const selectedAddress = addresses.find((addr) => addr.id === addressId) || {
-        id: addressId,
-        address_line_1: formData.address_line_1,
-        address_line_2: formData.address_line_2,
-        street_address: formData.street_address,
-        city: formData.city,
-        state: formData.state,
-        zip_code: formData.zip_code,
-        phone: formData.phone,
-        is_default: false,
-      }
+      // Get all product names from cart
+      const productNames = cartItems.map((item) => item.product.name)
 
-      // Create Razorpay order via API
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'
-      const response = await fetch(`${API_URL}/api/orders/create-razorpay-order`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({
-          shipping_address: selectedAddress,
-          billing_address: selectedAddress,
-          contact_info: {
-            full_name: formData.full_name,
-            email: formData.email,
-            phone: formData.phone,
+      // Build full address string
+      const fullAddress = `${formData.address_line_1}${
+        formData.address_line_2 ? ', ' + formData.address_line_2 : ''
+      }, ${formData.street_address}, ${formData.city}, ${formData.state} ${formData.zip_code}`
+
+      // Send email notification
+      try {
+        const apiUrl =
+          process.env.NEXT_PUBLIC_API_URL ||
+          (process.env.NODE_ENV === 'production'
+            ? 'https://riyanshamrit.com'
+            : 'http://0.0.0.0:4000')
+
+        await fetch(`${apiUrl}/api/orders/whatsapp-notify`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${session.access_token}`,
           },
-        }),
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to create order')
+          body: JSON.stringify({
+            productNames,
+            customerName: formData.full_name,
+            customerEmail: formData.email,
+            customerPhone: formData.phone,
+            customerAddress: fullAddress,
+            orderType: 'checkout',
+          }),
+        })
+      } catch (emailError) {
+        console.error('Failed to send email notification:', emailError)
+        // Don't block the checkout if email fails
       }
 
-      // Initialize Razorpay payment
-      const options = {
-        key: data.key_id,
-        amount: data.amount * 100, // Amount in paise
-        currency: data.currency,
-        name: 'RIYANSH',
-        description: 'Order Payment',
-        order_id: data.razorpay_order_id,
-        handler: async function (response: any) {
-          try {
-            // Verify payment
-            const verifyResponse = await fetch(`${API_URL}/api/orders/verify-payment`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${session.access_token}`,
-              },
-              body: JSON.stringify({
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature,
-                order_id: data.order_id,
-              }),
-            })
+      // Create WhatsApp message with customer details
+      const whatsappMessage = `can you have the following products in stock = ${productNames.join(
+        ', '
+      )}
 
-            const verifyData = await verifyResponse.json()
+Customer Details:
+Name: ${formData.full_name}
+Email: ${formData.email}
+Phone: ${formData.phone}
+Address: ${fullAddress}`
 
-            if (verifyResponse.ok && verifyData.success) {
-              alert('Payment successful! Your order has been placed.')
-              router.push('/account/orders')
-            } else {
-              throw new Error(verifyData.error || 'Payment verification failed')
-            }
-          } catch (error: any) {
-            console.error('Payment verification error:', error)
-            alert(`Payment verification failed: ${error.message}`)
-          }
-        },
-        prefill: {
-          name: formData.full_name,
-          email: formData.email,
-          contact: formData.phone,
-        },
-        notes: {
-          address: `${formData.address_line_1}, ${formData.city}, ${formData.state}`,
-        },
-        theme: {
-          color: '#8BC34A',
-        },
-        modal: {
-          ondismiss: function () {
-            setSubmitting(false)
-            alert('Payment cancelled. Your order is saved and you can complete payment later.')
-          },
-        },
-      }
+      const encodedMessage = encodeURIComponent(whatsappMessage)
+      const whatsappUrl = `https://wa.me/9370646279?text=${encodedMessage}`
 
-      // Check if Razorpay is loaded
-      if (typeof (window as any).Razorpay === 'undefined') {
-        throw new Error('Razorpay SDK not loaded. Please refresh the page and try again.')
-      }
-
-      const razorpay = new (window as any).Razorpay(options)
-      razorpay.open()
-
-      razorpay.on('payment.failed', function (response: any) {
-        console.error('Payment failed:', response.error)
-        alert(`Payment failed: ${response.error.description}`)
-        setSubmitting(false)
-      })
+      // Redirect to WhatsApp
+      window.location.href = whatsappUrl
     } catch (error: any) {
       console.error('Error processing checkout:', error)
       alert(`Failed to process checkout: ${error.message || 'Please try again.'}`)
@@ -723,10 +678,17 @@ export default function CheckoutPage() {
                           {item.product.name}
                         </p>
                         <p className="text-sm text-gray-600 mt-1">
-                          {formatCurrency(item.product.price)} × {item.quantity}
+                          {formatCurrency(getItemPrice(item.product.price, item.quantity))} ×{' '}
+                          {item.quantity}
+                          {getItemPrice(item.product.price, item.quantity) !==
+                            item.product.price && (
+                            <span className="text-xs text-gray-400 line-through ml-2">
+                              {formatCurrency(item.product.price)}
+                            </span>
+                          )}
                         </p>
                         <p className="text-sm font-semibold text-[#8BC34A] mt-1">
-                          {formatCurrency(item.product.price * item.quantity)}
+                          {formatCurrency(getItemTotal(item.product.price, item.quantity))}
                         </p>
                       </div>
                     </div>
@@ -762,12 +724,12 @@ export default function CheckoutPage() {
                   {submitting ? (
                     <span className="flex items-center justify-center">
                       <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                      Processing...
+                      Redirecting...
                     </span>
                   ) : (
                     <span className="flex items-center justify-center">
-                      <CreditCard className="h-5 w-5 mr-2" />
-                      Proceed to Payment
+                      <ShoppingBag className="h-5 w-5 mr-2" />
+                      Proceed to WhatsApp Order
                       <ChevronRight className="h-5 w-5 ml-2" />
                     </span>
                   )}

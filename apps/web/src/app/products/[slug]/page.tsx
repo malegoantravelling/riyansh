@@ -1,13 +1,14 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
   Minus,
   Plus,
   ShoppingCart,
+  ShoppingBag,
   Heart,
   Share2,
   Truck,
@@ -42,6 +43,7 @@ interface Product {
 
 export default function ProductDetailsPage() {
   const params = useParams()
+  const router = useRouter()
   const toast = useToast()
   const { incrementCartCount, refreshCartCount } = useCart()
   const [product, setProduct] = useState<Product | null>(null)
@@ -147,6 +149,92 @@ export default function ProductDetailsPage() {
       // Fallback: Copy to clipboard
       navigator.clipboard.writeText(window.location.href)
       toast.success('Link Copied!', 'Product link copied to clipboard')
+    }
+  }
+
+  const handleBuyNow = async () => {
+    if (!product) return
+
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+
+      if (!session?.user) {
+        toast.warning('Login Required', 'Please login to proceed with Buy Now')
+        // Store the current page to redirect after login
+        localStorage.setItem('redirect_after_login', window.location.pathname)
+        router.push('/auth/login')
+        return
+      }
+
+      // Get user profile information
+      const { data: userProfile } = await supabase
+        .from('users')
+        .select('full_name, email')
+        .eq('id', session.user.id)
+        .single()
+
+      // Get user default address
+      const { data: defaultAddress } = await supabase
+        .from('user_addresses')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .eq('is_default', true)
+        .single()
+
+      // Build WhatsApp message with user details
+      const userName = userProfile?.full_name || 'Customer'
+      const userEmail = userProfile?.email || session.user.email || 'N/A'
+      const userPhone = defaultAddress?.phone || 'N/A'
+      const address = defaultAddress
+        ? `${defaultAddress.address_line_1}, ${defaultAddress.city}, ${defaultAddress.state}, ${defaultAddress.zip_code}`
+        : 'N/A'
+
+      // Send email notification
+      try {
+        const apiUrl =
+          process.env.NEXT_PUBLIC_API_URL ||
+          (process.env.NODE_ENV === 'production'
+            ? 'https://riyanshamrit.com'
+            : 'http://0.0.0.0:4000')
+
+        await fetch(`${apiUrl}/api/orders/whatsapp-notify`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({
+            productNames: [product.name],
+            customerName: userName,
+            customerEmail: userEmail,
+            customerPhone: userPhone,
+            customerAddress: address,
+            orderType: 'buy_now',
+          }),
+        })
+      } catch (emailError) {
+        console.error('Failed to send email notification:', emailError)
+        // Don't block the Buy Now if email fails
+      }
+
+      const whatsappMessage = `can you have ${product.name} in the stock?
+
+Customer Details:
+Name: ${userName}
+Email: ${userEmail}
+Phone: ${userPhone}
+Address: ${address}`
+
+      const encodedMessage = encodeURIComponent(whatsappMessage)
+      const whatsappUrl = `https://wa.me/9370646279?text=${encodedMessage}`
+
+      // Redirect to WhatsApp
+      window.location.href = whatsappUrl
+    } catch (error) {
+      console.error('Error processing Buy Now:', error)
+      toast.error('Error', 'Could not process Buy Now. Please try again.')
     }
   }
 
@@ -282,7 +370,7 @@ export default function ProductDetailsPage() {
         {/* Main Product Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 mb-16">
           {/* Product Image */}
-          <div className="space-y-4">
+          <div className="space-y-4 lg:sticky lg:top-8 lg:self-start">
             <div className="relative aspect-square bg-white rounded-3xl overflow-hidden border-2 border-gray-100 shadow-xl group">
               {/* Badges */}
               <div className="absolute top-6 left-6 z-10 flex flex-col gap-2">
@@ -363,15 +451,15 @@ export default function ProductDetailsPage() {
               )}
             </div>
 
-            {/* Stock Status */}
-            {product.stock_quantity !== undefined && (
+            {/* Stock Status - Hidden */}
+            {/* {product.stock_quantity !== undefined && (
               <div className="flex items-center gap-3 p-4 bg-white rounded-xl border-2 border-gray-100">
                 {product.stock_quantity > 0 ? (
                   <>
                     <CheckCircle2 className="h-6 w-6 text-green-500 flex-shrink-0" />
                     <div>
                       <p className="font-bold text-green-600">In Stock</p>
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm gainedgray-600">
                         {product.stock_quantity} units available
                       </p>
                     </div>
@@ -388,7 +476,7 @@ export default function ProductDetailsPage() {
                   </>
                 )}
               </div>
-            )}
+            )} */}
 
             {/* Quantity Selector */}
             <div className="space-y-4">
@@ -424,50 +512,63 @@ export default function ProductDetailsPage() {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Button
-                onClick={handleAddToCart}
-                disabled={addingToCart || product.stock_quantity === 0}
-                className="flex-1 h-14 text-lg font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
-                size="lg"
-              >
-                {addingToCart ? (
-                  <div className="flex items-center gap-2">
-                    <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    <span>Adding...</span>
-                  </div>
-                ) : (
-                  <>
-                    <ShoppingCart className="h-5 w-5 mr-2" />
-                    Add to Cart
-                  </>
-                )}
-              </Button>
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Button
+                  onClick={handleAddToCart}
+                  disabled={addingToCart || product.stock_quantity === 0}
+                  className="flex-1 h-14 text-lg font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                  size="lg"
+                >
+                  {addingToCart ? (
+                    <div className="flex items-center gap-2">
+                      <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span>Adding...</span>
+                    </div>
+                  ) : (
+                    <>
+                      <ShoppingCart className="h-5 w-5 mr-2" />
+                      Add to Cart
+                    </>
+                  )}
+                </Button>
 
-              <Button
-                variant="outline"
-                size="lg"
-                onClick={handleWishlist}
-                className={`h-14 w-14 sm:w-auto sm:px-6 rounded-xl border-2 transition-all duration-300 ${
-                  isWishlisted
-                    ? 'bg-pink-50 border-pink-300 hover:bg-pink-100'
-                    : 'border-gray-300 hover:border-[#8BC34A] hover:bg-[#8BC34A]/5'
-                }`}
-              >
-                <Heart
-                  className={`h-5 w-5 transition-colors ${
-                    isWishlisted ? 'fill-pink-500 text-pink-500' : ''
+                <Button
+                  variant="outline"
+                  size="lg"
+                  onClick={handleWishlist}
+                  className={`h-14 w-14 sm:w-auto sm:px-6 rounded-xl border-2 transition-all duration-300 ${
+                    isWishlisted
+                      ? 'bg-pink-50 border-pink-300'
+                      : 'border-gray-300 hover:border-[#8BC34A]'
                   }`}
-                />
-              </Button>
+                >
+                  <Heart
+                    className={`h-5 w-5 transition-colors ${
+                      isWishlisted ? 'fill-pink-500 text-pink-500' : ''
+                    }`}
+                  />
+                </Button>
 
+                <Button
+                  variant="outline"
+                  size="lg"
+                  onClick={handleShare}
+                  className="h-14 w-14 sm:w-auto sm:px-6 rounded-xl border-2 border-gray-300 hover:border-[#8BC34A] transition-all duration-300"
+                >
+                  <Share2 className="h-5 w-5" />
+                </Button>
+              </div>
+
+              {/* Buy Now Button */}
               <Button
-                variant="outline"
+                onClick={handleBuyNow}
+                disabled={product.stock_quantity === 0}
+                className="w-full h-14 text-lg font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 bg-gradient-to-r from-[#27AE60] to-[#229954] hover:from-[#229954] hover:to-[#1E8449] text-white"
                 size="lg"
-                onClick={handleShare}
-                className="h-14 w-14 sm:w-auto sm:px-6 rounded-xl border-2 border-gray-300 hover:border-[#8BC34A] hover:bg-[#8BC34A]/5 transition-all duration-300"
               >
-                <Share2 className="h-5 w-5" />
+                <ShoppingBag className="h-5 w-5 mr-2" />
+                Buy Now
               </Button>
             </div>
 

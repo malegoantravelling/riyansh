@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
-import { Plus, Pencil, Trash2, Upload, X } from 'lucide-react'
+import { Plus, Pencil, Trash2, Upload, X, Search, Filter } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { api } from '@/lib/api'
+import { api, API_URL } from '@/lib/api'
 import { formatCurrency } from '@/lib/utils'
+import DeleteConfirmationModal from '@/components/DeleteConfirmationModal.tsx'
+import Toast, { ToastType } from '@/components/SuccessToast'
 
 export default function Products() {
   const [products, setProducts] = useState<any[]>([])
@@ -14,6 +16,30 @@ export default function Products() {
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string>('')
   const [uploading, setUploading] = useState(false)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [categoryFilter, setCategoryFilter] = useState<string>('all')
+  const [statusFilter, setStatusFilter] = useState<string>('all')
+  const [priceRangeFilter, setPriceRangeFilter] = useState<string>('all')
+  const [deleteModal, setDeleteModal] = useState<{
+    isOpen: boolean
+    productId: string | null
+    productName: string
+  }>({
+    isOpen: false,
+    productId: null,
+    productName: '',
+  })
+  const [toast, setToast] = useState<{
+    isOpen: boolean
+    type: ToastType
+    title: string
+    message: string
+  }>({
+    isOpen: false,
+    type: 'success',
+    title: '',
+    message: '',
+  })
   const [formData, setFormData] = useState({
     name: '',
     slug: '',
@@ -69,6 +95,10 @@ export default function Products() {
     setFormData({ ...formData, image_url: '' })
   }
 
+  const showToast = (type: ToastType, title: string, message: string) => {
+    setToast({ isOpen: true, type, title, message })
+  }
+
   const uploadImage = async (): Promise<string | null> => {
     if (!imageFile) return formData.image_url || null
 
@@ -77,8 +107,11 @@ export default function Products() {
       const formDataToSend = new FormData()
       formDataToSend.append('image', imageFile)
 
-      const response = await fetch('http://localhost:4000/api/products/upload-image', {
+      const response = await fetch(`${API_URL}/api/products/upload-image`, {
         method: 'POST',
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('admin_token')}`,
+        },
         body: formDataToSend,
       })
 
@@ -90,7 +123,7 @@ export default function Products() {
       return data.imageUrl
     } catch (error) {
       console.error('Error uploading image:', error)
-      alert('Failed to upload image')
+      showToast('error', 'Upload Failed', 'Failed to upload image. Please try again.')
       return null
     } finally {
       setUploading(false)
@@ -114,7 +147,7 @@ export default function Products() {
     if (imageFile) {
       const uploadedUrl = await uploadImage()
       if (!uploadedUrl) {
-        alert('Failed to upload image. Please try again.')
+        // Toast already shown in uploadImage function
         return
       }
       imageUrl = uploadedUrl
@@ -136,10 +169,10 @@ export default function Products() {
     try {
       if (editingProduct) {
         await api.put(`/api/products/${editingProduct.id}`, productData)
-        alert('Product updated successfully!')
+        showToast('success', 'Success!', 'Product updated successfully!')
       } else {
         await api.post('/api/products', productData)
-        alert('Product created successfully!')
+        showToast('success', 'Success!', 'Product created successfully!')
       }
 
       setShowForm(false)
@@ -148,18 +181,32 @@ export default function Products() {
       fetchProducts()
     } catch (error: any) {
       console.error('Error saving product:', error)
-      alert(`Failed to save product: ${error.message || 'Unknown error'}`)
+      showToast('error', 'Error', `Failed to save product: ${error.message || 'Unknown error'}`)
     }
   }
 
   const handleDelete = async (id: string) => {
-    if (confirm('Are you sure you want to delete this product?')) {
-      try {
-        await api.delete(`/api/products/${id}`)
-        fetchProducts()
-      } catch (error) {
-        console.error('Error deleting product:', error)
-      }
+    const product = products.find((p) => p.id === id)
+    if (product) {
+      setDeleteModal({
+        isOpen: true,
+        productId: id,
+        productName: product.name,
+      })
+    }
+  }
+
+  const confirmDelete = async () => {
+    if (!deleteModal.productId) return
+
+    try {
+      await api.delete(`/api/products/${deleteModal.productId}`)
+      fetchProducts()
+      setDeleteModal({ isOpen: false, productId: null, productName: '' })
+      showToast('success', 'Success!', 'Product deleted successfully!')
+    } catch (error) {
+      console.error('Error deleting product:', error)
+      showToast('error', 'Error', 'Failed to delete product')
     }
   }
 
@@ -199,6 +246,39 @@ export default function Products() {
     setImagePreview('')
   }
 
+  // Filter products based on search term and filters
+  const filteredProducts = products.filter((product) => {
+    const matchesSearch =
+      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.category?.name?.toLowerCase().includes(searchTerm.toLowerCase())
+
+    const matchesCategory = categoryFilter === 'all' || product.category_id === categoryFilter
+
+    const matchesStatus =
+      statusFilter === 'all' ||
+      (statusFilter === 'active' && product.is_active) ||
+      (statusFilter === 'inactive' && !product.is_active)
+
+    const matchesPriceRange = (() => {
+      const price = product.price
+      switch (priceRangeFilter) {
+        case 'under-100':
+          return price < 100
+        case '100-500':
+          return price >= 100 && price <= 500
+        case '500-1000':
+          return price >= 500 && price <= 1000
+        case 'over-1000':
+          return price > 1000
+        default:
+          return true
+      }
+    })()
+
+    return matchesSearch && matchesCategory && matchesStatus && matchesPriceRange
+  })
+
   return (
     <div>
       <div className="flex justify-between items-center mb-8">
@@ -207,6 +287,75 @@ export default function Products() {
           <Plus className="h-4 w-4 mr-2" />
           Add Product
         </Button>
+      </div>
+
+      {/* Search and Filters */}
+      <div className="bg-white rounded-lg shadow p-6 mb-6 border border-gray-200">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Search */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <Input
+              type="text"
+              placeholder="Search products..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+
+          {/* Category Filter */}
+          <div className="relative">
+            <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <select
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#8BC34A] focus:border-transparent"
+            >
+              <option value="all">All Categories</option>
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Status Filter */}
+          <div className="relative">
+            <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#8BC34A] focus:border-transparent"
+            >
+              <option value="all">All Status</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </div>
+
+          {/* Price Range Filter */}
+          <div className="relative">
+            <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <select
+              value={priceRangeFilter}
+              onChange={(e) => setPriceRangeFilter(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#8BC34A] focus:border-transparent"
+            >
+              <option value="all">All Prices</option>
+              <option value="under-100">Under ₹100</option>
+              <option value="100-500">₹100 - ₹500</option>
+              <option value="500-1000">₹500 - ₹1000</option>
+              <option value="over-1000">Over ₹1000</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Results count */}
+        <div className="mt-4 text-sm text-gray-600">
+          Showing {filteredProducts.length} of {products.length} products
+        </div>
       </div>
 
       {showForm && (
@@ -363,66 +512,116 @@ export default function Products() {
       )}
 
       <div className="bg-white rounded-lg shadow border border-gray-200 overflow-hidden">
-        <table className="w-full">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Name
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Category
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Price
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Stock
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Status
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
-            {products.map((product) => (
-              <tr key={product.id}>
-                <td className="px-6 py-4 text-sm font-medium text-gray-900">{product.name}</td>
-                <td className="px-6 py-4 text-sm text-gray-500">{product.category?.name || '-'}</td>
-                <td className="px-6 py-4 text-sm text-gray-500">{formatCurrency(product.price)}</td>
-                <td className="px-6 py-4 text-sm text-gray-500">{product.stock_quantity}</td>
-                <td className="px-6 py-4 text-sm">
-                  <span
-                    className={`px-2 py-1 rounded-full text-xs ${
-                      product.is_active
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-gray-100 text-gray-800'
-                    }`}
-                  >
-                    {product.is_active ? 'Active' : 'Inactive'}
-                  </span>
-                </td>
-                <td className="px-6 py-4 text-sm space-x-2">
-                  <button
-                    onClick={() => handleEdit(product)}
-                    className="text-blue-600 hover:text-blue-800"
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(product.id)}
-                    className="text-red-600 hover:text-red-800"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                </td>
+        {filteredProducts.length === 0 ? (
+          <div className="p-12 text-center">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
+              <Plus className="h-8 w-8 text-gray-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">No products found</h3>
+            <p className="text-gray-500 mb-6">
+              {searchTerm ||
+              categoryFilter !== 'all' ||
+              statusFilter !== 'all' ||
+              priceRangeFilter !== 'all'
+                ? 'No products match your current filters. Try adjusting your search criteria.'
+                : 'No products available. Add your first product to get started.'}
+            </p>
+            {!searchTerm &&
+              categoryFilter === 'all' &&
+              statusFilter === 'all' &&
+              priceRangeFilter === 'all' && (
+                <Button onClick={() => setShowForm(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add First Product
+                </Button>
+              )}
+          </div>
+        ) : (
+          <table className="w-full">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Name
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Category
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Price
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Stock
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Status
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Actions
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {filteredProducts.map((product) => (
+                <tr key={product.id}>
+                  <td className="px-6 py-4 text-sm font-medium text-gray-900">{product.name}</td>
+                  <td className="px-6 py-4 text-sm text-gray-500">
+                    {product.category?.name || '-'}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-500">
+                    {formatCurrency(product.price)}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-500">{product.stock_quantity}</td>
+                  <td className="px-6 py-4 text-sm">
+                    <span
+                      className={`px-2 py-1 rounded-full text-xs ${
+                        product.is_active
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-gray-100 text-gray-800'
+                      }`}
+                    >
+                      {product.is_active ? 'Active' : 'Inactive'}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-sm space-x-2">
+                    <button
+                      onClick={() => handleEdit(product)}
+                      className="text-blue-600 hover:text-blue-800"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(product.id)}
+                      className="text-red-600 hover:text-red-800"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={deleteModal.isOpen}
+        onClose={() => setDeleteModal({ isOpen: false, productId: null, productName: '' })}
+        onConfirm={confirmDelete}
+        title="Delete Product"
+        message="Are you sure you want to delete this product? This action cannot be undone."
+        itemName={deleteModal.productName}
+      />
+
+      {/* Toast Notification */}
+      <Toast
+        isOpen={toast.isOpen}
+        onClose={() => setToast({ ...toast, isOpen: false })}
+        type={toast.type}
+        title={toast.title}
+        message={toast.message}
+        duration={toast.type === 'success' ? 3000 : 4000}
+      />
     </div>
   )
 }

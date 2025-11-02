@@ -165,9 +165,9 @@ export default function CartPage() {
       {/* Enhanced Breadcrumb Header */}
       <div className="bg-white border-b border-gray-100 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-4xl font-bold text-[#2d2d2d] mb-2">Shopping Cart</h1>
+              <h1 className="text-3xl sm:text-4xl font-bold text-[#2d2d2d] mb-2">Shopping Cart</h1>
               <div className="flex items-center gap-2 text-sm text-gray-500">
                 <Link href="/" className="hover:text-[#8BC34A] transition-colors">
                   Home
@@ -176,11 +176,11 @@ export default function CartPage() {
                 <span className="text-[#2d2d2d] font-semibold">Cart</span>
               </div>
             </div>
-            <Link href="/store">
+            <Link href="/store" className="w-full sm:w-auto">
               <Button
                 variant="outline"
                 size="lg"
-                className="rounded-xl border-2 hover:border-[#8BC34A] hover:text-[#8BC34A]"
+                className="w-full sm:w-auto rounded-xl border-2 hover:border-[#8BC34A] hover:bg-transparent hover:text-[#8BC34A] hover:shadow-sm hover:scale-100 justify-center sm:justify-start"
               >
                 <ArrowLeft className="h-5 w-5 mr-2" />
                 Continue Shopping
@@ -202,8 +202,8 @@ export default function CartPage() {
             </div>
             <h2 className="text-3xl font-bold text-[#2d2d2d] mb-4">Your Cart is Empty</h2>
             <p className="text-gray-600 mb-8 text-lg max-w-md mx-auto leading-relaxed">
-              Looks like you haven&apos;t added anything to your cart yet. Start shopping to find amazing
-              products!
+              Looks like you haven&apos;t added anything to your cart yet. Start shopping to find
+              amazing products!
             </p>
             <Link href="/store">
               <Button size="lg" className="px-8 py-6 text-lg rounded-xl shadow-lg hover:shadow-xl">
@@ -246,7 +246,7 @@ export default function CartPage() {
                         {/* Product Image */}
                         <Link
                           href={`/products/${item.product.id}`}
-                          className="relative w-32 h-32 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl flex-shrink-0 overflow-hidden group-hover:scale-105 transition-transform duration-300"
+                          className="relative w-32 h-32 bg-white rounded-xl flex-shrink-0 overflow-hidden group-hover:scale-105 transition-transform duration-300"
                         >
                           {item.product.image_url ? (
                             <Image

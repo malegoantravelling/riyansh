@@ -1,14 +1,36 @@
 import { useEffect, useState } from 'react'
-import { Plus, Pencil, Trash2 } from 'lucide-react'
+import { Plus, Pencil, Trash2, Tag } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { api } from '@/lib/api'
+import DeleteConfirmationModal from '@/components/DeleteConfirmationModal.tsx'
+import Toast, { ToastType } from '@/components/SuccessToast'
 
 export default function Categories() {
   const [categories, setCategories] = useState<any[]>([])
   const [showForm, setShowForm] = useState(false)
   const [editingCategory, setEditingCategory] = useState<any>(null)
+  const [deleteModal, setDeleteModal] = useState<{
+    isOpen: boolean
+    categoryId: string | null
+    categoryName: string
+  }>({
+    isOpen: false,
+    categoryId: null,
+    categoryName: '',
+  })
+  const [toast, setToast] = useState<{
+    isOpen: boolean
+    type: ToastType
+    title: string
+    message: string
+  }>({
+    isOpen: false,
+    type: 'success',
+    title: '',
+    message: '',
+  })
   const [formData, setFormData] = useState({
     name: '',
     slug: '',
@@ -29,14 +51,20 @@ export default function Categories() {
     }
   }
 
+  const showToast = (type: ToastType, title: string, message: string) => {
+    setToast({ isOpen: true, type, title, message })
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
     try {
       if (editingCategory) {
         await api.put(`/api/categories/${editingCategory.id}`, formData)
+        showToast('success', 'Success!', 'Category updated successfully!')
       } else {
         await api.post('/api/categories', formData)
+        showToast('success', 'Success!', 'Category created successfully!')
       }
 
       setShowForm(false)
@@ -45,17 +73,32 @@ export default function Categories() {
       fetchCategories()
     } catch (error) {
       console.error('Error saving category:', error)
+      showToast('error', 'Error', 'Failed to save category')
     }
   }
 
   const handleDelete = async (id: string) => {
-    if (confirm('Are you sure you want to delete this category?')) {
-      try {
-        await api.delete(`/api/categories/${id}`)
-        fetchCategories()
-      } catch (error) {
-        console.error('Error deleting category:', error)
-      }
+    const category = categories.find((c) => c.id === id)
+    if (category) {
+      setDeleteModal({
+        isOpen: true,
+        categoryId: id,
+        categoryName: category.name,
+      })
+    }
+  }
+
+  const confirmDelete = async () => {
+    if (!deleteModal.categoryId) return
+
+    try {
+      await api.delete(`/api/categories/${deleteModal.categoryId}`)
+      fetchCategories()
+      setDeleteModal({ isOpen: false, categoryId: null, categoryName: '' })
+      showToast('success', 'Success!', 'Category deleted successfully!')
+    } catch (error) {
+      console.error('Error deleting category:', error)
+      showToast('error', 'Error', 'Failed to delete category')
     }
   }
 
@@ -150,34 +193,73 @@ export default function Categories() {
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {categories.map((category) => (
-          <div key={category.id} className="bg-white rounded-lg shadow p-6 border border-gray-200">
-            <div className="flex justify-between items-start mb-4">
-              <h3 className="text-lg font-bold text-gray-800">{category.name}</h3>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => handleEdit(category)}
-                  className="text-blue-600 hover:text-blue-800"
-                >
-                  <Pencil className="h-4 w-4" />
-                </button>
-                <button
-                  onClick={() => handleDelete(category.id)}
-                  className="text-red-600 hover:text-red-800"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
-              </div>
+        {categories.length === 0 ? (
+          <div className="col-span-full p-12 text-center">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
+              <Tag className="h-8 w-8 text-gray-400" />
             </div>
-            <p className="text-sm text-gray-600 mb-2">
-              Slug: <span className="font-mono">{category.slug}</span>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">No categories found</h3>
+            <p className="text-gray-500 mb-6">
+              No categories available. Add your first category to get started.
             </p>
-            {category.description && (
-              <p className="text-sm text-gray-500">{category.description}</p>
-            )}
+            <Button onClick={() => setShowForm(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add First Category
+            </Button>
           </div>
-        ))}
+        ) : (
+          categories.map((category) => (
+            <div
+              key={category.id}
+              className="bg-white rounded-lg shadow p-6 border border-gray-200"
+            >
+              <div className="flex justify-between items-start mb-4">
+                <h3 className="text-lg font-bold text-gray-800">{category.name}</h3>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleEdit(category)}
+                    className="text-blue-600 hover:text-blue-800"
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(category.id)}
+                    className="text-red-600 hover:text-red-800"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+              <p className="text-sm text-gray-600 mb-2">
+                Slug: <span className="font-mono">{category.slug}</span>
+              </p>
+              {category.description && (
+                <p className="text-sm text-gray-500">{category.description}</p>
+              )}
+            </div>
+          ))
+        )}
       </div>
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={deleteModal.isOpen}
+        onClose={() => setDeleteModal({ isOpen: false, categoryId: null, categoryName: '' })}
+        onConfirm={confirmDelete}
+        title="Delete Category"
+        message="Are you sure you want to delete this category? This action cannot be undone."
+        itemName={deleteModal.categoryName}
+      />
+
+      {/* Toast Notification */}
+      <Toast
+        isOpen={toast.isOpen}
+        onClose={() => setToast({ ...toast, isOpen: false })}
+        type={toast.type}
+        title={toast.title}
+        message={toast.message}
+        duration={toast.type === 'success' ? 3000 : 4000}
+      />
     </div>
   )
 }

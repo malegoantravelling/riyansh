@@ -11,7 +11,7 @@ export default function StorePage() {
   const [products, setProducts] = useState<any[]>([])
   const [allProducts, setAllProducts] = useState<any[]>([])
   const [selectedCategory] = useState<string>('')
-  const [priceRange, setPriceRange] = useState([0, 1500])
+  const [priceRange, setPriceRange] = useState([0, 10000])
   const [sortBy, setSortBy] = useState('default')
   const [loading, setLoading] = useState(true)
   const [currentPage, setCurrentPage] = useState(1)
@@ -71,7 +71,7 @@ export default function StorePage() {
   )
 
   const resetFilters = () => {
-    setPriceRange([0, 1500])
+    setPriceRange([0, 10000])
     setSortBy('default')
     setProducts(allProducts)
     setCurrentPage(1)
@@ -130,7 +130,7 @@ export default function StorePage() {
           <Button
             onClick={() => setShowFilters(!showFilters)}
             variant="outline"
-            className="w-full justify-between"
+            className="w-full justify-between px-6 py-4"
             size="lg"
           >
             <span className="flex items-center gap-2">
@@ -165,14 +165,14 @@ export default function StorePage() {
                     <input
                       type="range"
                       min="0"
-                      max="1500"
+                      max="10000"
                       value={priceRange[1]}
                       onChange={(e) => setPriceRange([0, parseInt(e.target.value)])}
                       className="w-full h-3 bg-gray-200 rounded-full appearance-none cursor-pointer accent-[#8BC34A] hover:accent-[#7CB342] shadow-inner"
                       style={{
                         background: `linear-gradient(to right, #8BC34A 0%, #8BC34A ${
-                          (priceRange[1] / 1500) * 100
-                        }%, #e5e7eb ${(priceRange[1] / 1500) * 100}%, #e5e7eb 100%)`,
+                          (priceRange[1] / 10000) * 100
+                        }%, #e5e7eb ${(priceRange[1] / 10000) * 100}%, #e5e7eb 100%)`,
                       }}
                     />
                     <div className="flex justify-between mt-5 gap-3">
@@ -315,7 +315,7 @@ export default function StorePage() {
                     </div>
                     <h3 className="text-3xl font-bold text-[#2d2d2d] mb-3">No Products Found</h3>
                     <p className="text-gray-500 text-lg mb-8 max-w-md mx-auto leading-relaxed">
-                      We couldn't find any products matching your criteria. Try adjusting your
+                      We couldn&apos;t find any products matching your criteria. Try adjusting your
                       filters or browse our full collection.
                     </p>
                     <Button
