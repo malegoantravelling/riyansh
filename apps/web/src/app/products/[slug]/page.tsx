@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -43,6 +43,7 @@ interface Product {
 
 export default function ProductDetailsPage() {
   const params = useParams()
+  const router = useRouter()
   const toast = useToast()
   const { incrementCartCount, refreshCartCount } = useCart()
   const [product, setProduct] = useState<Product | null>(null)
@@ -151,16 +152,90 @@ export default function ProductDetailsPage() {
     }
   }
 
-  const handleBuyNow = () => {
+  const handleBuyNow = async () => {
     if (!product) return
 
-    // Create WhatsApp message with product name
-    const whatsappMessage = `can you have ${product.name} in the stock?`
-    const encodedMessage = encodeURIComponent(whatsappMessage)
-    const whatsappUrl = `https://wa.me/9370646279?text=${encodedMessage}`
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
 
-    // Redirect to WhatsApp
-    window.location.href = whatsappUrl
+      if (!session?.user) {
+        toast.warning('Login Required', 'Please login to proceed with Buy Now')
+        // Store the current page to redirect after login
+        localStorage.setItem('redirect_after_login', window.location.pathname)
+        router.push('/auth/login')
+        return
+      }
+
+      // Get user profile information
+      const { data: userProfile } = await supabase
+        .from('users')
+        .select('full_name, email')
+        .eq('id', session.user.id)
+        .single()
+
+      // Get user default address
+      const { data: defaultAddress } = await supabase
+        .from('user_addresses')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .eq('is_default', true)
+        .single()
+
+      // Build WhatsApp message with user details
+      const userName = userProfile?.full_name || 'Customer'
+      const userEmail = userProfile?.email || session.user.email || 'N/A'
+      const userPhone = defaultAddress?.phone || 'N/A'
+      const address = defaultAddress
+        ? `${defaultAddress.address_line_1}, ${defaultAddress.city}, ${defaultAddress.state}, ${defaultAddress.zip_code}`
+        : 'N/A'
+
+      // Send email notification
+      try {
+        const apiUrl =
+          process.env.NEXT_PUBLIC_API_URL ||
+          (process.env.NODE_ENV === 'production'
+            ? 'https://riyanshamrit.com'
+            : 'http://0.0.0.0:4000')
+
+        await fetch(`${apiUrl}/api/orders/whatsapp-notify`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({
+            productNames: [product.name],
+            customerName: userName,
+            customerEmail: userEmail,
+            customerPhone: userPhone,
+            customerAddress: address,
+            orderType: 'buy_now',
+          }),
+        })
+      } catch (emailError) {
+        console.error('Failed to send email notification:', emailError)
+        // Don't block the Buy Now if email fails
+      }
+
+      const whatsappMessage = `can you have ${product.name} in the stock?
+
+Customer Details:
+Name: ${userName}
+Email: ${userEmail}
+Phone: ${userPhone}
+Address: ${address}`
+
+      const encodedMessage = encodeURIComponent(whatsappMessage)
+      const whatsappUrl = `https://wa.me/9370646279?text=${encodedMessage}`
+
+      // Redirect to WhatsApp
+      window.location.href = whatsappUrl
+    } catch (error) {
+      console.error('Error processing Buy Now:', error)
+      toast.error('Error', 'Could not process Buy Now. Please try again.')
+    }
   }
 
   const handleAddToCart = async () => {

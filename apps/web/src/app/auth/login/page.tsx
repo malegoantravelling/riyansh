@@ -40,7 +40,18 @@ export default function LoginPage() {
       }
 
       if (data.user) {
-        router.push('/')
+        // Check if there's a stored redirect path (e.g., from Buy Now)
+        const redirectPath = localStorage.getItem('redirect_after_login')
+
+        if (redirectPath) {
+          // Clear the stored redirect path
+          localStorage.removeItem('redirect_after_login')
+          // Redirect to the stored path
+          router.push(redirectPath)
+        } else {
+          // Default redirect to home
+          router.push('/')
+        }
       }
     } catch (error: any) {
       setError(error.message)
