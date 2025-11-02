@@ -171,7 +171,7 @@ router.post('/verify-payment', authenticateToken, async (req: AuthRequest, res) 
     // Verify signature
     const body = razorpay_order_id + '|' + razorpay_payment_id
     const expectedSignature = crypto
-      .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET || '')
+      .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET || 'JJSQXyYUxWSFg24opv4i1pfm')
       .update(body.toString())
       .digest('hex')
 
