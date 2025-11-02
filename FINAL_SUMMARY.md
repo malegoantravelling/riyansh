@@ -105,8 +105,29 @@ Test card: `4111111111111111`
 
 **Status**: Admin redirect loop fix ready - needs deployment! 🔧
 
+---
+
+## 🔴 URGENT: Admin Login Issue (NEW)
+
+**Issue**: Admin panel cannot login - API calls going to `localhost:4000`
+
+**Error**: `POST http://localhost:4000/api/auth/admin/login net::ERR_CONNECTION_REFUSED`
+
+**Root Cause**: Deployed admin app was built with old code (localhost fallback)
+
+**Fix Applied**:
+
+1. ✅ Updated `apps/admin/src/lib/api.ts` - changed fallback to `https://riyanshamrit.com`
+2. ✅ Fixed `apps/admin/src/pages/Products.tsx` - removed hardcoded localhost
+
+**Deploy Script**: `FIX_ADMIN_LOGIN.sh`
+
+**See**: `ADMIN_LOGIN_ISSUE_ANALYSIS.md` for full details
+
+---
+
 **Next**:
 
-1. Upload fixed `.htaccess` and `ecosystem.config.js`
-2. Run `FIX_ADMIN_REDIRECT_LOOP.sh` on server
-3. Test `https://riyanshamrit.com/admin/`
+1. Upload fixed `.htaccess`, `ecosystem.config.js`, and admin source files
+2. Run `FIX_ADMIN_LOGIN.sh` on server (rebuilds admin with correct API URL)
+3. Test login at `https://riyanshamrit.com/admin/`

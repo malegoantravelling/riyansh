@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { supabase } from '@/lib/supabase'
 import { formatCurrency } from '@/lib/utils'
-import { ShoppingBag, MapPin, User, Mail, Phone, CreditCard, ChevronRight } from 'lucide-react'
+import { ShoppingBag, MapPin, User, Mail, Phone, ChevronRight } from 'lucide-react'
 
 interface CartItem {
   id: string
@@ -267,114 +267,16 @@ export default function CheckoutPage() {
         if (updateError) throw updateError
       }
 
-      // Get the full address object
-      const selectedAddress = addresses.find((addr) => addr.id === addressId) || {
-        id: addressId,
-        address_line_1: formData.address_line_1,
-        address_line_2: formData.address_line_2,
-        street_address: formData.street_address,
-        city: formData.city,
-        state: formData.state,
-        zip_code: formData.zip_code,
-        phone: formData.phone,
-        is_default: false,
-      }
+      // Get all product names from cart
+      const productNames = cartItems.map((item) => item.product.name).join(', ')
 
-      // Create Razorpay order via API (use relative path in production)
-      const apiUrl = process.env.NODE_ENV === 'production' ? '' : (process.env.NEXT_PUBLIC_API_URL || 'http://0.0.0.0:4000')
-      const response = await fetch(`${apiUrl}/api/orders/create-razorpay-order`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({
-          shipping_address: selectedAddress,
-          billing_address: selectedAddress,
-          contact_info: {
-            full_name: formData.full_name,
-            email: formData.email,
-            phone: formData.phone,
-          },
-        }),
-      })
+      // Create WhatsApp message
+      const whatsappMessage = `can you have the following products in stock = ${productNames}`
+      const encodedMessage = encodeURIComponent(whatsappMessage)
+      const whatsappUrl = `https://wa.me/9370646279?text=${encodedMessage}`
 
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to create order')
-      }
-
-      // Initialize Razorpay payment
-      const options = {
-        key: data.key_id,
-        amount: data.amount * 100, // Amount in paise
-        currency: data.currency,
-        name: 'RIYANSH',
-        description: 'Order Payment',
-        order_id: data.razorpay_order_id,
-        handler: async function (response: any) {
-          try {
-            // Verify payment
-            const verifyResponse = await fetch(`${apiUrl}/api/orders/verify-payment`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${session.access_token}`,
-              },
-              body: JSON.stringify({
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature,
-                order_id: data.order_id,
-              }),
-            })
-
-            const verifyData = await verifyResponse.json()
-
-            if (verifyResponse.ok && verifyData.success) {
-              alert('Payment successful! Your order has been placed.')
-              router.push('/account/orders')
-            } else {
-              throw new Error(verifyData.error || 'Payment verification failed')
-            }
-          } catch (error: any) {
-            console.error('Payment verification error:', error)
-            alert(`Payment verification failed: ${error.message}`)
-          }
-        },
-        prefill: {
-          name: formData.full_name,
-          email: formData.email,
-          contact: formData.phone,
-        },
-        notes: {
-          address: `${formData.address_line_1}, ${formData.city}, ${formData.state}`,
-        },
-        theme: {
-          color: '#8BC34A',
-        },
-        modal: {
-          ondismiss: function () {
-            setSubmitting(false)
-            alert('Payment cancelled. Your order is saved and you can complete payment later.')
-          },
-        },
-      }
-
-      // Check if Razorpay is loaded
-      if (typeof (window as any).Razorpay === 'undefined') {
-        throw new Error('Razorpay SDK not loaded. Please refresh the page and try again.')
-      }
-
-      const razorpay = new (window as any).Razorpay(options)
-      razorpay.open()
-
-      razorpay.on('payment.failed', function (response: any) {
-        console.error('Payment failed:', response.error)
-        alert(`Payment failed: ${response.error.description}`)
-        setSubmitting(false)
-      })
+      // Redirect to WhatsApp
+      window.location.href = whatsappUrl
     } catch (error: any) {
       console.error('Error processing checkout:', error)
       alert(`Failed to process checkout: ${error.message || 'Please try again.'}`)
@@ -762,12 +664,12 @@ export default function CheckoutPage() {
                   {submitting ? (
                     <span className="flex items-center justify-center">
                       <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                      Processing...
+                      Redirecting...
                     </span>
                   ) : (
                     <span className="flex items-center justify-center">
-                      <CreditCard className="h-5 w-5 mr-2" />
-                      Proceed to Payment
+                      <ShoppingBag className="h-5 w-5 mr-2" />
+                      Proceed to WhatsApp Order
                       <ChevronRight className="h-5 w-5 ml-2" />
                     </span>
                   )}

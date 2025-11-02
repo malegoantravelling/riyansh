@@ -8,6 +8,7 @@ import {
   Minus,
   Plus,
   ShoppingCart,
+  ShoppingBag,
   Heart,
   Share2,
   Truck,
@@ -148,6 +149,18 @@ export default function ProductDetailsPage() {
       navigator.clipboard.writeText(window.location.href)
       toast.success('Link Copied!', 'Product link copied to clipboard')
     }
+  }
+
+  const handleBuyNow = () => {
+    if (!product) return
+
+    // Create WhatsApp message with product name
+    const whatsappMessage = `can you have ${product.name} in the stock?`
+    const encodedMessage = encodeURIComponent(whatsappMessage)
+    const whatsappUrl = `https://wa.me/9370646279?text=${encodedMessage}`
+
+    // Redirect to WhatsApp
+    window.location.href = whatsappUrl
   }
 
   const handleAddToCart = async () => {
@@ -424,50 +437,63 @@ export default function ProductDetailsPage() {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Button
-                onClick={handleAddToCart}
-                disabled={addingToCart || product.stock_quantity === 0}
-                className="flex-1 h-14 text-lg font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
-                size="lg"
-              >
-                {addingToCart ? (
-                  <div className="flex items-center gap-2">
-                    <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    <span>Adding...</span>
-                  </div>
-                ) : (
-                  <>
-                    <ShoppingCart className="h-5 w-5 mr-2" />
-                    Add to Cart
-                  </>
-                )}
-              </Button>
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Button
+                  onClick={handleAddToCart}
+                  disabled={addingToCart || product.stock_quantity === 0}
+                  className="flex-1 h-14 text-lg font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                  size="lg"
+                >
+                  {addingToCart ? (
+                    <div className="flex items-center gap-2">
+                      <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span>Adding...</span>
+                    </div>
+                  ) : (
+                    <>
+                      <ShoppingCart className="h-5 w-5 mr-2" />
+                      Add to Cart
+                    </>
+                  )}
+                </Button>
 
-              <Button
-                variant="outline"
-                size="lg"
-                onClick={handleWishlist}
-                className={`h-14 w-14 sm:w-auto sm:px-6 rounded-xl border-2 transition-all duration-300 ${
-                  isWishlisted
-                    ? 'bg-pink-50 border-pink-300'
-                    : 'border-gray-300 hover:border-[#8BC34A]'
-                }`}
-              >
-                <Heart
-                  className={`h-5 w-5 transition-colors ${
-                    isWishlisted ? 'fill-pink-500 text-pink-500' : ''
+                <Button
+                  variant="outline"
+                  size="lg"
+                  onClick={handleWishlist}
+                  className={`h-14 w-14 sm:w-auto sm:px-6 rounded-xl border-2 transition-all duration-300 ${
+                    isWishlisted
+                      ? 'bg-pink-50 border-pink-300'
+                      : 'border-gray-300 hover:border-[#8BC34A]'
                   }`}
-                />
-              </Button>
+                >
+                  <Heart
+                    className={`h-5 w-5 transition-colors ${
+                      isWishlisted ? 'fill-pink-500 text-pink-500' : ''
+                    }`}
+                  />
+                </Button>
 
+                <Button
+                  variant="outline"
+                  size="lg"
+                  onClick={handleShare}
+                  className="h-14 w-14 sm:w-auto sm:px-6 rounded-xl border-2 border-gray-300 hover:border-[#8BC34A] transition-all duration-300"
+                >
+                  <Share2 className="h-5 w-5" />
+                </Button>
+              </div>
+
+              {/* Buy Now Button */}
               <Button
-                variant="outline"
+                onClick={handleBuyNow}
+                disabled={product.stock_quantity === 0}
+                className="w-full h-14 text-lg font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 bg-gradient-to-r from-[#27AE60] to-[#229954] hover:from-[#229954] hover:to-[#1E8449] text-white"
                 size="lg"
-                onClick={handleShare}
-                className="h-14 w-14 sm:w-auto sm:px-6 rounded-xl border-2 border-gray-300 hover:border-[#8BC34A] transition-all duration-300"
               >
-                <Share2 className="h-5 w-5" />
+                <ShoppingBag className="h-5 w-5 mr-2" />
+                Buy Now
               </Button>
             </div>
 
