@@ -13,7 +13,6 @@ import {
   Award,
   Clock,
 } from 'lucide-react'
-import { Button } from './ui/button'
 
 export default function Footer() {
   const currentYear = new Date().getFullYear()
@@ -105,8 +104,10 @@ export default function Footer() {
             <h3 className="font-bold text-lg mb-6 text-white">Customer Service</h3>
             <ul className="space-y-3 flex flex-col items-center md:items-start">
               {[
-                { href: '/account/orders', label: 'Shipping Info' },
-                { href: '/about', label: 'Privacy Policy' },
+                { href: '/shipping', label: 'Shipping Policy' },
+                { href: '/cancellation-refund', label: 'Returns & Refunds' },
+                { href: '/privacy', label: 'Privacy Policy' },
+                { href: '/terms', label: 'Terms & Conditions' },
                 { href: '/contact', label: 'Support Center' },
               ].map((link) => (
                 <li key={link.label}>
@@ -214,17 +215,21 @@ export default function Footer() {
               rights reserved. Made with{' '}
               <Heart className="inline h-3 w-3 text-red-500 animate-pulse" /> for your wellness
             </p>
-            <div className="flex items-center gap-6 text-xs text-gray-500">
-              <Link href="#" className="hover:text-[#8BC34A] transition-colors">
+            <div className="flex items-center gap-6 text-xs text-gray-500 flex-wrap justify-center">
+              <Link href="/privacy" className="hover:text-[#8BC34A] transition-colors">
                 Privacy Policy
               </Link>
               <span>•</span>
-              <Link href="#" className="hover:text-[#8BC34A] transition-colors">
-                Terms of Service
+              <Link href="/terms" className="hover:text-[#8BC34A] transition-colors">
+                Terms & Conditions
               </Link>
               <span>•</span>
-              <Link href="#" className="hover:text-[#8BC34A] transition-colors">
-                Cookie Policy
+              <Link href="/shipping" className="hover:text-[#8BC34A] transition-colors">
+                Shipping Policy
+              </Link>
+              <span>•</span>
+              <Link href="/cancellation-refund" className="hover:text-[#8BC34A] transition-colors">
+                Returns & Refunds
               </Link>
             </div>
           </div>

@@ -4,8 +4,8 @@ module.exports = {
     // API Server (Backend)
     {
       name: 'riyansh-api',
-      script: 'npm',
-      args: 'start',
+      script: 'node',
+      args: 'dist/index.js',
       cwd: './apps/api',
       env: {
         NODE_ENV: 'production',
@@ -15,9 +15,9 @@ module.exports = {
       exec_mode: 'fork',
       watch: false,
       max_memory_restart: '1G',
-      error_file: './logs/api-err.log',
-      out_file: './logs/api-out.log',
-      log_file: './logs/api-combined.log',
+      error_file: '../logs/api-err.log',
+      out_file: '../logs/api-out.log',
+      log_file: '../logs/api-combined.log',
       time: true,
       merge_logs: true,
       autorestart: true,
@@ -27,8 +27,8 @@ module.exports = {
     // Web Application (Next.js Frontend)
     {
       name: 'riyansh-web',
-      script: 'npm',
-      args: 'start -- -p 3000',
+      script: 'node_modules/.bin/next',
+      args: 'start -p 3000',
       cwd: './apps/web',
       env: {
         NODE_ENV: 'production',
@@ -38,9 +38,9 @@ module.exports = {
       exec_mode: 'fork',
       watch: false,
       max_memory_restart: '1G',
-      error_file: './logs/web-err.log',
-      out_file: './logs/web-out.log',
-      log_file: './logs/web-combined.log',
+      error_file: '../logs/web-err.log',
+      out_file: '../logs/web-out.log',
+      log_file: '../logs/web-combined.log',
       time: true,
       merge_logs: true,
       autorestart: true,
@@ -50,8 +50,8 @@ module.exports = {
     // Admin Panel (Vite Frontend)
     {
       name: 'riyansh-admin',
-      script: 'npm',
-      args: 'run preview -- --port 3001',
+      script: 'node_modules/.bin/vite',
+      args: 'preview --port 3001 --host',
       cwd: './apps/admin',
       env: {
         NODE_ENV: 'production',
@@ -61,9 +61,9 @@ module.exports = {
       exec_mode: 'fork',
       watch: false,
       max_memory_restart: '512M',
-      error_file: './logs/admin-err.log',
-      out_file: './logs/admin-out.log',
-      log_file: './logs/admin-combined.log',
+      error_file: '../logs/admin-err.log',
+      out_file: '../logs/admin-out.log',
+      log_file: '../logs/admin-combined.log',
       time: true,
       merge_logs: true,
       autorestart: true,
