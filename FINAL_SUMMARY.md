@@ -191,3 +191,30 @@ Test card: `4111111111111111`
 - `apps/web/src/app/products/[slug]/page.tsx` - Added email call
 
 **See**: `EMAIL_NOTIFICATIONS_IMPLEMENTATION.md` for full details
+
+---
+
+## 🔧 NEW: Buy Now Login Redirect Fix
+
+**Completed**: Fixed Buy Now button redirect after login
+
+**Problem**:
+
+- Buy Now stored redirect path in localStorage but login always went to home page
+- Users lost context and had to navigate back to products
+
+**Solution**:
+
+- Updated login page to check for stored redirect path
+- If found, redirects back to that page after login
+- If not found, defaults to home page
+
+**User Flow**:
+
+- Click "Buy Now" → Login required → Store product page URL → Login → Redirect to product page
+
+**Files Modified**:
+
+- `apps/web/src/app/auth/login/page.tsx` - Added redirect path check
+
+**See**: `BUY_NOW_REDIRECT_FIX.md` for full details
