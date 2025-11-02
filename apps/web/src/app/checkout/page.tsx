@@ -68,17 +68,17 @@ export default function CheckoutPage() {
       return
     }
 
-    await Promise.all([fetchCartItems(), fetchUserProfile(), fetchAddresses()])
+    // Cache session and fetch all data in parallel
+    await Promise.all([
+      fetchCartItems(session.user.id),
+      fetchUserProfile(session.user.id, session.user.email || ''),
+      fetchAddresses(session.user.id),
+    ])
     setLoading(false)
   }
 
-  const fetchCartItems = async () => {
+  const fetchCartItems = async (userId: string) => {
     try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
-      if (!session?.user) return
-
       const { data, error } = await supabase
         .from('cart_items')
         .select(
@@ -93,7 +93,7 @@ export default function CheckoutPage() {
           )
         `
         )
-        .eq('user_id', session.user.id)
+        .eq('user_id', userId)
 
       if (error) throw error
 
@@ -110,17 +110,12 @@ export default function CheckoutPage() {
     }
   }
 
-  const fetchUserProfile = async () => {
+  const fetchUserProfile = async (userId: string, userEmail: string) => {
     try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
-      if (!session?.user) return
-
       const { data, error } = await supabase
         .from('users')
         .select('full_name, email')
-        .eq('id', session.user.id)
+        .eq('id', userId)
         .single()
 
       if (error) throw error
@@ -129,7 +124,7 @@ export default function CheckoutPage() {
         setFormData((prev) => ({
           ...prev,
           full_name: data.full_name || '',
-          email: data.email || session.user.email || '',
+          email: data.email || userEmail || '',
         }))
       }
     } catch (error) {
@@ -137,17 +132,12 @@ export default function CheckoutPage() {
     }
   }
 
-  const fetchAddresses = async () => {
+  const fetchAddresses = async (userId: string) => {
     try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
-      if (!session?.user) return
-
       const { data, error } = await supabase
         .from('user_addresses')
         .select('*')
-        .eq('user_id', session.user.id)
+        .eq('user_id', userId)
         .order('is_default', { ascending: false })
 
       if (error) throw error
@@ -193,8 +183,29 @@ export default function CheckoutPage() {
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
+  // Calculate price based on quantity discounts
+  const getItemPrice = (basePrice: number, quantity: number): number => {
+    // 3-5 quantity: ₹1300 per unit
+    // 6+ quantity: ₹1200 per unit
+    // Default: base price
+    if (quantity >= 6) {
+      return 1200
+    } else if (quantity >= 3) {
+      return 1300
+    }
+    return basePrice
+  }
+
+  // Calculate item total with quantity discounts
+  const getItemTotal = (basePrice: number, quantity: number): number => {
+    return getItemPrice(basePrice, quantity) * quantity
+  }
+
   const calculateTotal = () => {
-    return cartItems.reduce((total, item) => total + item.product.price * item.quantity, 0)
+    return cartItems.reduce(
+      (total, item) => total + getItemTotal(item.product.price, item.quantity),
+      0
+    )
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -667,10 +678,17 @@ Address: ${fullAddress}`
                           {item.product.name}
                         </p>
                         <p className="text-sm text-gray-600 mt-1">
-                          {formatCurrency(item.product.price)} × {item.quantity}
+                          {formatCurrency(getItemPrice(item.product.price, item.quantity))} ×{' '}
+                          {item.quantity}
+                          {getItemPrice(item.product.price, item.quantity) !==
+                            item.product.price && (
+                            <span className="text-xs text-gray-400 line-through ml-2">
+                              {formatCurrency(item.product.price)}
+                            </span>
+                          )}
                         </p>
                         <p className="text-sm font-semibold text-[#8BC34A] mt-1">
-                          {formatCurrency(item.product.price * item.quantity)}
+                          {formatCurrency(getItemTotal(item.product.price, item.quantity))}
                         </p>
                       </div>
                     </div>
