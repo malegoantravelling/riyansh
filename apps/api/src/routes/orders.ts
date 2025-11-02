@@ -386,8 +386,16 @@ router.put('/:id', async (req: AuthRequest, res) => {
 router.post('/whatsapp-notify', authenticateToken, async (req: AuthRequest, res) => {
   try {
     const userId = req.user?.id
-    const { productNames, customerName, customerEmail, customerPhone, customerAddress, orderType } =
-      req.body
+    const {
+      productNames,
+      billItems,
+      subtotal,
+      customerName,
+      customerEmail,
+      customerPhone,
+      customerAddress,
+      orderType,
+    } = req.body
 
     // Validate required fields
     if (!productNames || !Array.isArray(productNames) || productNames.length === 0) {
@@ -406,6 +414,8 @@ router.post('/whatsapp-notify', authenticateToken, async (req: AuthRequest, res)
     try {
       await sendWhatsAppOrderEmail({
         productNames,
+        billItems,
+        subtotal,
         customerName,
         customerEmail,
         customerPhone,

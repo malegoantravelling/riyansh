@@ -218,3 +218,42 @@ Test card: `4111111111111111`
 - `apps/web/src/app/auth/login/page.tsx` - Added redirect path check
 
 **See**: `BUY_NOW_REDIRECT_FIX.md` for full details
+
+---
+
+## 📋 NEW: Bill Integration for Email & WhatsApp
+
+**Completed**: Added detailed bills with quantity-based pricing to all order notifications
+
+**Features Implemented**:
+
+1. ✅ **Cart Page**: Discount display with strikethrough original prices
+2. ✅ **Checkout Page**: Bill generation with discounts in WhatsApp & email
+3. ✅ **Buy Now**: Bill generation with single-product discounts
+4. ✅ **Email**: Professional bill table with pricing details
+5. ✅ **WhatsApp**: Formatted bill in messages
+
+**Quantity-Based Pricing**:
+
+- **3-5 units**: ₹1,300 per unit
+- **6+ units**: ₹1,200 per unit
+- **<3 units**: Base price
+
+**Bill Includes**:
+
+- Product names
+- Quantities
+- Unit prices (with discounts)
+- Line totals
+- Original prices (strikethrough when discounted)
+- Subtotal
+
+**Files Modified**:
+
+- `apps/web/src/app/cart/page.tsx` - Discount display
+- `apps/web/src/app/checkout/page.tsx` - Bill generation
+- `apps/web/src/app/products/[slug]/page.tsx` - Buy Now bill
+- `apps/api/src/services/emailService.ts` - Email bill table
+- `apps/api/src/routes/orders.ts` - API updates
+
+**See**: `BILL_INTEGRATION_COMPLETE.md` for full details
