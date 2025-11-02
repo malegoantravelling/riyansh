@@ -107,8 +107,29 @@ export default function CartPage() {
     }
   }
 
+  // Calculate price based on quantity discounts
+  const getItemPrice = (basePrice: number, quantity: number): number => {
+    // 3-5 quantity: ₹1300 per unit
+    // 6+ quantity: ₹1200 per unit
+    // Default: base price
+    if (quantity >= 6) {
+      return 1200
+    } else if (quantity >= 3) {
+      return 1300
+    }
+    return basePrice
+  }
+
+  // Calculate item total with quantity discounts
+  const getItemTotal = (basePrice: number, quantity: number): number => {
+    return getItemPrice(basePrice, quantity) * quantity
+  }
+
   const calculateTotal = () => {
-    return cartItems.reduce((total, item) => total + item.product.price * item.quantity, 0)
+    return cartItems.reduce(
+      (total, item) => total + getItemTotal(item.product.price, item.quantity),
+      0
+    )
   }
 
   const handleCheckout = () => {
@@ -279,7 +300,13 @@ export default function CartPage() {
                             <div>
                               <p className="text-xs text-gray-500 mb-1">Unit Price</p>
                               <p className="text-2xl font-bold text-[#8BC34A]">
-                                {formatCurrency(item.product.price)}
+                                {formatCurrency(getItemPrice(item.product.price, item.quantity))}
+                                {getItemPrice(item.product.price, item.quantity) !==
+                                  item.product.price && (
+                                  <span className="text-sm text-gray-400 line-through ml-2">
+                                    {formatCurrency(item.product.price)}
+                                  </span>
+                                )}
                               </p>
                             </div>
                           </div>
@@ -318,7 +345,13 @@ export default function CartPage() {
                           <div className="text-right">
                             <p className="text-xs text-gray-500 mb-1">Total</p>
                             <p className="text-2xl font-bold text-[#2d2d2d]">
-                              {formatCurrency(item.product.price * item.quantity)}
+                              {formatCurrency(getItemTotal(item.product.price, item.quantity))}
+                              {getItemTotal(item.product.price, item.quantity) !==
+                                item.product.price * item.quantity && (
+                                <span className="text-xs text-gray-400 line-through ml-2 block">
+                                  {formatCurrency(item.product.price * item.quantity)}
+                                </span>
+                              )}
                             </p>
                           </div>
                           <div className="flex gap-2">

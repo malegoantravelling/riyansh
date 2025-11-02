@@ -281,6 +281,27 @@ export default function CheckoutPage() {
       // Get all product names from cart
       const productNames = cartItems.map((item) => item.product.name)
 
+      // Build detailed bill
+      const billItems = cartItems.map((item) => ({
+        name: item.product.name,
+        quantity: item.quantity,
+        unitPrice: getItemPrice(item.product.price, item.quantity),
+        total: getItemTotal(item.product.price, item.quantity),
+        originalPrice: item.product.price,
+      }))
+
+      const subtotal = calculateTotal()
+
+      // Build bill text
+      const billText = billItems
+        .map(
+          (item, idx) =>
+            `${idx + 1}. ${item.name}\n   Qty: ${item.quantity} × ${formatCurrency(
+              item.unitPrice
+            )} = ${formatCurrency(item.total)}`
+        )
+        .join('\n\n')
+
       // Build full address string
       const fullAddress = `${formData.address_line_1}${
         formData.address_line_2 ? ', ' + formData.address_line_2 : ''
@@ -302,6 +323,8 @@ export default function CheckoutPage() {
           },
           body: JSON.stringify({
             productNames,
+            billItems,
+            subtotal,
             customerName: formData.full_name,
             customerEmail: formData.email,
             customerPhone: formData.phone,
@@ -314,7 +337,7 @@ export default function CheckoutPage() {
         // Don't block the checkout if email fails
       }
 
-      // Create WhatsApp message with customer details
+      // Create WhatsApp message with customer details and bill
       const whatsappMessage = `can you have the following products in stock = ${productNames.join(
         ', '
       )}
@@ -323,7 +346,12 @@ Customer Details:
 Name: ${formData.full_name}
 Email: ${formData.email}
 Phone: ${formData.phone}
-Address: ${fullAddress}`
+Address: ${fullAddress}
+
+Order Bill:
+${billText}
+
+Subtotal: ${formatCurrency(subtotal)}`
 
       const encodedMessage = encodeURIComponent(whatsappMessage)
       const whatsappUrl = `https://wa.me/9370646279?text=${encodedMessage}`

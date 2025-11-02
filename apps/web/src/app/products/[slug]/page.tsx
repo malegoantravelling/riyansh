@@ -152,6 +152,20 @@ export default function ProductDetailsPage() {
     }
   }
 
+  // Calculate price based on quantity discounts
+  const getItemPrice = (basePrice: number, qty: number): number => {
+    if (qty >= 6) {
+      return 1200
+    } else if (qty >= 3) {
+      return 1300
+    }
+    return basePrice
+  }
+
+  const getItemTotal = (basePrice: number, qty: number): number => {
+    return getItemPrice(basePrice, qty) * qty
+  }
+
   const handleBuyNow = async () => {
     if (!product) return
 
@@ -191,6 +205,20 @@ export default function ProductDetailsPage() {
         ? `${defaultAddress.address_line_1}, ${defaultAddress.city}, ${defaultAddress.state}, ${defaultAddress.zip_code}`
         : 'N/A'
 
+      // Build bill details
+      const unitPrice = getItemPrice(product.price, quantity)
+      const itemTotal = getItemTotal(product.price, quantity)
+
+      const billItems = [
+        {
+          name: product.name,
+          quantity: quantity,
+          unitPrice: unitPrice,
+          total: itemTotal,
+          originalPrice: product.price,
+        },
+      ]
+
       // Send email notification
       try {
         const apiUrl =
@@ -207,6 +235,8 @@ export default function ProductDetailsPage() {
           },
           body: JSON.stringify({
             productNames: [product.name],
+            billItems,
+            subtotal: itemTotal,
             customerName: userName,
             customerEmail: userEmail,
             customerPhone: userPhone,
@@ -219,13 +249,22 @@ export default function ProductDetailsPage() {
         // Don't block the Buy Now if email fails
       }
 
+      // Build WhatsApp message with bill
+      const billText = `1. ${product.name}
+   Qty: ${quantity} × ₹${unitPrice.toLocaleString()} = ₹${itemTotal.toLocaleString()}`
+
       const whatsappMessage = `can you have ${product.name} in the stock?
 
 Customer Details:
 Name: ${userName}
 Email: ${userEmail}
 Phone: ${userPhone}
-Address: ${address}`
+Address: ${address}
+
+Order Bill:
+${billText}
+
+Subtotal: ₹${itemTotal.toLocaleString()}`
 
       const encodedMessage = encodeURIComponent(whatsappMessage)
       const whatsappUrl = `https://wa.me/9370646279?text=${encodedMessage}`

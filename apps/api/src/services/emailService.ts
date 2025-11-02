@@ -408,8 +408,18 @@ export const sendContactFormEmail = async (data: ContactFormData) => {
   }
 }
 
+interface BillItem {
+  name: string
+  quantity: number
+  unitPrice: number
+  total: number
+  originalPrice: number
+}
+
 interface WhatsAppOrderData {
   productNames: string[]
+  billItems?: BillItem[]
+  subtotal?: number
   customerName: string
   customerEmail: string
   customerPhone: string
@@ -421,10 +431,71 @@ export const sendWhatsAppOrderEmail = async (data: WhatsAppOrderData) => {
   try {
     const transporter = createTransporter()
 
-    // Format products list
-    const productsHtml = data.productNames
-      .map((product, index) => `<li style="padding: 5px 0; color: #333;">${product}</li>`)
-      .join('')
+    // Format bill items if available, otherwise fallback to simple product list
+    let productsHtml = ''
+    if (data.billItems && data.billItems.length > 0) {
+      // Detailed bill with prices
+      productsHtml = `
+        <table width="100%" cellpadding="0" cellspacing="0" style="border: 1px solid #eee; border-radius: 5px; overflow: hidden;">
+          <thead>
+            <tr style="background-color: #f5f5f5;">
+              <th style="padding: 12px; text-align: left; color: #666; font-weight: 600; border-bottom: 2px solid #ddd;">Product</th>
+              <th style="padding: 12px; text-align: center; color: #666; font-weight: 600; border-bottom: 2px solid #ddd;">Qty</th>
+              <th style="padding: 12px; text-align: right; color: #666; font-weight: 600; border-bottom: 2px solid #ddd;">Unit Price</th>
+              <th style="padding: 12px; text-align: right; color: #666; font-weight: 600; border-bottom: 2px solid #ddd;">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${data.billItems
+              .map(
+                (item, index) => `
+              <tr>
+                <td style="padding: 12px; border-bottom: 1px solid #eee; color: #333;">${
+                  item.name
+                }</td>
+                <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: center; color: #333;">${
+                  item.quantity
+                }</td>
+                <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right; color: #333;">₹${item.unitPrice.toLocaleString(
+                  'en-IN'
+                )}${
+                  item.unitPrice !== item.originalPrice
+                    ? `<br><span style="color: #999; text-decoration: line-through; font-size: 11px;">₹${item.originalPrice.toLocaleString(
+                        'en-IN'
+                      )}</span>`
+                    : ''
+                }</td>
+                <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right; font-weight: bold; color: #333;">₹${item.total.toLocaleString(
+                  'en-IN'
+                )}</td>
+              </tr>
+            `
+              )
+              .join('')}
+          </tbody>
+          ${
+            data.subtotal
+              ? `
+          <tfoot>
+            <tr style="background-color: #f9f9f9;">
+              <td colspan="3" style="padding: 15px; text-align: right; font-weight: bold; color: #333; font-size: 18px;">Subtotal:</td>
+              <td style="padding: 15px; text-align: right; font-weight: bold; color: #8BC34A; font-size: 20px;">₹${data.subtotal.toLocaleString(
+                'en-IN'
+              )}</td>
+            </tr>
+          </tfoot>
+          `
+              : ''
+          }
+        </table>
+      `
+    } else {
+      // Simple product list as fallback
+      productsHtml = data.productNames
+        .map((product, index) => `<li style="padding: 5px 0; color: #333;">${product}</li>`)
+        .join('')
+      productsHtml = `<ul style="margin: 0; padding-left: 20px; color: #333; line-height: 1.8;">${productsHtml}</ul>`
+    }
 
     const orderTypeText = data.orderType === 'buy_now' ? 'Buy Now' : 'Checkout'
     const subjectText = data.orderType === 'buy_now' ? 'Quick Buy' : 'Checkout'
@@ -522,15 +593,13 @@ export const sendWhatsAppOrderEmail = async (data: WhatsAppOrderData) => {
             </td>
           </tr>
 
-          <!-- Order Items -->
+          <!-- Order Items / Bill -->
           <tr>
             <td style="padding: 0 30px 30px 30px;">
-              <h2 style="margin: 0 0 20px 0; color: #333; font-size: 22px; border-bottom: 2px solid #8BC34A; padding-bottom: 10px;">Requested Products</h2>
+              <h2 style="margin: 0 0 20px 0; color: #333; font-size: 22px; border-bottom: 2px solid #8BC34A; padding-bottom: 10px;">Order Bill</h2>
               
               <div style="background-color: #f9f9f9; padding: 20px; border-radius: 8px; border-left: 4px solid #8BC34A;">
-                <ul style="margin: 0; padding-left: 20px; color: #333; line-height: 1.8;">
-                  ${productsHtml}
-                </ul>
+                ${productsHtml}
               </div>
             </td>
           </tr>
