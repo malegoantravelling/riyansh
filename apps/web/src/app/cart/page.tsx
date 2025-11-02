@@ -186,9 +186,9 @@ export default function CartPage() {
       {/* Enhanced Breadcrumb Header */}
       <div className="bg-white border-b border-gray-100 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-4xl font-bold text-[#2d2d2d] mb-2">Shopping Cart</h1>
+              <h1 className="text-3xl sm:text-4xl font-bold text-[#2d2d2d] mb-2">Shopping Cart</h1>
               <div className="flex items-center gap-2 text-sm text-gray-500">
                 <Link href="/" className="hover:text-[#8BC34A] transition-colors">
                   Home
@@ -197,11 +197,11 @@ export default function CartPage() {
                 <span className="text-[#2d2d2d] font-semibold">Cart</span>
               </div>
             </div>
-            <Link href="/store">
+            <Link href="/store" className="w-full sm:w-auto">
               <Button
                 variant="outline"
                 size="lg"
-                className="rounded-xl border-2 hover:border-[#8BC34A] hover:bg-transparent hover:text-[#8BC34A] hover:shadow-sm hover:scale-100"
+                className="w-full sm:w-auto rounded-xl border-2 hover:border-[#8BC34A] hover:bg-transparent hover:text-[#8BC34A] hover:shadow-sm hover:scale-100 justify-center sm:justify-start"
               >
                 <ArrowLeft className="h-5 w-5 mr-2" />
                 Continue Shopping
