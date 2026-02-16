@@ -4,8 +4,8 @@
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL ||
   (process.env.NODE_ENV === 'production'
-    ? 'https://riyansh-api.vercel.app/'
-    : 'http://0.0.0.0:4000')
+    ? 'https://riyansh-api.vercel.app'
+    : 'http://localhost:4000/')
 
 type HeadersInit = Headers | string[][] | Record<string, string>
 
