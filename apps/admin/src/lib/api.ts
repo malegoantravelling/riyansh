@@ -1,6 +1,6 @@
 // Use production URL as fallback if VITE_API_URL is not set
 // In production, this should be set via environment variable during build
-export const API_URL = import.meta.env.VITE_API_URL || 'https://riyanshamrit.com'
+export const API_URL = import.meta.env.VITE_API_URL || 'admin.riyanshamrit.com'
 
 const getToken = () => localStorage.getItem('admin_token')
 
