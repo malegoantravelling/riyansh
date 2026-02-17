@@ -1,0 +1,21 @@
+DirectoryIndex disabled
+
+# Enable rewrite engine
+RewriteEngine On
+RewriteBase /
+
+# API endpoints - Route /api/* to port 4000 (Express API)
+RewriteCond %{REQUEST_URI} ^/api/(.*)$
+RewriteRule ^api/(.*)$ https://riyanshamrit.com/api/$1 [P,L]
+
+# Admin panel - Route /admin/* to port 3001 (Vite Admin)
+# Forward the full path to preserve Vite base path
+RewriteCond %{REQUEST_URI} ^/admin/
+RewriteRule ^admin/(.*)$ https://admin.riyanshamrit.com/$1 [P,L]
+
+# Next.js static files and HMR
+RewriteCond %{REQUEST_URI} ^/_next/
+RewriteRule ^_next/(.*)$ https://riyanshamrit.com/_next/$1 [P,L]
+
+# Main website - Everything else to port 3000 (Next.js)
+RewriteRule ^(.*)?$ https://riyanshamrit.com/$1 [P,L]
