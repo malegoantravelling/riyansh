@@ -7,7 +7,7 @@ import { Package, Shield, Clock, TrendingUp } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useState, useEffect } from 'react'
-import { api } from '@/lib/api'
+import { getCachedProducts } from '@/lib/productCache'
 
 const testimonials = [
   {
@@ -29,17 +29,61 @@ const testimonials = [
 export default function Home() {
   const [featuredProducts, setFeaturedProducts] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [activeTopSellingIndex, setActiveTopSellingIndex] = useState(1)
+
+  const topSellingProducts = [
+    {
+      id: 'ts-1',
+      title: 'Riyansh Amrit Juice',
+      subtitle: '42 Herbs Wellness Drink',
+      description: 'Our flagship 42-herb formulation for daily immunity, digestion & body revitalization.',
+      image: '/image/riyansh_amrit_juice.png',
+      slug: 'riyansh-amrit-juice',
+    },
+    {
+      id: 'ts-2',
+      title: 'Riyansh Artho-G',
+      subtitle: 'Joint Pain & Mobility Care',
+      description: 'Targeted Ayurvedic formulation for joint pain relief, flexibility & bone wellness.',
+      image: '/image/riyansh_artho_g.png',
+      slug: 'riyansh-artho-g',
+    },
+    {
+      id: 'ts-3',
+      title: 'Riyansh Daibo-G',
+      subtitle: 'Blood Sugar Care',
+      description: 'Natural herbal formula to support healthy blood sugar levels and metabolic health.',
+      image: '/image/riyansh_daibo_g.png',
+      slug: 'riyansh-daibo-g',
+    },
+    {
+      id: 'ts-4',
+      title: 'Riyansh Lady Life',
+      subtitle: 'Women Health Care',
+      description: 'Specialized Ayurvedic wellness formula for hormonal balance & female vitality.',
+      image: '/image/riyansh_lady_life.png',
+      slug: 'riyansh-lady-life-care',
+    },
+  ]
+
+  const handlePrevTopSelling = () => {
+    setActiveTopSellingIndex((prev) => (prev > 0 ? prev - 1 : topSellingProducts.length - 1))
+  }
+
+  const handleNextTopSelling = () => {
+    setActiveTopSellingIndex((prev) => (prev < topSellingProducts.length - 1 ? prev + 1 : 0))
+  }
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const data = await api.get('/api/products')
-        const productsArray = Array.isArray(data) ? data : []
-        // Show first 8 products as featured products
-        setFeaturedProducts(productsArray.slice(0, 8))
-      } catch (error) {
-        console.error('Error fetching products:', error)
-        setFeaturedProducts([])
+        // Use in-memory cached products — 0ms on repeated loads, ~300ms only on first cold load
+        const data = await getCachedProducts()
+        if (Array.isArray(data) && data.length > 0) {
+          setFeaturedProducts(data.slice(0, 8))
+        }
+      } catch (err) {
+        console.warn('Product fetch error:', err)
       } finally {
         setLoading(false)
       }
@@ -50,48 +94,65 @@ export default function Home() {
 
   return (
     <div>
-      {/* Enhanced Hero Section */}
-      <section className="relative h-[700px] bg-gradient-to-br from-[#f8fdf9] via-white to-[#A5D6A7]/5 overflow-hidden">
-        {/* Background with overlay */}
+      {/* Hero — fills remaining first viewport below compact header */}
+      <section className="relative min-h-[calc(100svh-8.75rem)] lg:h-[calc(100svh-8.75rem)] bg-gradient-to-br from-[#f8fdf9] via-white to-[#A5D6A7]/5 overflow-hidden">
+        {/* Mobile: static hero image */}
         <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          className="absolute inset-0 lg:hidden bg-cover bg-right bg-no-repeat"
           style={{
-            backgroundImage: 'url(/image/hero_bg_2.jpg)',
+            backgroundImage: 'url(/image/riyansh_amrit_hero_mobile.png)',
             backgroundSize: 'cover',
+            backgroundPosition: 'right center',
           }}
+          role="img"
+          aria-label="Riyansh Amrit Juice 42 Herbs"
+        />
+
+        {/* Laptop/desktop: hero video */}
+        <video
+          className="absolute inset-0 hidden lg:block w-full h-full object-cover object-right"
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          aria-hidden="true"
         >
-          <div className="absolute inset-0 bg-gradient-to-r from-white/95 via-white/90 to-white/70" />
-        </div>
+          <source src="/video/riyansh_amrit_hero.mp4" type="video/mp4" />
+        </video>
+
+        {/* Text backdrop overlay restricted to left side only so the right side media stays clear */}
+        <div className="absolute inset-y-0 left-0 w-full md:w-3/5 lg:w-[55%] bg-gradient-to-r from-white via-white/90 to-transparent pointer-events-none" />
 
         {/* Decorative Elements */}
-        <div className="absolute top-20 right-20 w-96 h-96 bg-[#8BC34A]/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-10 left-10 w-72 h-72 bg-[#8BC34A]/5 rounded-full blur-2xl" />
+        <div className="absolute top-10 right-16 w-72 h-72 bg-[#5B8C51]/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-6 left-8 w-56 h-56 bg-[#5B8C51]/5 rounded-full blur-2xl" />
 
         {/* Content */}
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center">
-          <div className="max-w-2xl space-y-6 animate-fade-in-up">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full min-h-[inherit] flex items-center py-8 lg:py-6">
+          <div className="max-w-2xl space-y-4 lg:space-y-5 animate-fade-in-up">
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#8BC34A]/10 rounded-full border border-[#8BC34A]/20">
-              <span className="w-2 h-2 bg-[#8BC34A] rounded-full animate-pulse" />
-              <span className="text-sm font-semibold text-[#8BC34A]">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#5B8C51]/10 rounded-full border border-[#5B8C51]/20">
+              <span className="w-2 h-2 bg-[#5B8C51] rounded-full animate-pulse" />
+              <span className="text-xs font-semibold text-[#5B8C51]">
                 Trusted Healthcare Partner
               </span>
             </div>
 
             {/* Heading */}
-            <h1 className="text-6xl md:text-7xl font-bold text-[#333333] leading-tight">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-[#333333] leading-[1.1]">
               Your Health,{' '}
-              <span className="text-[#8BC34A] relative inline-block">
+              <span className="text-[#5B8C51] relative inline-block">
                 Our Priority
                 <svg
-                  className="absolute -bottom-2 left-0 w-full"
-                  height="12"
+                  className="absolute -bottom-1 left-0 w-full"
+                  height="10"
                   viewBox="0 0 300 12"
                   fill="none"
                 >
                   <path
                     d="M2 10C50 5 150 5 298 10"
-                    stroke="#8BC34A"
+                    stroke="#5B8C51"
                     strokeWidth="3"
                     strokeLinecap="round"
                   />
@@ -100,17 +161,17 @@ export default function Home() {
             </h1>
 
             {/* Description */}
-            <p className="text-xl text-[#666666] leading-relaxed">
+            <p className="text-base lg:text-lg text-[#666666] leading-relaxed max-w-xl">
               Discover premium quality medicines and healthcare products. Fast delivery, genuine
               products, and expert guidance at your fingertips.
             </p>
 
             {/* CTA Buttons */}
-            <div className="flex flex-wrap gap-4 pt-2">
+            <div className="flex flex-wrap gap-3 pt-1">
               <Link href="/store">
                 <Button
                   size="lg"
-                  className="text-base px-8 py-4 rounded-full shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105"
+                  className="text-sm lg:text-base px-6 lg:px-8 py-3 rounded-full shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105"
                 >
                   <span className="flex items-center gap-2">
                     Explore Products
@@ -129,7 +190,7 @@ export default function Home() {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="text-base px-8 py-4 rounded-full border-2 transition-all duration-300"
+                  className="text-sm lg:text-base px-6 lg:px-8 py-3 rounded-full border-2 transition-all duration-300"
                 >
                   Learn More
                 </Button>
@@ -137,11 +198,11 @@ export default function Home() {
             </div>
 
             {/* Trust Indicators */}
-            <div className="flex flex-wrap items-center gap-8 pt-6">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-[#8BC34A]/10 rounded-full flex items-center justify-center">
+            <div className="flex flex-wrap items-center gap-5 lg:gap-6 pt-2">
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 bg-[#5B8C51]/10 rounded-full flex items-center justify-center">
                   <svg
-                    className="w-6 h-6 text-[#8BC34A]"
+                    className="w-5 h-5 text-[#5B8C51]"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -159,10 +220,10 @@ export default function Home() {
                   <p className="text-xs text-[#666666]">Certified Products</p>
                 </div>
               </div>
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-[#8BC34A]/10 rounded-full flex items-center justify-center">
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 bg-[#5B8C51]/10 rounded-full flex items-center justify-center">
                   <svg
-                    className="w-6 h-6 text-[#8BC34A]"
+                    className="w-5 h-5 text-[#5B8C51]"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -180,10 +241,10 @@ export default function Home() {
                   <p className="text-xs text-[#666666]">Within 24 Hours</p>
                 </div>
               </div>
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-[#8BC34A]/10 rounded-full flex items-center justify-center">
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 bg-[#5B8C51]/10 rounded-full flex items-center justify-center">
                   <svg
-                    className="w-6 h-6 text-[#8BC34A]"
+                    className="w-5 h-5 text-[#5B8C51]"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -204,34 +265,96 @@ export default function Home() {
             </div>
           </div>
         </div>
+      </section>
 
-        {/* Floating Stats Card */}
-        <div
-          className="absolute bottom-8 right-8 hidden lg:block animate-fade-in"
-          style={{ animationDelay: '500ms' }}
-        >
-          <div className="bg-white/95 backdrop-blur-lg rounded-2xl shadow-2xl p-6 border border-[#EEEEEE]">
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 bg-gradient-to-br from-[#8BC34A] to-[#7CB342] rounded-xl flex items-center justify-center">
-                <svg
-                  className="w-7 h-7 text-white"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
-                  />
-                </svg>
-              </div>
-              <div>
-                <p className="text-3xl font-bold text-[#333333]">5,000+</p>
-                <p className="text-sm text-[#666666]">Happy Customers</p>
-              </div>
+      {/* ── Top Selling Ayurvedic Product Section ── */}
+      <section className="py-16 md:py-24 bg-white relative overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Section Header */}
+          <div className="text-center mb-14">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#1A1A1A] tracking-tight mb-3">
+              Top Selling Ayurvedic Product
+            </h2>
+            <p className="text-base sm:text-lg text-[#787878] font-medium">
+              Explore our best rated Online Ayurvedic Medicines
+            </p>
+          </div>
+
+          {/* Carousel Container with Navigation Controls */}
+          <div className="relative flex items-center justify-center">
+            {/* Left Control Arrow */}
+            <button
+              onClick={handlePrevTopSelling}
+              className="absolute -left-2 sm:left-0 z-20 w-11 h-11 sm:w-12 sm:h-12 bg-[#5B8C51] text-white rounded-full flex items-center justify-center shadow-lg hover:bg-[#4E7A45] hover:scale-110 active:scale-95 transition-all duration-300 group"
+              aria-label="Previous Top Selling Product"
+            >
+              <svg
+                className="w-6 h-6 stroke-[2.5] text-white transform group-hover:-translate-x-0.5 transition-transform"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+              </svg>
+            </button>
+
+            {/* Product Cards Grid */}
+            <div className="w-full px-8 sm:px-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 items-stretch">
+              {topSellingProducts.map((product, idx) => {
+                const isActive = activeTopSellingIndex === idx
+                return (
+                  <div
+                    key={product.id}
+                    onClick={() => setActiveTopSellingIndex(idx)}
+                    className={`cursor-pointer group relative bg-white rounded-2xl p-6 transition-all duration-500 flex flex-col items-center text-center ${
+                      isActive
+                        ? 'ring-2 ring-[#5B8C51] shadow-2xl border-b-4 border-b-[#5B8C51] -translate-y-2'
+                        : 'border border-gray-100 shadow-md hover:shadow-xl hover:border-[#5B8C51]/40 hover:-translate-y-1'
+                    }`}
+                  >
+                    {/* Product Image */}
+                    <div className="w-full aspect-square relative mb-6 flex items-center justify-center p-2">
+                      <Image
+                        src={product.image}
+                        alt={product.title}
+                        width={200}
+                        height={200}
+                        className="object-contain max-h-44 group-hover:scale-105 transition-transform duration-500"
+                      />
+                    </div>
+
+                    {/* Product Metadata */}
+                    <div className="mt-auto space-y-1.5 w-full">
+                      <h3 className="text-xl font-bold text-[#5B8C51] group-hover:text-[#4E7A45] transition-colors">
+                        {product.title}
+                      </h3>
+                      <p className="text-sm font-semibold text-[#1A1A1A]">
+                        {product.subtitle}
+                      </p>
+                      <p className="text-xs text-[#787878] leading-relaxed pt-2 max-w-[240px] mx-auto">
+                        {product.description}
+                      </p>
+                    </div>
+                  </div>
+                )
+              })}
             </div>
+
+            {/* Right Control Arrow */}
+            <button
+              onClick={handleNextTopSelling}
+              className="absolute -right-2 sm:right-0 z-20 w-11 h-11 sm:w-12 sm:h-12 bg-[#5B8C51] text-white rounded-full flex items-center justify-center shadow-lg hover:bg-[#4E7A45] hover:scale-110 active:scale-95 transition-all duration-300 group"
+              aria-label="Next Top Selling Product"
+            >
+              <svg
+                className="w-6 h-6 stroke-[2.5] text-white transform group-hover:translate-x-0.5 transition-transform"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+              </svg>
+            </button>
           </div>
         </div>
       </section>
@@ -242,7 +365,7 @@ export default function Home() {
           {/* Section Header */}
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-[#333333] mb-4">
-              Why Choose <span className="text-[#8BC34A]">Riyansh</span>
+              Why Choose <span className="text-[#5B8C51]">Riyansh</span>
             </h2>
             <p className="text-lg text-[#666666] max-w-2xl mx-auto">
               Experience the difference with our commitment to quality, speed, and customer
@@ -251,8 +374,8 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="group bg-white rounded-2xl p-8 border-2 border-[#EEEEEE] hover:border-[#8BC34A]/30 hover:shadow-2xl transition-all duration-500 text-center">
-              <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-[#8BC34A] to-[#7CB342] rounded-2xl mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+            <div className="group bg-white rounded-2xl p-8 border-2 border-[#EEEEEE] hover:border-[#5B8C51]/30 hover:shadow-2xl transition-all duration-500 text-center">
+              <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-[#5B8C51] to-[#4E7A45] rounded-2xl mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg">
                 <Package className="h-10 w-10 text-white" />
               </div>
               <h3 className="text-2xl font-bold text-[#333333] mb-3">Free Delivery</h3>
@@ -260,7 +383,7 @@ export default function Home() {
                 Get your orders delivered free of charge on all purchases above ₹500. Fast and
                 reliable shipping nationwide.
               </p>
-              <button className="inline-flex items-center text-[#8BC34A] font-semibold hover:gap-2 transition-all">
+              <button className="inline-flex items-center text-[#5B8C51] font-semibold hover:gap-2 transition-all">
                 Learn more
                 <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
@@ -273,8 +396,8 @@ export default function Home() {
               </button>
             </div>
 
-            <div className="group bg-white rounded-2xl p-8 border-2 border-[#EEEEEE] hover:border-[#8BC34A]/30 hover:shadow-2xl transition-all duration-500 text-center">
-              <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-[#8BC34A] to-[#7CB342] rounded-2xl mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+            <div className="group bg-white rounded-2xl p-8 border-2 border-[#EEEEEE] hover:border-[#5B8C51]/30 hover:shadow-2xl transition-all duration-500 text-center">
+              <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-[#5B8C51] to-[#4E7A45] rounded-2xl mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg">
                 <Shield className="h-10 w-10 text-white" />
               </div>
               <h3 className="text-2xl font-bold text-[#333333] mb-3">100% Genuine</h3>
@@ -282,7 +405,7 @@ export default function Home() {
                 All our medicines are sourced directly from certified manufacturers. Your health is
                 our top priority.
               </p>
-              <button className="inline-flex items-center text-[#8BC34A] font-semibold hover:gap-2 transition-all">
+              <button className="inline-flex items-center text-[#5B8C51] font-semibold hover:gap-2 transition-all">
                 Learn more
                 <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
@@ -295,8 +418,8 @@ export default function Home() {
               </button>
             </div>
 
-            <div className="group bg-white rounded-2xl p-8 border-2 border-[#EEEEEE] hover:border-[#8BC34A]/30 hover:shadow-2xl transition-all duration-500 text-center">
-              <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-[#8BC34A] to-[#7CB342] rounded-2xl mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+            <div className="group bg-white rounded-2xl p-8 border-2 border-[#EEEEEE] hover:border-[#5B8C51]/30 hover:shadow-2xl transition-all duration-500 text-center">
+              <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-[#5B8C51] to-[#4E7A45] rounded-2xl mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg">
                 <Clock className="h-10 w-10 text-white" />
               </div>
               <h3 className="text-2xl font-bold text-[#333333] mb-3">24/7 Support</h3>
@@ -304,7 +427,7 @@ export default function Home() {
                 Our expert pharmacists are available round the clock to answer your questions and
                 provide guidance.
               </p>
-              <button className="inline-flex items-center text-[#8BC34A] font-semibold hover:gap-2 transition-all">
+              <button className="inline-flex items-center text-[#5B8C51] font-semibold hover:gap-2 transition-all">
                 Learn more
                 <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
@@ -323,19 +446,19 @@ export default function Home() {
       {/* Products Section */}
       <section className="py-20 bg-gradient-to-b from-[#A5D6A7]/10 to-white relative overflow-hidden">
         {/* Decorative Background Elements */}
-        <div className="absolute top-0 left-0 w-96 h-96 bg-[#8BC34A]/5 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-[#8BC34A]/5 rounded-full blur-3xl translate-x-1/2 translate-y-1/2" />
+        <div className="absolute top-0 left-0 w-96 h-96 bg-[#5B8C51]/5 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-[#5B8C51]/5 rounded-full blur-3xl translate-x-1/2 translate-y-1/2" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           {/* Section Header */}
           <div className="text-center mb-16">
-            <div className="inline-flex items-center justify-center px-4 py-2 bg-[#8BC34A]/10 rounded-full mb-4">
-              <TrendingUp className="h-5 w-5 text-[#8BC34A] mr-2" />
-              <span className="text-sm font-semibold text-[#8BC34A]">Featured Collection</span>
+            <div className="inline-flex items-center justify-center px-4 py-2 bg-[#5B8C51]/10 rounded-full mb-4">
+              <TrendingUp className="h-5 w-5 text-[#5B8C51] mr-2" />
+              <span className="text-sm font-semibold text-[#5B8C51]">Featured Collection</span>
             </div>
             <h2 className="text-4xl md:text-5xl font-bold text-[#333333] mb-4">
               Our Premium{' '}
-              <span className="text-[#8BC34A] relative">
+              <span className="text-[#5B8C51] relative">
                 Products
                 <svg
                   className="absolute -bottom-2 left-0 w-full"
@@ -346,7 +469,7 @@ export default function Home() {
                 >
                   <path
                     d="M1 5.5C50 1.5 150 1.5 199 5.5"
-                    stroke="#8BC34A"
+                    stroke="#5B8C51"
                     strokeWidth="3"
                     strokeLinecap="round"
                   />
@@ -395,7 +518,7 @@ export default function Home() {
               <Button
                 size="lg"
                 variant="outline"
-                className="group relative overflow-hidden border-2 border-[#8BC34A] text-[#8BC34A] hover:text-white px-8 py-4 text-base font-semibold rounded-full transition-all duration-300 hover:shadow-xl hover:scale-105"
+                className="group relative overflow-hidden border-2 border-[#5B8C51] text-[#5B8C51] hover:text-white px-8 py-4 text-base font-semibold rounded-full transition-all duration-300 hover:shadow-xl hover:scale-105"
               >
                 <span className="relative z-10 flex items-center gap-2">
                   View All Products
@@ -413,7 +536,7 @@ export default function Home() {
                     />
                   </svg>
                 </span>
-                <div className="absolute inset-0 bg-[#8BC34A] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+                <div className="absolute inset-0 bg-[#5B8C51] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
               </Button>
             </Link>
           </div>
@@ -421,7 +544,7 @@ export default function Home() {
       </section>
 
       {/* Enhanced Newsletter Section */}
-      <section className="relative py-24 bg-gradient-to-br from-[#8BC34A] via-[#7CB342] to-[#6FA839] overflow-hidden">
+      <section className="relative py-24 bg-gradient-to-br from-[#5B8C51] via-[#4E7A45] to-[#6FA839] overflow-hidden">
         {/* Decorative Background Pattern */}
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-10 left-10 w-72 h-72 bg-white rounded-full blur-3xl" />
@@ -493,12 +616,12 @@ export default function Home() {
                   <input
                     type="email"
                     placeholder="Enter your email address"
-                    className="w-full pl-12 pr-4 py-4 rounded-xl border-0 focus:outline-none focus:ring-2 focus:ring-[#8BC34A]/50 text-[#333333] placeholder-gray-400"
+                    className="w-full pl-12 pr-4 py-4 rounded-xl border-0 focus:outline-none focus:ring-2 focus:ring-[#5B8C51]/50 text-[#333333] placeholder-gray-400"
                   />
                 </div>
                 <Button
                   size="lg"
-                  className="bg-[#8BC34A] hover:bg-[#7CB342] text-white font-bold px-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 whitespace-nowrap"
+                  className="bg-[#5B8C51] hover:bg-[#4E7A45] text-white font-bold px-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 whitespace-nowrap"
                 >
                   Subscribe Now
                 </Button>
@@ -549,14 +672,14 @@ export default function Home() {
       <section className="py-20 bg-gradient-to-b from-gray-50 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <div className="inline-flex items-center justify-center px-4 py-2 bg-[#8BC34A]/10 rounded-full mb-4">
-              <svg className="w-5 h-5 text-[#8BC34A] mr-2" fill="currentColor" viewBox="0 0 20 20">
+            <div className="inline-flex items-center justify-center px-4 py-2 bg-[#5B8C51]/10 rounded-full mb-4">
+              <svg className="w-5 h-5 text-[#5B8C51] mr-2" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
               </svg>
-              <span className="text-sm font-semibold text-[#8BC34A]">Customer Reviews</span>
+              <span className="text-sm font-semibold text-[#5B8C51]">Customer Reviews</span>
             </div>
             <h2 className="text-4xl font-bold text-[#333333] mb-4">
-              What Our <span className="text-[#8BC34A]">Happy Customers</span> Say
+              What Our <span className="text-[#5B8C51]">Happy Customers</span> Say
             </h2>
             <p className="text-lg text-[#666666] max-w-2xl mx-auto">
               Join thousands of satisfied customers who trust us for their healthcare needs
@@ -567,13 +690,13 @@ export default function Home() {
             {testimonials.map((testimonial, index) => (
               <div
                 key={testimonial.id}
-                className="group bg-white rounded-2xl p-8 border-2 border-[#EEEEEE] hover:border-[#8BC34A]/30 hover:shadow-2xl transition-all duration-500"
+                className="group bg-white rounded-2xl p-8 border-2 border-[#EEEEEE] hover:border-[#5B8C51]/30 hover:shadow-2xl transition-all duration-500"
                 style={{ animationDelay: `${index * 150}ms` }}
               >
                 {/* Quote Icon */}
                 <div className="mb-6">
                   <svg
-                    className="w-12 h-12 text-[#8BC34A]/20 group-hover:text-[#8BC34A]/30 transition-colors"
+                    className="w-12 h-12 text-[#5B8C51]/20 group-hover:text-[#5B8C51]/30 transition-colors"
                     fill="currentColor"
                     viewBox="0 0 32 32"
                   >
@@ -602,7 +725,7 @@ export default function Home() {
                 {/* Customer Info */}
                 <div className="flex items-center gap-4 pt-6 border-t-2 border-[#EEEEEE]">
                   <div className="relative">
-                    <div className="w-14 h-14 rounded-full overflow-hidden ring-2 ring-[#8BC34A]/20 group-hover:ring-[#8BC34A]/40 transition-all">
+                    <div className="w-14 h-14 rounded-full overflow-hidden ring-2 ring-[#5B8C51]/20 group-hover:ring-[#5B8C51]/40 transition-all">
                       <Image
                         src={testimonial.avatar}
                         alt={testimonial.name}
@@ -611,7 +734,7 @@ export default function Home() {
                         className="w-full h-full object-cover object-center"
                       />
                     </div>
-                    <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-[#8BC34A] rounded-full flex items-center justify-center border-2 border-white">
+                    <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-[#5B8C51] rounded-full flex items-center justify-center border-2 border-white">
                       <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
                         <path
                           fillRule="evenodd"
@@ -623,7 +746,7 @@ export default function Home() {
                   </div>
                   <div>
                     <h4 className="font-bold text-[#333333] text-lg">{testimonial.name}</h4>
-                    <p className="text-sm text-[#8BC34A] font-medium">Verified Customer</p>
+                    <p className="text-sm text-[#5B8C51] font-medium">Verified Customer</p>
                   </div>
                 </div>
               </div>

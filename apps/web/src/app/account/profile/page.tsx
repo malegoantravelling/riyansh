@@ -105,12 +105,12 @@ export default function ProfilePage() {
         {/* Modern Profile Card */}
         <div className="bg-white rounded-2xl border-2 border-gray-100 shadow-xl overflow-hidden transition-all duration-300 hover:shadow-2xl">
           {/* Header Section */}
-          <div className="bg-gradient-to-r from-[#8BC34A] to-[#7CB342] p-6">
+          <div className="bg-gradient-to-r from-[#5B8C51] to-[#4E7A45] p-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <div className="relative">
                   <div className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center shadow-2xl">
-                    <User className="h-10 w-10 text-[#8BC34A]" />
+                    <User className="h-10 w-10 text-[#5B8C51]" />
                   </div>
                   <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center border-4 border-white shadow-lg">
                     <CheckCircle className="h-4 w-4 text-white" />
@@ -162,7 +162,7 @@ export default function ProfilePage() {
                 htmlFor="full_name"
                 className="text-sm font-semibold text-[#2d2d2d] flex items-center gap-2"
               >
-                <User className="h-4 w-4 text-[#8BC34A]" />
+                <User className="h-4 w-4 text-[#5B8C51]" />
                 Full Name
               </Label>
               <div className="relative">
@@ -173,7 +173,7 @@ export default function ProfilePage() {
                   disabled={!editMode}
                   className={`h-14 text-base border-2 transition-all duration-300 ${
                     editMode
-                      ? 'border-[#8BC34A]/30 focus:border-[#8BC34A] focus:ring-2 focus:ring-[#8BC34A]/20'
+                      ? 'border-[#5B8C51]/30 focus:border-[#5B8C51] focus:ring-2 focus:ring-[#5B8C51]/20'
                       : 'border-gray-200 bg-gray-50 cursor-not-allowed'
                   }`}
                   placeholder="Enter your full name"
@@ -192,7 +192,7 @@ export default function ProfilePage() {
                 htmlFor="email"
                 className="text-sm font-semibold text-[#2d2d2d] flex items-center gap-2"
               >
-                <Mail className="h-4 w-4 text-[#8BC34A]" />
+                <Mail className="h-4 w-4 text-[#5B8C51]" />
                 Email Address
               </Label>
               <div className="relative">
@@ -217,8 +217,8 @@ export default function ProfilePage() {
 
             {/* Edit Mode Info Banner */}
             {editMode && (
-              <div className="flex items-center gap-3 px-4 py-3 bg-[#8BC34A]/10 border border-[#8BC34A]/20 rounded-xl">
-                <Edit className="h-5 w-5 text-[#8BC34A]" />
+              <div className="flex items-center gap-3 px-4 py-3 bg-[#5B8C51]/10 border border-[#5B8C51]/20 rounded-xl">
+                <Edit className="h-5 w-5 text-[#5B8C51]" />
                 <p className="text-sm text-[#2d2d2d]">
                   You're in edit mode. Make your changes and click "Save Changes" to update your
                   profile.

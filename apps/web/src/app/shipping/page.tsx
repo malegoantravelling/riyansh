@@ -93,7 +93,7 @@ export default function ShippingPage() {
   return (
     <div className="bg-gradient-to-b from-white via-gray-50 to-white">
       {/* Hero Section */}
-      <div className="relative bg-gradient-to-r from-[#8BC34A] via-[#7CB342] to-[#8BC34A] py-20 overflow-hidden">
+      <div className="relative bg-gradient-to-r from-[#5B8C51] via-[#4E7A45] to-[#5B8C51] py-20 overflow-hidden">
         <div
           className="absolute inset-0"
           style={{
@@ -135,8 +135,8 @@ export default function ShippingPage() {
 
       {/* Main Content */}
       <section className="py-20 bg-white relative overflow-hidden">
-        <div className="absolute top-20 right-0 w-96 h-96 bg-[#8BC34A]/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 left-0 w-96 h-96 bg-[#7CB342]/5 rounded-full blur-3xl" />
+        <div className="absolute top-20 right-0 w-96 h-96 bg-[#5B8C51]/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-20 left-0 w-96 h-96 bg-[#4E7A45]/5 rounded-full blur-3xl" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="space-y-16">
@@ -149,20 +149,20 @@ export default function ShippingPage() {
                 {shippingOptions.map((option, index) => (
                   <div
                     key={index}
-                    className="relative bg-gradient-to-br from-white to-gray-50 rounded-2xl p-8 border border-gray-200 hover:border-[#8BC34A] transition-all duration-300 shadow-sm hover:shadow-xl group"
+                    className="relative bg-gradient-to-br from-white to-gray-50 rounded-2xl p-8 border border-gray-200 hover:border-[#5B8C51] transition-all duration-300 shadow-sm hover:shadow-xl group"
                   >
                     {index === 0 && (
-                      <div className="absolute top-4 right-4 bg-[#8BC34A] text-white px-3 py-1 rounded-full text-xs font-bold">
+                      <div className="absolute top-4 right-4 bg-[#5B8C51] text-white px-3 py-1 rounded-full text-xs font-bold">
                         RECOMMENDED
                       </div>
                     )}
                     <div className="flex items-start gap-6 mb-6">
-                      <div className="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-[#8BC34A] to-[#7CB342] rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <div className="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-[#5B8C51] to-[#4E7A45] rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
                         <option.icon className="h-8 w-8 text-white" />
                       </div>
                       <div className="flex-1">
                         <h3 className="text-2xl font-bold text-gray-900 mb-2">{option.title}</h3>
-                        <div className="flex items-center gap-2 text-[#8BC34A] font-bold">
+                        <div className="flex items-center gap-2 text-[#5B8C51] font-bold">
                           <Clock className="h-5 w-5" />
                           <span className="text-xl">{option.duration}</span>
                         </div>
@@ -173,7 +173,7 @@ export default function ShippingPage() {
                     <ul className="space-y-2">
                       {option.features.map((feature, idx) => (
                         <li key={idx} className="flex items-start gap-2">
-                          <CheckCircle2 className="h-5 w-5 text-[#8BC34A] flex-shrink-0 mt-0.5" />
+                          <CheckCircle2 className="h-5 w-5 text-[#5B8C51] flex-shrink-0 mt-0.5" />
                           <span className="text-gray-700">{feature}</span>
                         </li>
                       ))}
@@ -192,9 +192,9 @@ export default function ShippingPage() {
                 {shippingInfo.map((info, index) => (
                   <div
                     key={index}
-                    className="flex items-start gap-6 p-8 bg-white rounded-2xl border border-gray-200 hover:border-[#8BC34A] transition-all duration-300 shadow-sm"
+                    className="flex items-start gap-6 p-8 bg-white rounded-2xl border border-gray-200 hover:border-[#5B8C51] transition-all duration-300 shadow-sm"
                   >
-                    <div className="flex-shrink-0 w-14 h-14 bg-gradient-to-br from-[#8BC34A] to-[#7CB342] rounded-xl flex items-center justify-center">
+                    <div className="flex-shrink-0 w-14 h-14 bg-gradient-to-br from-[#5B8C51] to-[#4E7A45] rounded-xl flex items-center justify-center">
                       <info.icon className="h-7 w-7 text-white" />
                     </div>
                     <div className="flex-1 space-y-3">
@@ -202,7 +202,7 @@ export default function ShippingPage() {
                       <ul className="space-y-2">
                         {info.details.map((detail, idx) => (
                           <li key={idx} className="flex items-start gap-2">
-                            <span className="text-[#8BC34A] mt-1">•</span>
+                            <span className="text-[#5B8C51] mt-1">•</span>
                             <span className="text-gray-700 leading-relaxed">{detail}</span>
                           </li>
                         ))}
@@ -223,14 +223,14 @@ export default function ShippingPage() {
                   {trackingSteps.map((step, index) => (
                     <div key={index} className="relative">
                       <div className="flex flex-col items-center text-center">
-                        <div className="w-16 h-16 bg-gradient-to-br from-[#8BC34A] to-[#7CB342] rounded-full flex items-center justify-center mb-4 shadow-lg relative z-10 group-hover:scale-110 transition-transform">
+                        <div className="w-16 h-16 bg-gradient-to-br from-[#5B8C51] to-[#4E7A45] rounded-full flex items-center justify-center mb-4 shadow-lg relative z-10 group-hover:scale-110 transition-transform">
                           <span className="text-2xl font-bold text-white">{step.step}</span>
                         </div>
                         <h3 className="font-bold text-gray-900 mb-2">{step.title}</h3>
                         <p className="text-sm text-gray-600 leading-relaxed">{step.description}</p>
                       </div>
                       {index < trackingSteps.length - 1 && (
-                        <div className="hidden md:block absolute top-8 left-[60%] w-full h-0.5 bg-gradient-to-r from-[#8BC34A] to-[#7CB342] z-0" />
+                        <div className="hidden md:block absolute top-8 left-[60%] w-full h-0.5 bg-gradient-to-r from-[#5B8C51] to-[#4E7A45] z-0" />
                       )}
                     </div>
                   ))}
@@ -250,7 +250,7 @@ export default function ShippingPage() {
                 </p>
                 <ul className="space-y-2 text-gray-700">
                   <li>• Email: riyanshamrit106@gmail.com</li>
-                  <li>• Phone: +91 9370646279</li>
+                  <li>• Phone: +91 8605911293</li>
                   <li>• We respond within 24 hours</li>
                 </ul>
               </div>
@@ -270,7 +270,7 @@ export default function ShippingPage() {
             </div>
 
             {/* Contact Section */}
-            <div className="bg-gradient-to-br from-[#8BC34A]/10 to-[#7CB342]/5 rounded-2xl p-8 border border-[#8BC34A]/20">
+            <div className="bg-gradient-to-br from-[#5B8C51]/10 to-[#4E7A45]/5 rounded-2xl p-8 border border-[#5B8C51]/20">
               <h3 className="text-2xl font-bold text-gray-900 mb-4">Need Help With Shipping?</h3>
               <p className="text-gray-700 leading-relaxed mb-6">
                 Our customer support team is here to help you with any shipping-related questions or
@@ -279,13 +279,13 @@ export default function ShippingPage() {
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <a
                   href="mailto:riyanshamrit106@gmail.com"
-                  className="px-6 py-3 bg-gradient-to-r from-[#8BC34A] to-[#7CB342] text-white rounded-lg hover:opacity-90 transition-opacity font-semibold text-center"
+                  className="px-6 py-3 bg-gradient-to-r from-[#5B8C51] to-[#4E7A45] text-white rounded-lg hover:opacity-90 transition-opacity font-semibold text-center"
                 >
                   Email Us
                 </a>
                 <a
-                  href="tel:+919370646279"
-                  className="px-6 py-3 bg-white text-[#8BC34A] border-2 border-[#8BC34A] rounded-lg hover:bg-[#8BC34A] hover:text-white transition-all font-semibold text-center"
+                  href="tel:+918605911293"
+                  className="px-6 py-3 bg-white text-[#5B8C51] border-2 border-[#5B8C51] rounded-lg hover:bg-[#5B8C51] hover:text-white transition-all font-semibold text-center"
                 >
                   Call Us
                 </a>

@@ -88,7 +88,7 @@ export default function PrivacyPage() {
   return (
     <div className="bg-gradient-to-b from-white via-gray-50 to-white">
       {/* Hero Section */}
-      <div className="relative bg-gradient-to-r from-[#8BC34A] via-[#7CB342] to-[#8BC34A] py-20 overflow-hidden">
+      <div className="relative bg-gradient-to-r from-[#5B8C51] via-[#4E7A45] to-[#5B8C51] py-20 overflow-hidden">
         <div
           className="absolute inset-0"
           style={{
@@ -130,13 +130,13 @@ export default function PrivacyPage() {
 
       {/* Main Content */}
       <section className="py-20 bg-white relative overflow-hidden">
-        <div className="absolute top-20 right-0 w-96 h-96 bg-[#8BC34A]/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 left-0 w-96 h-96 bg-[#7CB342]/5 rounded-full blur-3xl" />
+        <div className="absolute top-20 right-0 w-96 h-96 bg-[#5B8C51]/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-20 left-0 w-96 h-96 bg-[#4E7A45]/5 rounded-full blur-3xl" />
 
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="space-y-12">
             {/* Introduction */}
-            <div className="bg-gradient-to-br from-[#8BC34A]/10 to-[#7CB342]/5 rounded-2xl p-8 border border-[#8BC34A]/20">
+            <div className="bg-gradient-to-br from-[#5B8C51]/10 to-[#4E7A45]/5 rounded-2xl p-8 border border-[#5B8C51]/20">
               <p className="text-lg text-gray-700 leading-relaxed">
                 At Riyansh, we understand the importance of your privacy. This Privacy Policy
                 explains how we collect, use, disclose, and protect your personal information when
@@ -151,8 +151,8 @@ export default function PrivacyPage() {
             {/* Policy Sections */}
             {sections.map((section, index) => (
               <div key={index} className="group">
-                <div className="flex items-start gap-6 p-8 bg-white rounded-2xl border border-gray-200 hover:border-[#8BC34A] transition-all duration-300 shadow-sm hover:shadow-xl">
-                  <div className="flex-shrink-0 w-14 h-14 bg-gradient-to-br from-[#8BC34A] to-[#7CB342] rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                <div className="flex items-start gap-6 p-8 bg-white rounded-2xl border border-gray-200 hover:border-[#5B8C51] transition-all duration-300 shadow-sm hover:shadow-xl">
+                  <div className="flex-shrink-0 w-14 h-14 bg-gradient-to-br from-[#5B8C51] to-[#4E7A45] rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
                     <section.icon className="h-7 w-7 text-white" />
                   </div>
                   <div className="flex-1 space-y-4">
@@ -191,7 +191,7 @@ export default function PrivacyPage() {
             </div>
 
             {/* Contact Section */}
-            <div className="bg-gradient-to-br from-[#8BC34A]/10 to-[#7CB342]/5 rounded-2xl p-8 border border-[#8BC34A]/20">
+            <div className="bg-gradient-to-br from-[#5B8C51]/10 to-[#4E7A45]/5 rounded-2xl p-8 border border-[#5B8C51]/20">
               <h3 className="text-2xl font-bold text-gray-900 mb-4">Contact Us</h3>
               <p className="text-gray-700 leading-relaxed mb-4">
                 If you have any questions about this Privacy Policy or our privacy practices, please
@@ -202,15 +202,15 @@ export default function PrivacyPage() {
                   <strong>Email:</strong>{' '}
                   <a
                     href="mailto:riyanshamrit106@gmail.com"
-                    className="text-[#8BC34A] hover:underline"
+                    className="text-[#5B8C51] hover:underline"
                   >
                     riyanshamrit106@gmail.com
                   </a>
                 </p>
                 <p className="text-gray-700">
                   <strong>Phone:</strong>{' '}
-                  <a href="tel:+919370646279" className="text-[#8BC34A] hover:underline">
-                    +91 9370646279
+                  <a href="tel:+918605911293" className="text-[#5B8C51] hover:underline">
+                    +91 8605911293
                   </a>
                 </p>
                 <p className="text-gray-700">

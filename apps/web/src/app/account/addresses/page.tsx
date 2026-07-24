@@ -156,9 +156,9 @@ export default function AddressesPage() {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-white">
         <div className="text-center">
           <div className="relative inline-flex">
-            <div className="w-32 h-32 border-8 border-[#8BC34A]/20 border-t-[#8BC34A] rounded-full animate-spin"></div>
+            <div className="w-32 h-32 border-8 border-[#5B8C51]/20 border-t-[#5B8C51] rounded-full animate-spin"></div>
             <div className="absolute inset-0 flex items-center justify-center">
-              <MapPin className="w-12 h-12 text-[#8BC34A]" />
+              <MapPin className="w-12 h-12 text-[#5B8C51]" />
             </div>
           </div>
           <p className="mt-6 text-lg font-semibold text-gray-600 animate-pulse">
@@ -198,7 +198,7 @@ export default function AddressesPage() {
           <div className="bg-white rounded-2xl border-2 border-gray-100 shadow-xl p-12">
             <div className="text-center">
               <div className="relative inline-flex mb-8">
-                <div className="absolute inset-0 bg-gradient-to-br from-[#8BC34A]/20 to-[#7CB342]/20 rounded-full blur-3xl" />
+                <div className="absolute inset-0 bg-gradient-to-br from-[#5B8C51]/20 to-[#4E7A45]/20 rounded-full blur-3xl" />
                 <div className="relative w-32 h-32 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center border-4 border-white shadow-2xl">
                   <MapPin className="h-16 w-16 text-gray-400" />
                 </div>
@@ -222,18 +222,18 @@ export default function AddressesPage() {
             {addresses.map((address, index) => (
               <div
                 key={address.id}
-                className="group bg-white rounded-2xl border-2 border-gray-100 shadow-lg overflow-hidden transition-all duration-300 hover:shadow-2xl hover:border-[#8BC34A]/30"
+                className="group bg-white rounded-2xl border-2 border-gray-100 shadow-lg overflow-hidden transition-all duration-300 hover:shadow-2xl hover:border-[#5B8C51]/30"
                 style={{ animationDelay: `${index * 100}ms` }}
               >
                 {/* Card Header */}
-                <div className="bg-gradient-to-r from-[#8BC34A]/5 to-[#7CB342]/5 p-4 border-b-2 border-gray-100">
+                <div className="bg-gradient-to-r from-[#5B8C51]/5 to-[#4E7A45]/5 p-4 border-b-2 border-gray-100">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center md:gap-72 gap-56">
-                      <div className="w-12 h-12 bg-gradient-to-br from-[#8BC34A] to-[#7CB342] rounded-xl flex items-center justify-center shadow-lg">
+                      <div className="w-12 h-12 bg-gradient-to-br from-[#5B8C51] to-[#4E7A45] rounded-xl flex items-center justify-center shadow-lg">
                         <MapPin className="h-6 w-6 text-white" />
                       </div>
                       {address.is_default && (
-                        <span className="px-3 py-1 bg-gradient-to-r from-[#8BC34A] to-[#7CB342] text-white text-sm font-bold rounded-full shadow-md flex items-center gap-1">
+                        <span className="px-3 py-1 bg-gradient-to-r from-[#5B8C51] to-[#4E7A45] text-white text-sm font-bold rounded-full shadow-md flex items-center gap-1">
                           <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
                           Default
                         </span>
@@ -261,7 +261,7 @@ export default function AddressesPage() {
                   <Button
                     onClick={() => handleEdit(address)}
                     variant="outline"
-                    className="flex-1 rounded-xl border-2 hover:border-[#8BC34A] hover:text-[#ffffff] transition-all"
+                    className="flex-1 rounded-xl border-2 hover:border-[#5B8C51] hover:text-[#ffffff] transition-all"
                   >
                     <Edit className="h-4 w-4 mr-2" />
                     Edit
@@ -284,7 +284,7 @@ export default function AddressesPage() {
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border-2 border-gray-100">
               {/* Modal Header */}
-              <div className="sticky top-0 z-10 bg-gradient-to-r from-[#8BC34A] to-[#7CB342] p-6 flex items-center justify-between shadow-lg">
+              <div className="sticky top-0 z-10 bg-gradient-to-r from-[#5B8C51] to-[#4E7A45] p-6 flex items-center justify-between shadow-lg">
                 <h2 className="text-2xl font-bold text-white flex items-center gap-2">
                   <MapPin className="h-6 w-6" />
                   {editingAddress ? 'Edit Address' : 'Add New Address'}
@@ -306,7 +306,7 @@ export default function AddressesPage() {
                     htmlFor="address_line_1"
                     className="text-sm font-semibold text-[#2d2d2d] mb-2 flex items-center gap-2"
                   >
-                    <MapPin className="h-4 w-4 text-[#8BC34A]" />
+                    <MapPin className="h-4 w-4 text-[#5B8C51]" />
                     Address *
                   </Label>
                   <Input
@@ -314,7 +314,7 @@ export default function AddressesPage() {
                     value={formData.address_line_1}
                     onChange={(e) => handleChange('address_line_1', e.target.value)}
                     required
-                    className="h-12 border-2 focus:border-[#8BC34A] focus:ring-2 focus:ring-[#8BC34A]/20"
+                    className="h-12 border-2 focus:border-[#5B8C51] focus:ring-2 focus:ring-[#5B8C51]/20"
                     placeholder="Enter street address"
                   />
                 </div>
@@ -331,7 +331,7 @@ export default function AddressesPage() {
                     value={formData.street_address}
                     onChange={(e) => handleChange('street_address', e.target.value)}
                     required
-                    className="h-12 border-2 focus:border-[#8BC34A] focus:ring-2 focus:ring-[#8BC34A]/20"
+                    className="h-12 border-2 focus:border-[#5B8C51] focus:ring-2 focus:ring-[#5B8C51]/20"
                     placeholder="Apt, suite, etc."
                   />
                 </div>
@@ -348,7 +348,7 @@ export default function AddressesPage() {
                     id="address_line_2"
                     value={formData.address_line_2}
                     onChange={(e) => handleChange('address_line_2', e.target.value)}
-                    className="h-12 border-2 focus:border-[#8BC34A] focus:ring-2 focus:ring-[#8BC34A]/20"
+                    className="h-12 border-2 focus:border-[#5B8C51] focus:ring-2 focus:ring-[#5B8C51]/20"
                     placeholder="Additional address details"
                   />
                 </div>
@@ -363,7 +363,7 @@ export default function AddressesPage() {
                       value={formData.city}
                       onChange={(e) => handleChange('city', e.target.value)}
                       required
-                      className="h-12 border-2 focus:border-[#8BC34A] focus:ring-2 focus:ring-[#8BC34A]/20"
+                      className="h-12 border-2 focus:border-[#5B8C51] focus:ring-2 focus:ring-[#5B8C51]/20"
                       placeholder="City name"
                     />
                   </div>
@@ -376,7 +376,7 @@ export default function AddressesPage() {
                       value={formData.state}
                       onChange={(e) => handleChange('state', e.target.value)}
                       required
-                      className="h-12 w-full rounded-md border-2 border-gray-200 bg-background px-3 py-2 text-sm focus:border-[#8BC34A] focus:ring-2 focus:ring-[#8BC34A]/20 transition-all"
+                      className="h-12 w-full rounded-md border-2 border-gray-200 bg-background px-3 py-2 text-sm focus:border-[#5B8C51] focus:ring-2 focus:ring-[#5B8C51]/20 transition-all"
                     >
                       <option value="">Select State</option>
                       <option value="Maharashtra">Maharashtra</option>
@@ -400,7 +400,7 @@ export default function AddressesPage() {
                     value={formData.zip_code}
                     onChange={(e) => handleChange('zip_code', e.target.value)}
                     required
-                    className="h-12 border-2 focus:border-[#8BC34A] focus:ring-2 focus:ring-[#8BC34A]/20"
+                    className="h-12 border-2 focus:border-[#5B8C51] focus:ring-2 focus:ring-[#5B8C51]/20"
                     placeholder="Postal code"
                   />
                 </div>
@@ -411,7 +411,7 @@ export default function AddressesPage() {
                     id="is_default"
                     checked={formData.is_default}
                     onChange={(e) => handleChange('is_default', e.target.checked)}
-                    className="w-5 h-5 rounded border-2 border-gray-300 text-[#8BC34A] focus:ring-[#8BC34A] cursor-pointer"
+                    className="w-5 h-5 rounded border-2 border-gray-300 text-[#5B8C51] focus:ring-[#5B8C51] cursor-pointer"
                   />
                   <Label
                     htmlFor="is_default"

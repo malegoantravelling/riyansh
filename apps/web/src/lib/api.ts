@@ -1,11 +1,13 @@
 // Get API URL from environment variables
 // Development: NEXT_PUBLIC_API_URL=http://0.0.0.0:4000
 // Production: NEXT_PUBLIC_API_URL=https://riyansh-api.vercel.app/
-const API_URL =
+const BASE_API_URL =
   process.env.NEXT_PUBLIC_API_URL ||
   (process.env.NODE_ENV === 'production'
     ? 'https://riyansh-api.vercel.app'
-    : 'http://localhost:4000/')
+    : 'http://localhost:4000')
+
+const API_URL = BASE_API_URL.replace(/\/+$/, '')
 
 type HeadersInit = Headers | string[][] | Record<string, string>
 
@@ -19,11 +21,21 @@ export const api = {
       headers['Authorization'] = `Bearer ${token}`
     }
 
-    const response = await fetch(`${API_URL}${endpoint}`, {
-      headers,
-    })
+    const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 1200)
 
-    return response.json()
+    try {
+      const response = await fetch(`${API_URL}${cleanEndpoint}`, {
+        headers,
+        signal: controller.signal,
+      })
+      clearTimeout(timeoutId)
+      return await response.json()
+    } catch (error) {
+      clearTimeout(timeoutId)
+      throw error
+    }
   },
 
   async post(endpoint: string, data: any, token?: string) {

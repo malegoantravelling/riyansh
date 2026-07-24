@@ -99,9 +99,9 @@ export default function OrdersPage() {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-white">
         <div className="text-center">
           <div className="relative inline-flex">
-            <div className="w-32 h-32 border-8 border-[#8BC34A]/20 border-t-[#8BC34A] rounded-full animate-spin"></div>
+            <div className="w-32 h-32 border-8 border-[#5B8C51]/20 border-t-[#5B8C51] rounded-full animate-spin"></div>
             <div className="absolute inset-0 flex items-center justify-center">
-              <ShoppingBag className="w-12 h-12 text-[#8BC34A]" />
+              <ShoppingBag className="w-12 h-12 text-[#5B8C51]" />
             </div>
           </div>
           <p className="mt-6 text-lg font-semibold text-gray-600 animate-pulse">
@@ -128,7 +128,7 @@ export default function OrdersPage() {
           <div className="bg-white rounded-2xl border-2 border-gray-100 shadow-xl p-12">
             <div className="text-center">
               <div className="relative inline-flex mb-8">
-                <div className="absolute inset-0 bg-gradient-to-br from-[#8BC34A]/20 to-[#7CB342]/20 rounded-full blur-3xl" />
+                <div className="absolute inset-0 bg-gradient-to-br from-[#5B8C51]/20 to-[#4E7A45]/20 rounded-full blur-3xl" />
                 <div className="relative w-32 h-32 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center border-4 border-white shadow-2xl">
                   <Package className="h-16 w-16 text-gray-400" />
                 </div>
@@ -139,7 +139,7 @@ export default function OrdersPage() {
               </p>
               <a
                 href="/store"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#8BC34A] to-[#7CB342] text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#5B8C51] to-[#4E7A45] text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
               >
                 <ShoppingBag className="h-5 w-5" />
                 Explore Store
@@ -153,14 +153,14 @@ export default function OrdersPage() {
               return (
                 <div
                   key={order.id}
-                  className="bg-white rounded-2xl border-2 border-gray-100 shadow-lg overflow-hidden transition-all duration-300 hover:shadow-2xl hover:border-[#8BC34A]/30"
+                  className="bg-white rounded-2xl border-2 border-gray-100 shadow-lg overflow-hidden transition-all duration-300 hover:shadow-2xl hover:border-[#5B8C51]/30"
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
                   {/* Order Header */}
-                  <div className="bg-gradient-to-r from-[#8BC34A]/5 to-[#7CB342]/5 p-6 border-b-2 border-gray-100">
+                  <div className="bg-gradient-to-r from-[#5B8C51]/5 to-[#4E7A45]/5 p-6 border-b-2 border-gray-100">
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                       <div className="flex items-center gap-4">
-                        <div className="w-14 h-14 bg-gradient-to-br from-[#8BC34A] to-[#7CB342] rounded-xl flex items-center justify-center shadow-lg">
+                        <div className="w-14 h-14 bg-gradient-to-br from-[#5B8C51] to-[#4E7A45] rounded-xl flex items-center justify-center shadow-lg">
                           <ShoppingBag className="h-7 w-7 text-white" />
                         </div>
                         <div>
@@ -169,11 +169,11 @@ export default function OrdersPage() {
                           </h3>
                           <div className="flex flex-wrap items-center gap-4 mt-1">
                             <div className="flex items-center gap-2 text-sm text-gray-600">
-                              <Calendar className="h-4 w-4 text-[#8BC34A]" />
+                              <Calendar className="h-4 w-4 text-[#5B8C51]" />
                               <span>{new Date(order.created_at).toLocaleDateString()}</span>
                             </div>
                             <div className="flex items-center gap-2 text-sm text-gray-600">
-                              <CreditCard className="h-4 w-4 text-[#8BC34A]" />
+                              <CreditCard className="h-4 w-4 text-[#5B8C51]" />
                               <span className="font-semibold text-[#2d2d2d]">
                                 {formatCurrency(order.total_amount)}
                               </span>
@@ -189,7 +189,7 @@ export default function OrdersPage() {
                           {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                         </span>
                         <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <Truck className="h-4 w-4 text-[#8BC34A]" />
+                          <Truck className="h-4 w-4 text-[#5B8C51]" />
                           <span>Expected: {getDeliveryEstimate(order.created_at)}</span>
                         </div>
                       </div>
@@ -201,7 +201,7 @@ export default function OrdersPage() {
                     {order.items.map((item) => (
                       <div
                         key={item.id}
-                        className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl border-2 border-transparent hover:border-[#8BC34A]/30 transition-all duration-300"
+                        className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl border-2 border-transparent hover:border-[#5B8C51]/30 transition-all duration-300"
                       >
                         <div className="relative w-20 h-20 bg-white rounded-xl flex items-center justify-center overflow-hidden border-2 border-gray-200 flex-shrink-0 shadow-sm">
                           {item.product_image ? (
@@ -227,7 +227,7 @@ export default function OrdersPage() {
                           </div>
                         </div>
                         <div className="text-right flex-shrink-0">
-                          <p className="font-bold text-lg text-[#8BC34A]">
+                          <p className="font-bold text-lg text-[#5B8C51]">
                             {formatCurrency(item.price * item.quantity)}
                           </p>
                           <p className="text-xs text-gray-500 mt-1">Subtotal</p>

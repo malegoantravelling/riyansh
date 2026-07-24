@@ -16,6 +16,10 @@ const config: Config = {
       },
     },
     extend: {
+      fontFamily: {
+        sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],
+        serif: ['var(--font-playfair)', 'Georgia', 'serif'],
+      },
       colors: {
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
@@ -23,13 +27,24 @@ const config: Config = {
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
         primary: {
-          DEFAULT: '#8BC34A',
-          hover: '#7CB342',
+          DEFAULT: '#5B8C51',
+          hover: '#4E7A45',
           foreground: '#FFFFFF',
         },
         secondary: {
-          DEFAULT: '#A5D6A7',
-          foreground: '#333333',
+          DEFAULT: '#F6F0E2',
+          foreground: '#1A1A1A',
+        },
+        ayurveda: {
+          green: '#5B8C51',
+          'green-dark': '#4E7A45',
+          cream: '#F6F0E2',
+          'cream-light': '#FAF8F2',
+          yellow: '#F6F0E2',
+          black: '#1A1A1A',
+          gray: '#787878',
+          'light-yellow': '#FAF8F2',
+          muted: '#787878',
         },
         accent: {
           DEFAULT: '#FF69B4',

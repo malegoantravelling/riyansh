@@ -39,7 +39,7 @@ const Toast = ({ toast, onClose }: ToastProps) => {
   const getIcon = () => {
     switch (toast.type) {
       case 'success':
-        return <CheckCircle2 className="h-5 w-5 text-[#8BC34A]" />
+        return <CheckCircle2 className="h-5 w-5 text-[#5B8C51]" />
       case 'error':
         return <AlertCircle className="h-5 w-5 text-red-500" />
       case 'warning':
@@ -52,7 +52,7 @@ const Toast = ({ toast, onClose }: ToastProps) => {
   const getBorderColor = () => {
     switch (toast.type) {
       case 'success':
-        return 'border-l-[#8BC34A]'
+        return 'border-l-[#5B8C51]'
       case 'error':
         return 'border-l-red-500'
       case 'warning':
@@ -75,7 +75,7 @@ const Toast = ({ toast, onClose }: ToastProps) => {
         <div
           className={`h-full ${
             toast.type === 'success'
-              ? 'bg-[#8BC34A]'
+              ? 'bg-[#5B8C51]'
               : toast.type === 'error'
               ? 'bg-red-500'
               : toast.type === 'warning'

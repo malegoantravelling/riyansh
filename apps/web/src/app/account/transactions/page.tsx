@@ -94,7 +94,7 @@ export default function TransactionsPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#8BC34A]"></div>
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#5B8C51]"></div>
       </div>
     )
   }
@@ -149,7 +149,7 @@ export default function TransactionsPage() {
                 <div className="flex items-start justify-between">
                   {/* Left Section */}
                   <div className="flex items-start space-x-4 flex-1">
-                    <div className="bg-gradient-to-br from-[#8BC34A] to-[#7CB342] p-3 rounded-lg">
+                    <div className="bg-gradient-to-br from-[#5B8C51] to-[#4E7A45] p-3 rounded-lg">
                       <CreditCard className="h-6 w-6 text-white" />
                     </div>
 
@@ -194,7 +194,7 @@ export default function TransactionsPage() {
                   {/* Right Section */}
                   <div className="flex flex-col items-end space-y-3 ml-4">
                     <div className="text-right">
-                      <div className="text-2xl font-bold text-[#8BC34A]">
+                      <div className="text-2xl font-bold text-[#5B8C51]">
                         {formatCurrency(transaction.amount)}
                       </div>
                       <div className="text-xs text-gray-500">{transaction.currency}</div>
@@ -232,7 +232,7 @@ export default function TransactionsPage() {
           </div>
           <div className="bg-white rounded-lg shadow p-6">
             <div className="text-sm text-gray-600 mb-1">Total Spent</div>
-            <div className="text-3xl font-bold text-[#8BC34A]">
+            <div className="text-3xl font-bold text-[#5B8C51]">
               {formatCurrency(
                 transactions
                   .filter((tx) => tx.status === 'success')

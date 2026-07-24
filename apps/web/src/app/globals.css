@@ -4,50 +4,55 @@
 
 :root {
   --background: 0 0% 100%;
-  --foreground: 0 0% 20%;
+  --foreground: 0 0% 10%;
 
   --card: 0 0% 100%;
-  --card-foreground: 0 0% 20%;
+  --card-foreground: 0 0% 10%;
 
   --popover: 0 0% 100%;
-  --popover-foreground: 0 0% 20%;
+  --popover-foreground: 0 0% 10%;
 
-  --primary: 88 50% 53%;
+  --primary: 109 27% 43%;
   --primary-foreground: 0 0% 100%;
 
-  --secondary: 122 38% 75%;
-  --secondary-foreground: 0 0% 20%;
+  --secondary: 42 50% 92%;
+  --secondary-foreground: 0 0% 10%;
 
   --muted: 0 0% 96%;
-  --muted-foreground: 0 0% 45%;
+  --muted-foreground: 0 0% 47%;
 
-  --accent: 330 100% 71%;
+  --accent: 109 27% 43%;
   --accent-foreground: 0 0% 100%;
 
   --destructive: 0 84% 60%;
   --destructive-foreground: 0 0% 100%;
 
-  --border: 0 0% 80%;
+  --border: 0 0% 88%;
   --input: 0 0% 89%;
-  --ring: 88 50% 53%;
+  --ring: 109 27% 43%;
 
   --radius: 0.5rem;
 
-  /* Enhanced Design Tokens */
+  /* Enhanced Design Tokens (Figma Palette) */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 
-  /* Brand Colors */
-  --brand-primary: #8bc34a;
-  --brand-primary-dark: #7cb342;
-  --brand-primary-darker: #689f38;
-  --brand-primary-light: #aed581;
+  /* Brand Colors — Figma color styles */
+  --brand-green: #5b8c51;
+  --brand-green-dark: #4e7a45;
+  --brand-green-darker: #3b5d34;
+  --brand-green-light: #7ba872;
+  --brand-white: #ffffff;
+  --brand-yellow: #f6f0e2;
+  --brand-black: #1a1a1a;
+  --brand-gray: #787878;
+  --brand-light-yellow: #faf8f2;
 
   /* Status Colors */
-  --success: #10b981;
+  --success: #5b8c51;
   --warning: #f59e0b;
   --error: #ef4444;
   --info: #3b82f6;
@@ -168,12 +173,12 @@ html {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #8bc34a, #7cb342);
+  background: linear-gradient(180deg, #5b8c51, #4e7a45);
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #7cb342, #689f38);
+  background: linear-gradient(180deg, #4e7a45, #3b5d34);
 }
 
 /* Glass morphism effect */
@@ -185,7 +190,7 @@ html {
 
 /* Text gradient effect */
 .text-gradient {
-  background: linear-gradient(135deg, #8bc34a, #7cb342);
+  background: linear-gradient(135deg, #5b8c51, #4e7a45);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -193,19 +198,19 @@ html {
 
 /* Enhanced focus states */
 *:focus-visible {
-  outline: 2px solid #8bc34a;
+  outline: 2px solid #5b8c51;
   outline-offset: 2px;
   border-radius: 4px;
 }
 
 /* Selection styling */
 ::selection {
-  background-color: #8bc34a;
+  background-color: #5b8c51;
   color: white;
 }
 
 ::-moz-selection {
-  background-color: #8bc34a;
+  background-color: #5b8c51;
   color: white;
 }
 
@@ -220,7 +225,7 @@ html {
 }
 
 .shadow-glow-green {
-  box-shadow: 0 0 20px rgba(139, 195, 74, 0.3);
+  box-shadow: 0 0 20px rgba(91, 140, 81, 0.3);
 }
 
 /* Smooth Transitions */
@@ -230,7 +235,7 @@ html {
 
 /* Gradient Text */
 .text-gradient-green {
-  background: linear-gradient(135deg, #8bc34a, #7cb342);
+  background: linear-gradient(135deg, #5b8c51, #4e7a45);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -251,8 +256,8 @@ input:focus,
 textarea:focus,
 select:focus {
   outline: none;
-  border-color: #8bc34a;
-  box-shadow: 0 0 0 3px rgba(139, 195, 74, 0.1);
+  border-color: #5b8c51;
+  box-shadow: 0 0 0 3px rgba(91, 140, 81, 0.15);
 }
 
 /* Button Press Effect */

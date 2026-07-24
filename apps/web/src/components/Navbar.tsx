@@ -1,21 +1,45 @@
 'use client'
 
 import Link from 'next/link'
-import { ShoppingCart, User, ChevronDown, Menu, X, CreditCard, MapPin, LogOut } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { useState, useEffect } from 'react'
+import {
+  ShoppingCart,
+  User,
+  Heart,
+  Phone,
+  Truck,
+  Search,
+  Menu,
+  X,
+  CreditCard,
+  MapPin,
+  LogOut,
+} from 'lucide-react'
+import { FormEvent, useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { usePathname, useRouter } from 'next/navigation'
 import { useCart } from '@/contexts/CartContext'
+import { useWishlist } from '@/contexts/WishlistContext'
+
+const categoryLinks = [
+  { href: '/', label: 'Home', match: (path: string) => path === '/' },
+  { href: '/store', label: 'Store', match: (path: string) => path.startsWith('/store') },
+  { href: '/about', label: 'About us', match: (path: string) => path.startsWith('/about') },
+  {
+    href: '/contact',
+    label: 'E-Consultation',
+    match: (path: string) => path.startsWith('/contact'),
+  },
+]
 
 export default function Navbar() {
   const pathname = usePathname()
   const router = useRouter()
   const { cartCount } = useCart()
+  const { wishlistCount } = useWishlist()
   const [user, setUser] = useState<any>(null)
   const [showDropdown, setShowDropdown] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [scrolled, setScrolled] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -28,18 +52,7 @@ export default function Navbar() {
       setUser(session?.user ?? null)
     })
 
-    return () => {
-      subscription.unsubscribe()
-    }
-  }, [])
-
-  // Scroll effect
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 10)
-    }
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
+    return () => subscription.unsubscribe()
   }, [])
 
   const handleLogout = async () => {
@@ -53,216 +66,266 @@ export default function Navbar() {
     router.push(href)
   }
 
-  const navLinks = [
-    { href: '/', label: 'Home' },
-    { href: '/store', label: 'Store' },
-    { href: '/about', label: 'About' },
-    { href: '/contact', label: 'Contact' },
-  ]
+  const handleSearch = (e: FormEvent) => {
+    e.preventDefault()
+    const q = searchQuery.trim()
+    router.push(q ? `/store?q=${encodeURIComponent(q)}` : '/store')
+  }
 
   return (
-    <>
-      {/* Top Bar */}
-
-      {/* Main Navbar */}
-      <nav
-        className={`sticky top-0 z-50 transition-all duration-300 ${
-          scrolled
-            ? 'bg-white/80 backdrop-blur-lg shadow-lg border-b border-gray-100'
-            : 'bg-white/70 backdrop-blur-md border-b border-gray-100/50'
-        }`}
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-20">
-            {/* Logo */}
-            <Link href="/" className="flex items-center space-x-2 group">
-              <div className="relative">
-                <span className="text-3xl font-extrabold tracking-tight">
-                  <span className="text-[#2d2d2d]">RIY</span>
-                  <span className="text-[#8BC34A]">ANSH</span>
+    <header className="w-full relative bg-white shadow-[0_1px_0_rgba(0,0,0,0.04)]">
+      {/* ── Tier 1: Utility bar ── */}
+      <div className="bg-[#F6F0E2]">
+        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 h-9 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4 sm:gap-5 min-w-0">
+            <Link
+              href="/wishlist"
+              className="inline-flex items-center gap-1.5 text-[12px] font-medium tracking-[0.08em] uppercase text-[#555555] hover:text-ayurveda-green transition-colors relative"
+            >
+              <Heart className="h-3.5 w-3.5" strokeWidth={1.5} />
+              <span className="hidden sm:inline">Wishlist</span>
+              {wishlistCount > 0 && (
+                <span className="ml-1 bg-ayurveda-green text-white text-[10px] font-bold rounded-full w-4 h-4 inline-flex items-center justify-center">
+                  {wishlistCount}
                 </span>
-                {/* <div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-[#8BC34A] to-[#7CB342] group-hover:w-full transition-all duration-300" /> */}
-              </div>
+              )}
             </Link>
 
-            {/* Desktop Navigation */}
-            <div className="hidden lg:flex items-center space-x-1">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={`relative px-4 py-2 font-semibold text-sm transition-all duration-300 rounded-lg group ${
-                    pathname === link.href
-                      ? 'text-[#8BC34A]'
-                      : 'text-[#2d2d2d] hover:text-[#8BC34A]'
-                  }`}
-                >
-                  {link.label}
-                  <div className="absolute inset-0 bg-[#8BC34A]/5 rounded-lg scale-0 group-hover:scale-100 transition-transform duration-300" />
-                </Link>
-              ))}
-            </div>
-
-            {/* Actions */}
-            <div className="flex items-center gap-3">
-              {/* Cart */}
-              <Link href="/cart" className="relative group">
-                <div className="flex items-center justify-center w-10 h-10 rounded-full text-[#2d2d2d] hover:bg-[#8BC34A]/10 hover:text-[#8BC34A] transition-all duration-300">
-                  <ShoppingCart className="h-5 w-5" />
-                  {cartCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-gradient-to-r from-[#8BC34A] to-[#7CB342] text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center shadow-lg animate-pulse">
-                      {cartCount}
-                    </span>
-                  )}
-                </div>
-              </Link>
-
-              {/* User Menu */}
-              {user ? (
-                <div className="relative hidden sm:block">
-                  <button
-                    onClick={() => setShowDropdown(!showDropdown)}
-                    className="flex items-center gap-2 px-4 py-2 rounded-xl text-[#2d2d2d] hover:bg-[#8BC34A]/10 transition-all duration-300 border-2 border-transparent hover:border-[#8BC34A]/20"
-                  >
-                    <div className="w-8 h-8 bg-gradient-to-br from-[#8BC34A] to-[#7CB342] rounded-full flex items-center justify-center text-white font-bold text-sm">
-                      {(user.user_metadata?.full_name || user.email || 'U')[0].toUpperCase()}
-                    </div>
-                    <span className="text-sm font-semibold max-w-[100px] truncate">
-                      {user.user_metadata?.full_name || user.email?.split('@')[0] || 'User'}
-                    </span>
-                    <ChevronDown
-                      className={`h-4 w-4 transition-transform duration-300 ${
-                        showDropdown ? 'rotate-180' : ''
-                      }`}
-                    />
-                  </button>
-
-                  {showDropdown && (
-                    <>
-                      <div className="fixed inset-0 z-40" onClick={() => setShowDropdown(false)} />
-                      <div className="absolute right-0 mt-3 w-56 bg-white/95 backdrop-blur-lg rounded-2xl shadow-2xl border-2 border-gray-100 z-50 overflow-hidden animate-fade-in">
-                        <div className="p-2">
-                          {[
-                            { href: '/account/profile', label: 'My Profile', icon: User },
-                            { href: '/account/orders', label: 'My Orders', icon: ShoppingCart },
-                            {
-                              href: '/account/transactions',
-                              label: 'Transactions',
-                              icon: CreditCard,
-                            },
-                            { href: '/account/addresses', label: 'Addresses', icon: MapPin },
-                          ].map((item) => (
-                            <button
-                              key={item.href}
-                              onClick={() => handleNavigation(item.href)}
-                              className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-[#2d2d2d] hover:bg-[#8BC34A]/10 hover:text-[#8BC34A] rounded-xl transition-all duration-300"
-                            >
-                              <item.icon className="h-4 w-4" />
-                              {item.label}
-                            </button>
-                          ))}
-                          <hr className="my-2 border-gray-100" />
-                          <button
-                            onClick={handleLogout}
-                            className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 rounded-xl transition-all duration-300"
-                          >
-                            <LogOut className="h-4 w-4" />
-                            Logout
-                          </button>
-                        </div>
-                      </div>
-                    </>
-                  )}
-                </div>
-              ) : (
-                <Link href="/auth/login" className="hidden sm:block">
-                  <Button className="rounded-xl px-6 font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:text-white">
-                    Login
-                  </Button>
-                </Link>
-              )}
-
-              {/* Mobile Menu Button */}
+            {user ? (
               <button
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="lg:hidden flex items-center justify-center w-10 h-10 rounded-full text-[#2d2d2d] hover:bg-[#8BC34A]/10 hover:text-[#8BC34A] transition-all duration-300"
+                type="button"
+                onClick={() => setShowDropdown((v) => !v)}
+                className="inline-flex items-center gap-1.5 text-[12px] font-medium tracking-[0.08em] uppercase text-[#555555] hover:text-ayurveda-green transition-colors"
               >
-                {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+                <User className="h-3.5 w-3.5" strokeWidth={1.5} />
+                <span className="hidden sm:inline">Account</span>
+              </button>
+            ) : (
+              <>
+                <Link
+                  href="/auth/login"
+                  className="inline-flex items-center gap-1.5 text-[12px] font-medium tracking-[0.08em] uppercase text-[#555555] hover:text-ayurveda-green transition-colors"
+                >
+                  <User className="h-3.5 w-3.5" strokeWidth={1.5} />
+                  <span className="hidden sm:inline">Login</span>
+                </Link>
+                <Link
+                  href="/auth/signup"
+                  className="inline-flex items-center gap-1.5 text-[12px] font-medium tracking-[0.08em] uppercase text-[#555555] hover:text-ayurveda-green transition-colors"
+                >
+                  <User className="h-3.5 w-3.5" strokeWidth={1.5} />
+                  <span className="hidden md:inline">Create An Account</span>
+                </Link>
+              </>
+            )}
+          </div>
+
+          {/* Cart — aligned to content container (red box position) */}
+          <Link
+            href="/cart"
+            className="shrink-0 h-9 inline-flex items-center gap-1.5 bg-ayurveda-green text-white px-4 text-[12px] font-semibold tracking-[0.1em] uppercase hover:bg-ayurveda-green-dark transition-colors"
+          >
+            <ShoppingCart className="h-4 w-4" strokeWidth={1.75} />
+            <span>
+              Cart
+              {cartCount > 0 ? (
+                <span className="ml-1 normal-case tracking-normal">({cartCount})</span>
+              ) : null}
+            </span>
+          </Link>
+        </div>
+      </div>
+
+      {/* Account dropdown */}
+      {showDropdown && user && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setShowDropdown(false)} />
+          <div className="absolute left-4 sm:left-6 top-9 w-56 bg-white rounded-md shadow-xl border border-gray-100 z-50 overflow-hidden">
+            <div className="p-2">
+              {[
+                { href: '/account/profile', label: 'My Profile', icon: User },
+                { href: '/account/orders', label: 'My Orders', icon: ShoppingCart },
+                { href: '/account/transactions', label: 'Transactions', icon: CreditCard },
+                { href: '/account/addresses', label: 'Addresses', icon: MapPin },
+              ].map((item) => (
+                <button
+                  key={item.href}
+                  type="button"
+                  onClick={() => handleNavigation(item.href)}
+                  className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-[#333333] hover:bg-[#F6F0E2] hover:text-ayurveda-green rounded transition-colors"
+                >
+                  <item.icon className="h-4 w-4" />
+                  {item.label}
+                </button>
+              ))}
+              <hr className="my-1.5 border-gray-100" />
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-red-600 hover:bg-red-50 rounded transition-colors"
+              >
+                <LogOut className="h-4 w-4" />
+                Logout
               </button>
             </div>
           </div>
-        </div>
+        </>
+      )}
 
-        {/* Mobile Menu */}
-        {mobileMenuOpen && (
-          <div className="lg:hidden border-t border-gray-100 bg-white/95 backdrop-blur-lg animate-fade-in">
-            <div className="max-w-7xl mx-auto px-4 py-6 space-y-3">
-              {navLinks.map((link) => (
+      {/* ── Tier 2: Brand + contact + search ── */}
+      <div className="bg-white border-b border-[#EEEEEE]">
+        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 py-3.5 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+          {/* Logo */}
+          <Link href="/" className="flex flex-col shrink-0">
+            <span className="text-[26px] lg:text-[28px] leading-none font-extrabold tracking-tight">
+              <span className="text-[#222222]">RIY</span>
+              <span className="text-ayurveda-green">ANSH</span>
+            </span>
+            <span className="mt-1 text-[11px] tracking-[0.18em] uppercase text-[#999999]">
+              Health Care At A Click
+            </span>
+          </Link>
+
+          {/* Contact + Shipping */}
+          <div className="hidden lg:flex items-center gap-6 xl:gap-8 flex-1 justify-center">
+            <a
+              href="tel:+918605911293"
+              className="flex items-center gap-2.5 hover:opacity-90 transition-opacity"
+            >
+              <Phone className="h-7 w-7 text-ayurveda-green shrink-0" strokeWidth={1.25} />
+              <span className="block">
+                <span className="block text-[13px] leading-tight text-[#888888]">
+                  Order Online or Call Us
+                </span>
+                <span className="block text-[15px] font-semibold text-[#222222] tracking-wide">
+                  +91 8605911293
+                </span>
+              </span>
+            </a>
+
+            <div className="flex items-center gap-2.5 max-w-[280px]">
+              <Truck className="h-7 w-7 text-ayurveda-green shrink-0" strokeWidth={1.25} />
+              <span className="block text-[14px] leading-snug text-[#222222]">
+                <span className="font-bold">FREE Shipping</span>{' '}
+                <span className="font-normal">ON ORDER ABOVE</span>
+                <span className="block text-[12px] text-[#666666]">
+                  ₹500++ (Only On Selected Items)
+                </span>
+              </span>
+            </div>
+          </div>
+
+          {/* Search + mobile menu */}
+          <div className="flex items-center gap-2 shrink-0 ml-auto sm:ml-0">
+            <form
+              onSubmit={handleSearch}
+              className="relative hidden sm:block w-[200px] lg:w-[220px]"
+            >
+              <input
+                type="search"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search products"
+                className="w-full h-9 pl-3.5 pr-9 rounded-full border border-[#DDDDDD] bg-white text-sm text-[#333333] placeholder:text-[#AAAAAA] focus:outline-none focus:border-ayurveda-green focus:ring-0"
+              />
+              <button
+                type="submit"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#888888] hover:text-ayurveda-green"
+                aria-label="Search products"
+              >
+                <Search className="h-3.5 w-3.5" strokeWidth={1.75} />
+              </button>
+            </form>
+
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen((v) => !v)}
+              className="lg:hidden flex items-center justify-center w-9 h-9 text-[#222222]"
+              aria-label="Toggle menu"
+            >
+              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Tier 3: Category nav ── */}
+      <nav className="bg-ayurveda-green">
+        <div className="max-w-[1200px] mx-auto px-2 sm:px-4">
+          <ul className="hidden lg:flex items-stretch justify-center h-10">
+            {categoryLinks.map((link) => {
+              const active = link.match(pathname)
+              return (
+                <li key={link.label} className="flex">
+                  <Link
+                    href={link.href}
+                    className={`flex items-center px-2.5 xl:px-3.5 text-[14px] font-medium text-white whitespace-nowrap transition-colors ${
+                      active ? 'bg-black/15' : 'hover:bg-black/10'
+                    }`}
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              )
+            })}
+          </ul>
+        </div>
+      </nav>
+
+      {/* Mobile menu */}
+      {mobileMenuOpen && (
+        <div className="lg:hidden bg-white border-b border-gray-100 shadow-lg">
+          <div className="px-4 py-4 space-y-1">
+            {categoryLinks.map((link) => {
+              const active = link.match(pathname)
+              return (
                 <Link
-                  key={link.href}
+                  key={link.label}
                   href={link.href}
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`block px-4 py-3 rounded-xl font-semibold transition-all duration-300 ${
-                    pathname === link.href
-                      ? 'bg-gradient-to-r from-[#8BC34A] to-[#7CB342] text-white shadow-lg'
-                      : 'text-[#2d2d2d] hover:bg-[#8BC34A]/10 hover:text-[#8BC34A]'
+                  className={`block px-3 py-2.5 text-[15px] font-medium rounded ${
+                    active
+                      ? 'bg-ayurveda-green text-white'
+                      : 'text-[#333333] hover:bg-[#F6F0E2] hover:text-ayurveda-green'
                   }`}
                 >
                   {link.label}
                 </Link>
-              ))}
+              )
+            })}
 
-              <hr className="my-4 border-gray-100" />
+            <div className="pt-3 mt-2 border-t border-gray-100 space-y-1">
+              <a
+                href="tel:+918605911293"
+                className="flex items-center gap-2 px-3 py-2 text-sm text-[#666666]"
+              >
+                <Phone className="h-4 w-4 text-ayurveda-green" />
+                +91 8605911293
+              </a>
+              <p className="px-3 py-1 text-xs text-[#888888]">Free shipping on orders above ₹500</p>
 
-              {user ? (
-                <div className="space-y-2">
-                  <div className="flex items-center gap-3 px-4 py-3 bg-gray-50 rounded-xl">
-                    <div className="w-10 h-10 bg-gradient-to-br from-[#8BC34A] to-[#7CB342] rounded-full flex items-center justify-center text-white font-bold">
-                      {(user.user_metadata?.full_name || user.email || 'U')[0].toUpperCase()}
-                    </div>
-                    <div>
-                      <p className="font-bold text-sm text-[#2d2d2d]">
-                        {user.user_metadata?.full_name || user.email?.split('@')[0] || 'User'}
-                      </p>
-                      <p className="text-xs text-gray-500">{user.email}</p>
-                    </div>
-                  </div>
-                  {[
-                    { href: '/account/profile', label: 'My Profile' },
-                    { href: '/account/orders', label: 'My Orders' },
-                    { href: '/account/transactions', label: 'Transactions' },
-                    { href: '/account/addresses', label: 'Addresses' },
-                  ].map((item) => (
-                    <button
-                      key={item.href}
-                      onClick={() => {
-                        setMobileMenuOpen(false)
-                        router.push(item.href)
-                      }}
-                      className="w-full text-left block px-4 py-3 text-sm font-medium text-[#2d2d2d] hover:bg-[#8BC34A]/10 hover:text-[#8BC34A] rounded-xl transition-all duration-300"
-                    >
-                      {item.label}
-                    </button>
-                  ))}
-                  <button
-                    onClick={() => {
-                      handleLogout()
-                      setMobileMenuOpen(false)
-                    }}
-                    className="w-full text-left px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 rounded-xl transition-all duration-300"
+              {!user && (
+                <>
+                  <Link
+                    href="/auth/login"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block px-3 py-2.5 text-sm font-medium text-ayurveda-green"
                   >
-                    Logout
-                  </button>
-                </div>
-              ) : (
-                <Link href="/auth/login" onClick={() => setMobileMenuOpen(false)}>
-                  <Button className="w-full rounded-xl py-6 font-semibold shadow-lg">Login</Button>
-                </Link>
+                    Login
+                  </Link>
+                  <Link
+                    href="/auth/signup"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block px-3 py-2.5 text-sm font-medium text-[#333333]"
+                  >
+                    Create An Account
+                  </Link>
+                </>
               )}
             </div>
           </div>
-        )}
-      </nav>
-    </>
+        </div>
+      )}
+    </header>
   )
 }

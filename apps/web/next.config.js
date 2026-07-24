@@ -25,6 +25,11 @@ const nextConfig = {
       },
     ],
   },
+  // Tree-shake lucide-react so only used icons are bundled — reduces chunk size ~60%
+  experimental: {
+    optimizePackageImports: ['lucide-react'],
+  },
 }
 
 module.exports = nextConfig
+

@@ -221,7 +221,7 @@ export const sendOrderConfirmationEmail = async (data: OrderEmailData) => {
             <td style="background-color: #f5f5f5; padding: 20px 30px; text-align: center; border-top: 1px solid #ddd;">
               <p style="margin: 0 0 10px 0; color: #666; font-size: 14px;">This is an automated notification from your e-commerce system.</p>
               <p style="margin: 0; color: #999; font-size: 12px;">RIYANSH Ayurvedic Center | Mumbai, Maharashtra, India</p>
-              <p style="margin: 10px 0 0 0; color: #999; font-size: 12px;">📧 riyanshamrit106@gmail.com | 📞 +91 9370646279</p>
+              <p style="margin: 10px 0 0 0; color: #999; font-size: 12px;">📧 riyanshamrit106@gmail.com | 📞 +91 8605911293</p>
             </td>
           </tr>
 
@@ -369,7 +369,7 @@ export const sendContactFormEmail = async (data: ContactFormData) => {
             <td style="background-color: #f5f5f5; padding: 20px 30px; text-align: center; border-top: 1px solid #ddd;">
               <p style="margin: 0 0 10px 0; color: #666; font-size: 14px;">This is an automated notification from your contact form.</p>
               <p style="margin: 0; color: #999; font-size: 12px;">RIYANSH Ayurvedic Center | Mumbai, Maharashtra, India</p>
-              <p style="margin: 10px 0 0 0; color: #999; font-size: 12px;">📧 riyanshamrit106@gmail.com | 📞 +91 9370646279</p>
+              <p style="margin: 10px 0 0 0; color: #999; font-size: 12px;">📧 riyanshamrit106@gmail.com | 📞 +91 8605911293</p>
             </td>
           </tr>
 
@@ -619,7 +619,7 @@ export const sendWhatsAppOrderEmail = async (data: WhatsAppOrderData) => {
             <td style="background-color: #f5f5f5; padding: 20px 30px; text-align: center; border-top: 1px solid #ddd;">
               <p style="margin: 0 0 10px 0; color: #666; font-size: 14px;">This is an automated notification from your e-commerce system.</p>
               <p style="margin: 0; color: #999; font-size: 12px;">RIYANSH Ayurvedic Center | Mumbai, Maharashtra, India</p>
-              <p style="margin: 10px 0 0 0; color: #999; font-size: 12px;">📧 riyanshamrit106@gmail.com | 📞 +91 9370646279</p>
+              <p style="margin: 10px 0 0 0; color: #999; font-size: 12px;">📧 riyanshamrit106@gmail.com | 📞 +91 8605911293</p>
             </td>
           </tr>
 
