@@ -7,14 +7,13 @@ import {
   Heart,
   Phone,
   Truck,
-  Search,
   Menu,
   X,
   CreditCard,
   MapPin,
   LogOut,
 } from 'lucide-react'
-import { FormEvent, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { usePathname, useRouter } from 'next/navigation'
 import { useCart } from '@/contexts/CartContext'
@@ -39,7 +38,6 @@ export default function Navbar() {
   const [user, setUser] = useState<any>(null)
   const [showDropdown, setShowDropdown] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [searchQuery, setSearchQuery] = useState('')
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -66,12 +64,6 @@ export default function Navbar() {
     router.push(href)
   }
 
-  const handleSearch = (e: FormEvent) => {
-    e.preventDefault()
-    const q = searchQuery.trim()
-    router.push(q ? `/store?q=${encodeURIComponent(q)}` : '/store')
-  }
-
   return (
     <header className="w-full relative bg-white shadow-[0_1px_0_rgba(0,0,0,0.04)]">
       {/* ── Tier 1: Utility bar ── */}
@@ -90,37 +82,9 @@ export default function Navbar() {
                 </span>
               )}
             </Link>
-
-            {user ? (
-              <button
-                type="button"
-                onClick={() => setShowDropdown((v) => !v)}
-                className="inline-flex items-center gap-1.5 text-[12px] font-medium tracking-[0.08em] uppercase text-[#555555] hover:text-ayurveda-green transition-colors"
-              >
-                <User className="h-3.5 w-3.5" strokeWidth={1.5} />
-                <span className="hidden sm:inline">Account</span>
-              </button>
-            ) : (
-              <>
-                <Link
-                  href="/auth/login"
-                  className="inline-flex items-center gap-1.5 text-[12px] font-medium tracking-[0.08em] uppercase text-[#555555] hover:text-ayurveda-green transition-colors"
-                >
-                  <User className="h-3.5 w-3.5" strokeWidth={1.5} />
-                  <span className="hidden sm:inline">Login</span>
-                </Link>
-                <Link
-                  href="/auth/signup"
-                  className="inline-flex items-center gap-1.5 text-[12px] font-medium tracking-[0.08em] uppercase text-[#555555] hover:text-ayurveda-green transition-colors"
-                >
-                  <User className="h-3.5 w-3.5" strokeWidth={1.5} />
-                  <span className="hidden md:inline">Create An Account</span>
-                </Link>
-              </>
-            )}
           </div>
 
-          {/* Cart — aligned to content container (red box position) */}
+          {/* Cart — aligned to content container */}
           <Link
             href="/cart"
             className="shrink-0 h-9 inline-flex items-center gap-1.5 bg-ayurveda-green text-white px-4 text-[12px] font-semibold tracking-[0.1em] uppercase hover:bg-ayurveda-green-dark transition-colors"
@@ -136,43 +100,7 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Account dropdown */}
-      {showDropdown && user && (
-        <>
-          <div className="fixed inset-0 z-40" onClick={() => setShowDropdown(false)} />
-          <div className="absolute left-4 sm:left-6 top-9 w-56 bg-white rounded-md shadow-xl border border-gray-100 z-50 overflow-hidden">
-            <div className="p-2">
-              {[
-                { href: '/account/profile', label: 'My Profile', icon: User },
-                { href: '/account/orders', label: 'My Orders', icon: ShoppingCart },
-                { href: '/account/transactions', label: 'Transactions', icon: CreditCard },
-                { href: '/account/addresses', label: 'Addresses', icon: MapPin },
-              ].map((item) => (
-                <button
-                  key={item.href}
-                  type="button"
-                  onClick={() => handleNavigation(item.href)}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-[#333333] hover:bg-[#F6F0E2] hover:text-ayurveda-green rounded transition-colors"
-                >
-                  <item.icon className="h-4 w-4" />
-                  {item.label}
-                </button>
-              ))}
-              <hr className="my-1.5 border-gray-100" />
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-red-600 hover:bg-red-50 rounded transition-colors"
-              >
-                <LogOut className="h-4 w-4" />
-                Logout
-              </button>
-            </div>
-          </div>
-        </>
-      )}
-
-      {/* ── Tier 2: Brand + contact + search ── */}
+      {/* ── Tier 2: Brand + contact + account ── */}
       <div className="bg-white border-b border-[#EEEEEE]">
         <div className="max-w-[1200px] mx-auto px-4 sm:px-6 py-3.5 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
           {/* Logo */}
@@ -215,27 +143,28 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* Search + mobile menu */}
-          <div className="flex items-center gap-2 shrink-0 ml-auto sm:ml-0">
-            <form
-              onSubmit={handleSearch}
-              className="relative hidden sm:block w-[200px] lg:w-[220px]"
-            >
-              <input
-                type="search"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search products"
-                className="w-full h-9 pl-3.5 pr-9 rounded-full border border-[#DDDDDD] bg-white text-sm text-[#333333] placeholder:text-[#AAAAAA] focus:outline-none focus:border-ayurveda-green focus:ring-0"
-              />
+          {/* Account (replaces search) + mobile menu */}
+          <div className="relative flex items-center gap-2 shrink-0 ml-auto sm:ml-0">
+            {user ? (
               <button
-                type="submit"
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#888888] hover:text-ayurveda-green"
-                aria-label="Search products"
+                type="button"
+                onClick={() => setShowDropdown((v) => !v)}
+                className="inline-flex items-center gap-2 h-9 px-3 sm:px-4 rounded-full border border-[#DDDDDD] bg-white text-[13px] font-semibold tracking-[0.06em] uppercase text-[#333333] hover:border-ayurveda-green hover:text-ayurveda-green transition-colors"
               >
-                <Search className="h-3.5 w-3.5" strokeWidth={1.75} />
+                <User className="h-4 w-4" strokeWidth={1.5} />
+                <span className="hidden sm:inline">Account</span>
               </button>
-            </form>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Link
+                  href="/auth/login"
+                  className="inline-flex items-center gap-2 h-9 px-3 sm:px-4 rounded-full border border-[#DDDDDD] bg-white text-[13px] font-semibold tracking-[0.06em] uppercase text-[#333333] hover:border-ayurveda-green hover:text-ayurveda-green transition-colors"
+                >
+                  <User className="h-4 w-4" strokeWidth={1.5} />
+                  <span className="hidden sm:inline">Account</span>
+                </Link>
+              </div>
+            )}
 
             <button
               type="button"
@@ -245,6 +174,42 @@ export default function Navbar() {
             >
               {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
+
+            {/* Account dropdown — anchored to right-side Account control */}
+            {showDropdown && user && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setShowDropdown(false)} />
+                <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-md shadow-xl border border-gray-100 z-50 overflow-hidden">
+                  <div className="p-2">
+                    {[
+                      { href: '/account/profile', label: 'My Profile', icon: User },
+                      { href: '/account/orders', label: 'My Orders', icon: ShoppingCart },
+                      { href: '/account/transactions', label: 'Transactions', icon: CreditCard },
+                      { href: '/account/addresses', label: 'Addresses', icon: MapPin },
+                    ].map((item) => (
+                      <button
+                        key={item.href}
+                        type="button"
+                        onClick={() => handleNavigation(item.href)}
+                        className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-[#333333] hover:bg-[#F6F0E2] hover:text-ayurveda-green rounded transition-colors"
+                      >
+                        <item.icon className="h-4 w-4" />
+                        {item.label}
+                      </button>
+                    ))}
+                    <hr className="my-1.5 border-gray-100" />
+                    <button
+                      type="button"
+                      onClick={handleLogout}
+                      className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-red-600 hover:bg-red-50 rounded transition-colors"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      Logout
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -304,7 +269,27 @@ export default function Navbar() {
               </a>
               <p className="px-3 py-1 text-xs text-[#888888]">Free shipping on orders above ₹500</p>
 
-              {!user && (
+              {user ? (
+                <>
+                  <Link
+                    href="/account/profile"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block px-3 py-2.5 text-sm font-medium text-ayurveda-green"
+                  >
+                    My Account
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMobileMenuOpen(false)
+                      handleLogout()
+                    }}
+                    className="block w-full text-left px-3 py-2.5 text-sm font-medium text-red-600"
+                  >
+                    Logout
+                  </button>
+                </>
+              ) : (
                 <>
                   <Link
                     href="/auth/login"

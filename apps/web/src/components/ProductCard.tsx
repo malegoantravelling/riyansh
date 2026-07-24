@@ -3,6 +3,7 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { ShoppingCart, Star, Heart } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
@@ -30,6 +31,7 @@ interface ProductCardProps {
 
 export default function ProductCard({ product }: ProductCardProps) {
   const [addingToCart, setAddingToCart] = useState(false)
+  const router = useRouter()
   const toast = useToast()
   const { incrementCartCount, refreshCartCount } = useCart()
   const { isInWishlist, toggleWishlist } = useWishlist()
@@ -70,6 +72,11 @@ export default function ProductCard({ product }: ProductCardProps) {
 
       if (!session?.user) {
         toast.warning('Login Required', 'Please login to add items to cart')
+        localStorage.setItem(
+          'redirect_after_login',
+          window.location.pathname || '/store'
+        )
+        router.push('/auth/login')
         setAddingToCart(false)
         return
       }

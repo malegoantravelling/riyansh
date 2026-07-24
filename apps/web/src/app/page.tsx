@@ -6,23 +6,23 @@ import ProductCardSkeleton from '@/components/ProductCardSkeleton'
 import { Package, Shield, Clock, TrendingUp } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { getCachedProducts } from '@/lib/productCache'
 
 const testimonials = [
   {
     id: 1,
-    name: 'Priya Sharma',
-    text: "Excellent service and genuine products! I have been ordering my mother's diabetes medicines from Riyansh for the past 6 months. The medicines are always authentic, well-packaged, and delivered on time. The customer support team is very helpful and knowledgeable.",
+    name: 'Chanchal Patil',
+    text: 'Best product! Ya Riyansh Amrit Juice mule maza acidity cha problem kami zala ani ya mule maza weight loss zala. Amrit juice ghya, nirogi raha. Best product!',
     avatar:
-      'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=200&h=200',
+      'https://images.pexels.com/photos/3763188/pexels-photo-3763188.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop',
   },
   {
     id: 2,
-    name: 'Rajesh Kumar',
-    text: 'Best online pharmacy in India! Their Ayurvedic products are of premium quality and 100% genuine. I ordered Amrit juice and tablets for my family, and we can see real health benefits. Fast delivery and great customer service. Highly recommended!',
+    name: 'Nagesh Kulkarni',
+    text: 'Good product and great service. Mala Amrit Juice mule khup fayda zala. Maza weight loss zala ani mulvyadh sampala. Highly recommend Riyansh Amrit Juice!',
     avatar:
-      'https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=200&h=200',
+      'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop',
   },
 ]
 
@@ -30,6 +30,7 @@ export default function Home() {
   const [featuredProducts, setFeaturedProducts] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [activeTopSellingIndex, setActiveTopSellingIndex] = useState(1)
+  const heroVideoRef = useRef<HTMLVideoElement>(null)
 
   const topSellingProducts = [
     {
@@ -92,6 +93,52 @@ export default function Home() {
     fetchProducts()
   }, [])
 
+  // Hero video: play forward, then reverse with rAF, then loop
+  useEffect(() => {
+    const video = heroVideoRef.current
+    if (!video) return
+
+    let raf = 0
+    let reversing = false
+
+    const cancelReverse = () => {
+      if (raf) {
+        cancelAnimationFrame(raf)
+        raf = 0
+      }
+      reversing = false
+    }
+
+    const reverseStep = () => {
+      const v = heroVideoRef.current
+      if (!v || !reversing) return
+
+      // ~30fps reverse step (matches forward perceived pacing on typical displays)
+      v.currentTime = Math.max(0, v.currentTime - 1 / 30)
+
+      if (v.currentTime > 0.05) {
+        raf = requestAnimationFrame(reverseStep)
+      } else {
+        cancelReverse()
+        v.currentTime = 0
+        void v.play()
+      }
+    }
+
+    const onEnded = () => {
+      cancelReverse()
+      reversing = true
+      raf = requestAnimationFrame(reverseStep)
+    }
+
+    video.addEventListener('ended', onEnded)
+
+    return () => {
+      video.removeEventListener('ended', onEnded)
+      cancelReverse()
+    }
+  }, [])
+
   return (
     <div>
       {/* Hero — fills remaining first viewport below compact header */}
@@ -108,12 +155,12 @@ export default function Home() {
           aria-label="Riyansh Amrit Juice 42 Herbs"
         />
 
-        {/* Laptop/desktop: hero video */}
+        {/* Laptop/desktop: hero video — forward then reverse ping-pong */}
         <video
+          ref={heroVideoRef}
           className="absolute inset-0 hidden lg:block w-full h-full object-cover object-right"
           autoPlay
           muted
-          loop
           playsInline
           preload="metadata"
           aria-hidden="true"

@@ -161,6 +161,11 @@ Total Amount: ₹${itemTotal.toLocaleString()}`
 
       if (!session?.user) {
         toast.warning('Login Required', 'Please login to add items to cart')
+        localStorage.setItem(
+          'redirect_after_login',
+          window.location.pathname || `/products/${product.slug}`
+        )
+        router.push('/auth/login')
         setAddingToCart(false)
         return
       }
