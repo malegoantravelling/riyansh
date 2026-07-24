@@ -142,7 +142,7 @@ Order Details:
 Total Amount: ₹${itemTotal.toLocaleString()}`
 
       const encodedMessage = encodeURIComponent(whatsappMessage)
-      const whatsappUrl = `https://wa.me/8605911293?text=${encodedMessage}`
+      const whatsappUrl = `https://wa.me/918605911293?text=${encodedMessage}`
       window.location.href = whatsappUrl
     } catch (error) {
       console.error('Error processing Buy Now:', error)

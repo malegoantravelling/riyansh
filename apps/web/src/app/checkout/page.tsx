@@ -401,7 +401,7 @@ ${billText}
 Subtotal: ${formatCurrency(subtotal)}`
 
       const encodedMessage = encodeURIComponent(whatsappMessage)
-      const whatsappUrl = `https://wa.me/8605911293?text=${encodedMessage}`
+      const whatsappUrl = `https://wa.me/918605911293?text=${encodedMessage}`
 
       window.location.href = whatsappUrl
     } catch (error: any) {
@@ -742,14 +742,6 @@ Subtotal: ${formatCurrency(subtotal)}`
                     <ChevronLeft className="h-4 w-4" />
                     Return to cart
                   </Link>
-
-                  <button
-                    type="submit"
-                    disabled={submitting}
-                    className="bg-[#5B8C51] hover:bg-[#4E7A45] text-white font-semibold text-sm px-8 py-3.5 rounded-md transition-colors disabled:opacity-60 disabled:cursor-not-allowed whitespace-nowrap"
-                  >
-                    {submitting ? 'Processing...' : 'Continue to shipping'}
-                  </button>
                 </div>
               </div>
             </div>
@@ -841,6 +833,30 @@ Subtotal: ${formatCurrency(subtotal)}`
                     </div>
                     <p className="text-xl font-bold text-[#1A1A1A]">{formatCurrency(subtotal)}</p>
                   </div>
+                </div>
+
+                {/* Buy Now — WhatsApp order */}
+                <div className="mt-5 pt-5 border-t border-[#E8E8E8]">
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="w-full bg-[#5B8C51] hover:bg-[#4E7A45] text-white font-bold text-sm py-3.5 px-6 rounded-md flex items-center justify-center gap-2 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                  >
+                    {submitting ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        <span>Redirecting to WhatsApp...</span>
+                      </>
+                    ) : (
+                      <>
+                        <ShoppingBag className="h-4 w-4" />
+                        <span>Buy Now</span>
+                      </>
+                    )}
+                  </button>
+                  <p className="text-[11px] text-gray-400 text-center mt-2.5">
+                    Completes your order via WhatsApp at +91 8605911293
+                  </p>
                 </div>
               </div>
             </div>
