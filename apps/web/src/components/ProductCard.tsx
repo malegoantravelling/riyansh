@@ -31,6 +31,7 @@ interface ProductCardProps {
 
 export default function ProductCard({ product }: ProductCardProps) {
   const [addingToCart, setAddingToCart] = useState(false)
+  const [buyingNow, setBuyingNow] = useState(false)
   const router = useRouter()
   const toast = useToast()
   const { incrementCartCount, refreshCartCount } = useCart()
@@ -39,6 +40,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   const isWishlisted = isInWishlist(product.id)
   const rating = product.rating || 5
   const hasSale = product.compare_at_price && product.price < product.compare_at_price
+  const isOutOfStock = product.stock_quantity === 0
 
   const handleToggleWishlist = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -114,6 +116,71 @@ export default function ProductCard({ product }: ProductCardProps) {
       await refreshCartCount()
     } finally {
       setAddingToCart(false)
+    }
+  }
+
+  const handleBuyNow = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    setBuyingNow(true)
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+
+      if (!session?.user) {
+        toast.warning('Login Required', 'Please login to proceed with Buy Now')
+        localStorage.setItem(
+          'redirect_after_login',
+          window.location.pathname || '/store'
+        )
+        router.push('/auth/login')
+        return
+      }
+
+      const { data: userProfile } = await supabase
+        .from('users')
+        .select('full_name, email')
+        .eq('id', session.user.id)
+        .single()
+
+      const { data: defaultAddress } = await supabase
+        .from('user_addresses')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .eq('is_default', true)
+        .single()
+
+      const userName = userProfile?.full_name || 'Customer'
+      const userEmail = userProfile?.email || session.user.email || 'N/A'
+      const userPhone = defaultAddress?.phone || 'N/A'
+      const address = defaultAddress
+        ? `${defaultAddress.address_line_1}, ${defaultAddress.city}, ${defaultAddress.state}, ${defaultAddress.zip_code}`
+        : 'N/A'
+
+      const whatsappMessage = `Hello Riyansh Amrit! I want to order ${product.name}.
+
+Customer Details:
+Name: ${userName}
+Email: ${userEmail}
+Phone: ${userPhone}
+Address: ${address}
+
+Order Details:
+1. ${product.name}
+   Qty: 1 × ₹${product.price.toLocaleString()} = ₹${product.price.toLocaleString()}
+
+Total Amount: ₹${product.price.toLocaleString()}`
+
+      const encodedMessage = encodeURIComponent(whatsappMessage)
+      const whatsappUrl = `https://wa.me/918605911293?text=${encodedMessage}`
+      window.location.href = whatsappUrl
+    } catch (error) {
+      console.error('Error processing Buy Now:', error)
+      toast.error('Error', 'Could not process Buy Now. Please try again.')
+    } finally {
+      setBuyingNow(false)
     }
   }
 
@@ -200,45 +267,60 @@ export default function ProductCard({ product }: ProductCardProps) {
         </div>
       </Link>
 
-      {/* Action Button: Add to Cart */}
-      <div className="mt-auto pt-1">
+      {/* Action Buttons: Add to Cart + Buy Now */}
+      <div className="mt-auto pt-1 flex gap-2">
         <Button
           onClick={handleAddToCart}
-          disabled={addingToCart || product.stock_quantity === 0}
+          disabled={addingToCart || isOutOfStock}
           variant="outline"
           className={`
-            w-full h-10 text-xs sm:text-sm font-semibold rounded-md
+            flex-1 h-10 text-xs sm:text-sm font-semibold rounded-md
             border border-[#5B8C51] text-[#5B8C51] bg-white
             hover:bg-[#5B8C51] hover:text-white
-            transition-all duration-300 flex items-center justify-center gap-1.5 shadow-sm
+            transition-all duration-300 flex items-center justify-center gap-1 shadow-sm px-2
             ${
-              product.stock_quantity === 0
+              isOutOfStock
                 ? 'border-gray-200 text-gray-400 bg-gray-100 hover:bg-gray-100 hover:text-gray-400 cursor-not-allowed'
                 : ''
             }
           `}
         >
           {addingToCart ? (
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1">
               <div className="h-3.5 w-3.5 border-2 border-[#5B8C51] border-t-transparent rounded-full animate-spin" />
               <span>Adding...</span>
             </div>
-          ) : product.stock_quantity === 0 ? (
+          ) : isOutOfStock ? (
             'Out of Stock'
           ) : (
             <>
               <span>Add to Cart</span>
-              <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M17 8l4 4m0 0l-4 4m4-4H3"
-                />
-              </svg>
+              <span className="text-base leading-none">→</span>
             </>
           )}
         </Button>
+
+        {!isOutOfStock && (
+          <Button
+            onClick={handleBuyNow}
+            disabled={buyingNow}
+            className="flex-1 h-10 text-xs sm:text-sm font-semibold rounded-md
+              bg-[#5B8C51] text-white hover:bg-[#4E7A45]
+              transition-all duration-300 flex items-center justify-center gap-1 shadow-sm px-2"
+          >
+            {buyingNow ? (
+              <div className="flex items-center gap-1">
+                <div className="h-3.5 w-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <span>Buying...</span>
+              </div>
+            ) : (
+              <>
+                <span>Buy Now</span>
+                <span className="text-base leading-none">→</span>
+              </>
+            )}
+          </Button>
+        )}
       </div>
     </div>
   )
