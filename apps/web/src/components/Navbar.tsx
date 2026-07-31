@@ -6,7 +6,6 @@ import {
   User,
   Heart,
   Phone,
-  Truck,
   Menu,
   X,
   CreditCard,
@@ -114,7 +113,7 @@ export default function Navbar() {
             </span>
           </Link>
 
-          {/* Contact + Shipping */}
+          {/* Contact */}
           <div className="hidden lg:flex items-center gap-6 xl:gap-8 flex-1 justify-center">
             <a
               href="tel:+918605911293"
@@ -130,17 +129,6 @@ export default function Navbar() {
                 </span>
               </span>
             </a>
-
-            <div className="flex items-center gap-2.5 max-w-[280px]">
-              <Truck className="h-7 w-7 text-ayurveda-green shrink-0" strokeWidth={1.25} />
-              <span className="block text-[14px] leading-snug text-[#222222]">
-                <span className="font-bold">FREE Shipping</span>{' '}
-                <span className="font-normal">ON ORDER ABOVE</span>
-                <span className="block text-[12px] text-[#666666]">
-                  ₹500++ (Only On Selected Items)
-                </span>
-              </span>
-            </div>
           </div>
 
           {/* Account (replaces search) + mobile menu */}
@@ -267,7 +255,6 @@ export default function Navbar() {
                 <Phone className="h-4 w-4 text-ayurveda-green" />
                 +91 8605911293
               </a>
-              <p className="px-3 py-1 text-xs text-[#888888]">Free shipping on orders above ₹500</p>
 
               {user ? (
                 <>
