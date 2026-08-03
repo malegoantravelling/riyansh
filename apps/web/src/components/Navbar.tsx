@@ -1,20 +1,9 @@
 'use client'
 
 import Link from 'next/link'
-import {
-  ShoppingCart,
-  User,
-  Heart,
-  Phone,
-  Menu,
-  X,
-  CreditCard,
-  MapPin,
-  LogOut,
-} from 'lucide-react'
-import { useEffect, useState } from 'react'
-import { supabase } from '@/lib/supabase'
-import { usePathname, useRouter } from 'next/navigation'
+import { ShoppingCart, Heart, Phone, Menu, X } from 'lucide-react'
+import { useState } from 'react'
+import { usePathname } from 'next/navigation'
 import { useCart } from '@/contexts/CartContext'
 import { useWishlist } from '@/contexts/WishlistContext'
 
@@ -31,37 +20,9 @@ const categoryLinks = [
 
 export default function Navbar() {
   const pathname = usePathname()
-  const router = useRouter()
   const { cartCount } = useCart()
   const { wishlistCount } = useWishlist()
-  const [user, setUser] = useState<any>(null)
-  const [showDropdown, setShowDropdown] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null)
-    })
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
-    })
-
-    return () => subscription.unsubscribe()
-  }, [])
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut()
-    setShowDropdown(false)
-    router.push('/')
-  }
-
-  const handleNavigation = (href: string) => {
-    setShowDropdown(false)
-    router.push(href)
-  }
 
   return (
     <header className="w-full relative bg-white shadow-[0_1px_0_rgba(0,0,0,0.04)]">
@@ -99,7 +60,7 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* ── Tier 2: Brand + contact + account ── */}
+      {/* ── Tier 2: Brand + contact + mobile menu ── */}
       <div className="bg-white border-b border-[#EEEEEE]">
         <div className="max-w-[1200px] mx-auto px-4 sm:px-6 py-3.5 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
           {/* Logo */}
@@ -131,29 +92,8 @@ export default function Navbar() {
             </a>
           </div>
 
-          {/* Account (replaces search) + mobile menu */}
+          {/* Mobile menu toggle */}
           <div className="relative flex items-center gap-2 shrink-0 ml-auto sm:ml-0">
-            {user ? (
-              <button
-                type="button"
-                onClick={() => setShowDropdown((v) => !v)}
-                className="inline-flex items-center gap-2 h-9 px-3 sm:px-4 rounded-full border border-[#DDDDDD] bg-white text-[13px] font-semibold tracking-[0.06em] uppercase text-[#333333] hover:border-ayurveda-green hover:text-ayurveda-green transition-colors"
-              >
-                <User className="h-4 w-4" strokeWidth={1.5} />
-                <span className="hidden sm:inline">Account</span>
-              </button>
-            ) : (
-              <div className="flex items-center gap-2">
-                <Link
-                  href="/auth/login"
-                  className="inline-flex items-center gap-2 h-9 px-3 sm:px-4 rounded-full border border-[#DDDDDD] bg-white text-[13px] font-semibold tracking-[0.06em] uppercase text-[#333333] hover:border-ayurveda-green hover:text-ayurveda-green transition-colors"
-                >
-                  <User className="h-4 w-4" strokeWidth={1.5} />
-                  <span className="hidden sm:inline">Account</span>
-                </Link>
-              </div>
-            )}
-
             <button
               type="button"
               onClick={() => setMobileMenuOpen((v) => !v)}
@@ -162,42 +102,6 @@ export default function Navbar() {
             >
               {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
-
-            {/* Account dropdown — anchored to right-side Account control */}
-            {showDropdown && user && (
-              <>
-                <div className="fixed inset-0 z-40" onClick={() => setShowDropdown(false)} />
-                <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-md shadow-xl border border-gray-100 z-50 overflow-hidden">
-                  <div className="p-2">
-                    {[
-                      { href: '/account/profile', label: 'My Profile', icon: User },
-                      { href: '/account/orders', label: 'My Orders', icon: ShoppingCart },
-                      { href: '/account/transactions', label: 'Transactions', icon: CreditCard },
-                      { href: '/account/addresses', label: 'Addresses', icon: MapPin },
-                    ].map((item) => (
-                      <button
-                        key={item.href}
-                        type="button"
-                        onClick={() => handleNavigation(item.href)}
-                        className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-[#333333] hover:bg-[#F6F0E2] hover:text-ayurveda-green rounded transition-colors"
-                      >
-                        <item.icon className="h-4 w-4" />
-                        {item.label}
-                      </button>
-                    ))}
-                    <hr className="my-1.5 border-gray-100" />
-                    <button
-                      type="button"
-                      onClick={handleLogout}
-                      className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-red-600 hover:bg-red-50 rounded transition-colors"
-                    >
-                      <LogOut className="h-4 w-4" />
-                      Logout
-                    </button>
-                  </div>
-                </div>
-              </>
-            )}
           </div>
         </div>
       </div>
@@ -255,45 +159,6 @@ export default function Navbar() {
                 <Phone className="h-4 w-4 text-ayurveda-green" />
                 +91 8605911293
               </a>
-
-              {user ? (
-                <>
-                  <Link
-                    href="/account/profile"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="block px-3 py-2.5 text-sm font-medium text-ayurveda-green"
-                  >
-                    My Account
-                  </Link>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMobileMenuOpen(false)
-                      handleLogout()
-                    }}
-                    className="block w-full text-left px-3 py-2.5 text-sm font-medium text-red-600"
-                  >
-                    Logout
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Link
-                    href="/auth/login"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="block px-3 py-2.5 text-sm font-medium text-ayurveda-green"
-                  >
-                    Login
-                  </Link>
-                  <Link
-                    href="/auth/signup"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="block px-3 py-2.5 text-sm font-medium text-[#333333]"
-                  >
-                    Create An Account
-                  </Link>
-                </>
-              )}
             </div>
           </div>
         </div>

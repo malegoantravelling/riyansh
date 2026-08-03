@@ -382,10 +382,9 @@ router.put('/:id', async (req: AuthRequest, res) => {
   }
 })
 
-// Send WhatsApp order notification email
-router.post('/whatsapp-notify', authenticateToken, async (req: AuthRequest, res) => {
+// Send WhatsApp order notification email (public — guest checkout)
+router.post('/whatsapp-notify', async (req, res) => {
   try {
-    const userId = req.user?.id
     const {
       productNames,
       billItems,

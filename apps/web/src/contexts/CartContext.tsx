@@ -1,107 +1,112 @@
 'use client'
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
-import { supabase } from '@/lib/supabase'
+
+export interface CartItem {
+  id: string
+  name: string
+  slug: string
+  price: number
+  image_url?: string
+  quantity: number
+}
 
 interface CartContextType {
+  items: CartItem[]
   cartCount: number
+  addItem: (product: Omit<CartItem, 'quantity'>, quantity?: number) => void
+  updateQuantity: (productId: string, quantity: number) => void
+  removeItem: (productId: string) => void
+  clearCart: () => void
   refreshCartCount: () => Promise<void>
   incrementCartCount: (amount?: number) => void
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined)
 
+const CART_STORAGE_KEY = 'riyansh_cart_v1'
+
 export function CartProvider({ children }: { children: ReactNode }) {
-  const [cartCount, setCartCount] = useState(0)
-  const [userId, setUserId] = useState<string | null>(null)
+  const [items, setItems] = useState<CartItem[]>([])
+  const [isLoaded, setIsLoaded] = useState(false)
 
   useEffect(() => {
-    // Initialize cart count and set up auth listener
-    const initializeCart = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
-
-      if (session?.user) {
-        setUserId(session.user.id)
-        await fetchCartCount(session.user.id)
+    try {
+      const stored = localStorage.getItem(CART_STORAGE_KEY)
+      if (stored) {
+        setItems(JSON.parse(stored))
       }
-    }
-
-    initializeCart()
-
-    // Listen to auth state changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (session?.user) {
-        setUserId(session.user.id)
-        await fetchCartCount(session.user.id)
-      } else {
-        setUserId(null)
-        setCartCount(0)
-      }
-    })
-
-    return () => {
-      subscription.unsubscribe()
+    } catch (err) {
+      console.error('Failed to load cart from localStorage:', err)
+    } finally {
+      setIsLoaded(true)
     }
   }, [])
 
   useEffect(() => {
-    if (!userId) return
-
-    // Set up realtime subscription for cart changes
-    const cartSubscription = supabase
-      .channel('cart_changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'cart_items',
-          filter: `user_id=eq.${userId}`,
-        },
-        () => {
-          // Refresh cart count when database changes
-          fetchCartCount(userId)
-        }
-      )
-      .subscribe()
-
-    return () => {
-      cartSubscription.unsubscribe()
-    }
-  }, [userId])
-
-  const fetchCartCount = async (uid: string) => {
+    if (!isLoaded) return
     try {
-      const { data, error } = await supabase
-        .from('cart_items')
-        .select('quantity')
-        .eq('user_id', uid)
-
-      if (!error && data) {
-        const totalCount = data.reduce((sum, item) => sum + item.quantity, 0)
-        setCartCount(totalCount)
-      }
-    } catch (error) {
-      console.error('Error fetching cart count:', error)
+      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items))
+    } catch (err) {
+      console.error('Failed to save cart to localStorage:', err)
     }
+  }, [items, isLoaded])
+
+  const cartCount = items.reduce((sum, item) => sum + item.quantity, 0)
+
+  const addItem = (product: Omit<CartItem, 'quantity'>, quantity: number = 1) => {
+    setItems((prev) => {
+      const existing = prev.find((item) => item.id === product.id)
+      if (existing) {
+        return prev.map((item) =>
+          item.id === product.id
+            ? { ...item, quantity: item.quantity + quantity }
+            : item
+        )
+      }
+      return [...prev, { ...product, quantity }]
+    })
+  }
+
+  const updateQuantity = (productId: string, quantity: number) => {
+    if (quantity < 1) {
+      removeItem(productId)
+      return
+    }
+    setItems((prev) =>
+      prev.map((item) => (item.id === productId ? { ...item, quantity } : item))
+    )
+  }
+
+  const removeItem = (productId: string) => {
+    setItems((prev) => prev.filter((item) => item.id !== productId))
+  }
+
+  const clearCart = () => {
+    setItems([])
   }
 
   const refreshCartCount = async () => {
-    if (userId) {
-      await fetchCartCount(userId)
-    }
+    // No-op for localStorage cart; count is derived from items
   }
 
-  const incrementCartCount = (amount: number = 1) => {
-    setCartCount((prev) => prev + amount)
+  const incrementCartCount = (_amount: number = 1) => {
+    // No-op for compatibility; addItem already updates count via items
   }
 
   return (
-    <CartContext.Provider value={{ cartCount, refreshCartCount, incrementCartCount }}>
+    <CartContext.Provider
+      value={{
+        items,
+        cartCount,
+        addItem,
+        updateQuantity,
+        removeItem,
+        clearCart,
+        refreshCartCount,
+        incrementCartCount,
+      }}
+    >
       {children}
     </CartContext.Provider>
   )

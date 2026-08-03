@@ -6,55 +6,30 @@ import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { Trash2, Package, Heart, ShoppingBag, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { useWishlist } from '@/contexts/WishlistContext'
+import { useWishlist, WishlistItem } from '@/contexts/WishlistContext'
 import { useCart } from '@/contexts/CartContext'
 import { useToast } from '@/contexts/ToastContext'
-import { supabase } from '@/lib/supabase'
 
 export default function WishlistPage() {
   const { wishlistItems, removeFromWishlist } = useWishlist()
-  const { incrementCartCount, refreshCartCount } = useCart()
+  const { addItem } = useCart()
   const toast = useToast()
   const router = useRouter()
   const [processingId, setProcessingId] = useState<string | null>(null)
   const [processingCheckout, setProcessingCheckout] = useState(false)
 
-  const handleCheckoutSingle = async (item: any) => {
+  const toCartProduct = (item: WishlistItem) => ({
+    id: item.id,
+    name: item.name,
+    slug: item.slug,
+    price: item.price,
+    image_url: item.image_url,
+  })
+
+  const handleCheckoutSingle = (item: WishlistItem) => {
     setProcessingId(item.id)
     try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
-
-      if (!session?.user) {
-        toast.warning('Login Required', 'Please login to proceed to checkout')
-        localStorage.setItem('redirect_after_login', '/checkout')
-        router.push('/auth/login')
-        return
-      }
-
-      const { data: existingItem } = await supabase
-        .from('cart_items')
-        .select('*')
-        .eq('user_id', session.user.id)
-        .eq('product_id', item.id)
-        .single()
-
-      if (existingItem) {
-        await supabase
-          .from('cart_items')
-          .update({ quantity: existingItem.quantity + 1 })
-          .eq('id', existingItem.id)
-      } else {
-        await supabase.from('cart_items').insert({
-          user_id: session.user.id,
-          product_id: item.id,
-          quantity: 1,
-        })
-      }
-
-      incrementCartCount(1)
-      await refreshCartCount()
+      addItem(toCartProduct(item), 1)
       router.push('/checkout')
     } catch (error) {
       console.error('Error adding item for checkout:', error)
@@ -64,48 +39,14 @@ export default function WishlistPage() {
     }
   }
 
-  const handleCheckoutAll = async () => {
+  const handleCheckoutAll = () => {
     if (wishlistItems.length === 0) return
 
     setProcessingCheckout(true)
     try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
-
-      if (!session?.user) {
-        toast.warning('Login Required', 'Please login to proceed to checkout')
-        localStorage.setItem('redirect_after_login', '/checkout')
-        router.push('/auth/login')
-        return
-      }
-
-      let totalAdded = 0
       for (const item of wishlistItems) {
-        const { data: existingItem } = await supabase
-          .from('cart_items')
-          .select('*')
-          .eq('user_id', session.user.id)
-          .eq('product_id', item.id)
-          .single()
-
-        if (existingItem) {
-          await supabase
-            .from('cart_items')
-            .update({ quantity: existingItem.quantity + 1 })
-            .eq('id', existingItem.id)
-        } else {
-          await supabase.from('cart_items').insert({
-            user_id: session.user.id,
-            product_id: item.id,
-            quantity: 1,
-          })
-        }
-        totalAdded += 1
+        addItem(toCartProduct(item), 1)
       }
-
-      incrementCartCount(totalAdded)
-      await refreshCartCount()
       toast.success('Proceeding to Checkout', 'All wishlist items added to your cart.')
       router.push('/checkout')
     } catch (error) {

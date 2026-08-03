@@ -1,142 +1,30 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import { supabase } from '@/lib/supabase'
 import Image from 'next/image'
 import Link from 'next/link'
 import { ShoppingBag, Package } from 'lucide-react'
 import { useCart } from '@/contexts/CartContext'
 
-interface CartItem {
-  id: string
-  quantity: number
-  product: {
-    id: string
-    name: string
-    slug: string
-    price: number
-    image_url?: string
-  }
-}
-
 export default function CartPage() {
   const router = useRouter()
-  const { refreshCartCount } = useCart()
-  const [cartItems, setCartItems] = useState<CartItem[]>([])
-  const [loading, setLoading] = useState(true)
-  const [user, setUser] = useState<any>(null)
+  const { items, updateQuantity, removeItem } = useCart()
   const [orderNote, setOrderNote] = useState('')
 
-  useEffect(() => {
-    checkAuth()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
-
-  const checkAuth = async () => {
-    const {
-      data: { session },
-    } = await supabase.auth.getSession()
-    if (session?.user) {
-      setUser(session.user)
-      await fetchCartItems()
-    }
-    setLoading(false)
-  }
-
-  const fetchCartItems = async () => {
-    try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
-      if (session?.user) {
-        const { data, error } = await supabase
-          .from('cart_items')
-          .select(
-            `
-            *,
-            product:products(*)
-          `
-          )
-          .eq('user_id', session.user.id)
-
-        if (error) throw error
-        setCartItems(data || [])
-      }
-    } catch (error) {
-      console.error('Error fetching cart items:', error)
-    }
-  }
-
-  const updateQuantity = async (itemId: string, newQuantity: number) => {
-    if (newQuantity < 1) return
-
-    try {
-      const { error } = await supabase
-        .from('cart_items')
-        .update({ quantity: newQuantity })
-        .eq('id', itemId)
-
-      if (error) throw error
-      await fetchCartItems()
-      await refreshCartCount()
-    } catch (error) {
-      console.error('Error updating quantity:', error)
-    }
-  }
-
-  const removeItem = async (itemId: string) => {
-    try {
-      const { error } = await supabase.from('cart_items').delete().eq('id', itemId)
-
-      if (error) throw error
-      await fetchCartItems()
-      await refreshCartCount()
-    } catch (error) {
-      console.error('Error removing item:', error)
-    }
-  }
-
   const calculateSubtotal = () => {
-    return cartItems.reduce((acc, item) => acc + item.product.price * item.quantity, 0)
+    return items.reduce((acc, item) => acc + item.price * item.quantity, 0)
   }
 
   const handleCheckout = () => {
-    if (cartItems.length === 0) return
+    if (items.length === 0) return
     if (orderNote.trim()) {
       localStorage.setItem('order_note', orderNote)
+    } else {
+      localStorage.removeItem('order_note')
     }
     router.push('/checkout')
-  }
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-[#5B8C51]/20 border-t-[#5B8C51] rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-sm font-semibold text-gray-500">Loading your cart...</p>
-        </div>
-      </div>
-    )
-  }
-
-  if (!user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="text-center max-w-md px-4 py-16 bg-[#FAF9F5] rounded-2xl border border-gray-200 my-8">
-          <ShoppingBag className="h-16 w-16 text-[#5B8C51] mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-[#1A1A1A] mb-2">Please Login</h2>
-          <p className="text-gray-500 text-xs sm:text-sm mb-6">
-            Sign in to view your cart and complete your order.
-          </p>
-          <Link href="/auth/login">
-            <Button className="bg-[#5B8C51] hover:bg-[#4E7A45] text-white px-6">
-              Login to Continue
-            </Button>
-          </Link>
-        </div>
-      </div>
-    )
   }
 
   return (
@@ -159,7 +47,7 @@ export default function CartPage() {
           Your Cart
         </h1>
 
-        {cartItems.length === 0 ? (
+        {items.length === 0 ? (
           <div className="bg-[#FAF9F5] rounded-2xl p-12 text-center border border-gray-200 max-w-md mx-auto my-8">
             <ShoppingBag className="h-16 w-16 text-gray-300 mx-auto mb-4" />
             <h2 className="text-xl font-bold text-[#1A1A1A] mb-2">Your Cart is Empty</h2>
@@ -189,19 +77,19 @@ export default function CartPage() {
 
                 {/* Table Body */}
                 <tbody className="divide-y divide-gray-100 text-xs sm:text-sm">
-                  {cartItems.map((item) => (
+                  {items.map((item) => (
                     <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
                       {/* Product Column */}
                       <td className="py-6 px-6">
                         <div className="flex items-center gap-4">
                           <Link
-                            href={`/products/${item.product.slug || item.product.id}`}
+                            href={`/products/${item.slug || item.id}`}
                             className="shrink-0 relative w-16 h-16 sm:w-20 sm:h-20 bg-[#F8F8F6] rounded-md overflow-hidden p-2 flex items-center justify-center border border-gray-100 group"
                           >
-                            {item.product.image_url ? (
+                            {item.image_url ? (
                               <Image
-                                src={item.product.image_url}
-                                alt={item.product.name}
+                                src={item.image_url}
+                                alt={item.name}
                                 fill
                                 className="object-contain p-1 group-hover:scale-105 transition-transform duration-300"
                               />
@@ -212,13 +100,13 @@ export default function CartPage() {
 
                           <div className="space-y-1">
                             <Link
-                              href={`/products/${item.product.slug || item.product.id}`}
+                              href={`/products/${item.slug || item.id}`}
                               className="font-bold text-[#1A1A1A] hover:text-[#5B8C51] transition-colors leading-snug line-clamp-2 text-sm sm:text-base"
                             >
-                              {item.product.name}
+                              {item.name}
                             </Link>
                             <p className="text-[11px] sm:text-xs text-gray-400 font-medium">
-                              Size: {item.product.name.toLowerCase().includes('juice') ? '500ML' : '60 Capsules'}
+                              Size: {item.name.toLowerCase().includes('juice') ? '500ML' : '60 Capsules'}
                             </p>
                           </div>
                         </div>
@@ -226,7 +114,7 @@ export default function CartPage() {
 
                       {/* Price Column */}
                       <td className="py-6 px-6 font-bold text-[#1A1A1A] text-sm sm:text-base whitespace-nowrap">
-                        ₹ {item.product.price.toLocaleString()}.00
+                        ₹ {item.price.toLocaleString()}.00
                       </td>
 
                       {/* Quantity Column */}
@@ -261,7 +149,7 @@ export default function CartPage() {
 
                       {/* Total Column */}
                       <td className="py-6 px-6 text-right font-bold text-[#1A1A1A] text-sm sm:text-base whitespace-nowrap">
-                        ₹ {(item.product.price * item.quantity).toLocaleString()}.00
+                        ₹ {(item.price * item.quantity).toLocaleString()}.00
                       </td>
                     </tr>
                   ))}

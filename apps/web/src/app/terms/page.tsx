@@ -52,14 +52,14 @@ export default function TermsPage() {
     },
     {
       icon: AlertCircle,
-      title: 'User Accounts',
+      title: 'Guest Orders',
       content: [
-        'You are responsible for maintaining the confidentiality of your account and password.',
-        'You agree to:',
-        '• Keep your account information current and accurate',
-        '• Notify us immediately of any unauthorized access',
-        '• Accept responsibility for all activities under your account',
-        'We are not liable for any losses caused by unauthorized use of your account.',
+        'You may place orders as a guest without creating an account.',
+        'When ordering, you agree to:',
+        '• Provide accurate contact and shipping details',
+        '• Confirm your order via WhatsApp when redirected',
+        '• Keep your contact information available for order updates',
+        'We are not liable for delays or issues caused by incorrect customer details.',
       ],
     },
     {

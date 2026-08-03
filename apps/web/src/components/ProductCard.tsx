@@ -6,7 +6,6 @@ import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { ShoppingCart, Star, Heart } from 'lucide-react'
-import { supabase } from '@/lib/supabase'
 import { useToast } from '@/contexts/ToastContext'
 import { useCart } from '@/contexts/CartContext'
 import { useWishlist } from '@/contexts/WishlistContext'
@@ -34,13 +33,21 @@ export default function ProductCard({ product }: ProductCardProps) {
   const [buyingNow, setBuyingNow] = useState(false)
   const router = useRouter()
   const toast = useToast()
-  const { incrementCartCount, refreshCartCount } = useCart()
+  const { addItem } = useCart()
   const { isInWishlist, toggleWishlist } = useWishlist()
 
   const isWishlisted = isInWishlist(product.id)
   const rating = product.rating || 5
   const hasSale = product.compare_at_price && product.price < product.compare_at_price
   const isOutOfStock = product.stock_quantity === 0
+
+  const cartProduct = {
+    id: product.id,
+    name: product.name,
+    slug: product.slug,
+    price: product.price,
+    image_url: product.image_url,
+  }
 
   const handleToggleWishlist = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -62,124 +69,33 @@ export default function ProductCard({ product }: ProductCardProps) {
     }
   }
 
-  const handleAddToCart = async (e: React.MouseEvent) => {
+  const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
 
     setAddingToCart(true)
     try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
-
-      if (!session?.user) {
-        toast.warning('Login Required', 'Please login to add items to cart')
-        localStorage.setItem(
-          'redirect_after_login',
-          window.location.pathname || '/store'
-        )
-        router.push('/auth/login')
-        setAddingToCart(false)
-        return
-      }
-
-      const { data: existingItem } = await supabase
-        .from('cart_items')
-        .select('*')
-        .eq('user_id', session.user.id)
-        .eq('product_id', product.id)
-        .single()
-
-      if (existingItem) {
-        const { error } = await supabase
-          .from('cart_items')
-          .update({ quantity: existingItem.quantity + 1 })
-          .eq('id', existingItem.id)
-
-        if (error) throw error
-      } else {
-        const { error } = await supabase.from('cart_items').insert({
-          user_id: session.user.id,
-          product_id: product.id,
-          quantity: 1,
-        })
-
-        if (error) throw error
-      }
-
-      incrementCartCount(1)
+      addItem(cartProduct, 1)
       toast.success('Added to Cart!', `${product.name} has been added to your cart`)
-      await refreshCartCount()
     } catch (error) {
       console.error('Error adding to cart:', error)
       toast.error('Failed to Add', 'Could not add product to cart. Please try again.')
-      await refreshCartCount()
     } finally {
       setAddingToCart(false)
     }
   }
 
-  const handleBuyNow = async (e: React.MouseEvent) => {
+  const handleBuyNow = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
 
     setBuyingNow(true)
     try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
-
-      if (!session?.user) {
-        toast.warning('Login Required', 'Please login to proceed with Buy Now')
-        localStorage.setItem(
-          'redirect_after_login',
-          window.location.pathname || '/store'
-        )
-        router.push('/auth/login')
-        return
-      }
-
-      const { data: userProfile } = await supabase
-        .from('users')
-        .select('full_name, email')
-        .eq('id', session.user.id)
-        .single()
-
-      const { data: defaultAddress } = await supabase
-        .from('user_addresses')
-        .select('*')
-        .eq('user_id', session.user.id)
-        .eq('is_default', true)
-        .single()
-
-      const userName = userProfile?.full_name || 'Customer'
-      const userEmail = userProfile?.email || session.user.email || 'N/A'
-      const userPhone = defaultAddress?.phone || 'N/A'
-      const address = defaultAddress
-        ? `${defaultAddress.address_line_1}, ${defaultAddress.city}, ${defaultAddress.state}, ${defaultAddress.zip_code}`
-        : 'N/A'
-
-      const whatsappMessage = `Hello Riyansh Amrit! I want to order ${product.name}.
-
-Customer Details:
-Name: ${userName}
-Email: ${userEmail}
-Phone: ${userPhone}
-Address: ${address}
-
-Order Details:
-1. ${product.name}
-   Qty: 1 × ₹${product.price.toLocaleString()} = ₹${product.price.toLocaleString()}
-
-Total Amount: ₹${product.price.toLocaleString()}`
-
-      const encodedMessage = encodeURIComponent(whatsappMessage)
-      const whatsappUrl = `https://wa.me/918605911293?text=${encodedMessage}`
-      window.location.href = whatsappUrl
+      addItem(cartProduct, 1)
+      router.push('/checkout')
     } catch (error) {
       console.error('Error processing Buy Now:', error)
       toast.error('Error', 'Could not process Buy Now. Please try again.')
-    } finally {
       setBuyingNow(false)
     }
   }
@@ -218,7 +134,7 @@ Total Amount: ₹${product.price.toLocaleString()}`
         ) : null}
       </div>
 
-      <Link href={`/products/${product.slug}`} className="block flex-1 flex flex-col items-center">
+      <Link href={`/products/${product.slug}`} className="flex-1 flex flex-col items-center">
         {/* Product Image Area */}
         <div className="relative w-full aspect-square bg-white flex items-center justify-center p-3 mb-3">
           {product.image_url ? (

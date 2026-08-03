@@ -34,7 +34,7 @@ export default function ProductDetailsPage() {
   const params = useParams()
   const router = useRouter()
   const toast = useToast()
-  const { incrementCartCount, refreshCartCount } = useCart()
+  const { addItem } = useCart()
   const [product, setProduct] = useState<Product | null>(null)
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
@@ -81,126 +81,46 @@ export default function ProductDetailsPage() {
     }
   }
 
-  const getItemPrice = (basePrice: number, qty: number): number => {
-    return basePrice
-  }
-
-  const getItemTotal = (basePrice: number, qty: number): number => {
-    return getItemPrice(basePrice, qty) * qty
-  }
-
-  const handleBuyNow = async () => {
+  const handleBuyNow = () => {
     if (!product) return
 
     try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
-
-      if (!session?.user) {
-        toast.warning('Login Required', 'Please login to proceed with Buy Now')
-        localStorage.setItem('redirect_after_login', window.location.pathname)
-        router.push('/auth/login')
-        return
-      }
-
-      const { data: userProfile } = await supabase
-        .from('users')
-        .select('full_name, email')
-        .eq('id', session.user.id)
-        .single()
-
-      const { data: defaultAddress } = await supabase
-        .from('user_addresses')
-        .select('*')
-        .eq('user_id', session.user.id)
-        .eq('is_default', true)
-        .single()
-
-      const userName = userProfile?.full_name || 'Customer'
-      const userEmail = userProfile?.email || session.user.email || 'N/A'
-      const userPhone = defaultAddress?.phone || 'N/A'
-      const address = defaultAddress
-        ? `${defaultAddress.address_line_1}, ${defaultAddress.city}, ${defaultAddress.state}, ${defaultAddress.zip_code}`
-        : 'N/A'
-
-      const unitPrice = getItemPrice(product.price, quantity)
-      const itemTotal = getItemTotal(product.price, quantity)
-
-      const whatsappMessage = `Hello Riyansh Amrit! I want to order ${product.name}.
-
-Customer Details:
-Name: ${userName}
-Email: ${userEmail}
-Phone: ${userPhone}
-Address: ${address}
-
-Order Details:
-1. ${product.name}
-   Qty: ${quantity} × ₹${unitPrice.toLocaleString()} = ₹${itemTotal.toLocaleString()}
-
-Total Amount: ₹${itemTotal.toLocaleString()}`
-
-      const encodedMessage = encodeURIComponent(whatsappMessage)
-      const whatsappUrl = `https://wa.me/918605911293?text=${encodedMessage}`
-      window.location.href = whatsappUrl
+      addItem(
+        {
+          id: product.id,
+          name: product.name,
+          slug: product.slug,
+          price: product.price,
+          image_url: product.image_url,
+        },
+        quantity
+      )
+      router.push('/checkout')
     } catch (error) {
       console.error('Error processing Buy Now:', error)
       toast.error('Error', 'Could not process Buy Now. Please try again.')
     }
   }
 
-  const handleAddToCart = async () => {
+  const handleAddToCart = () => {
     if (!product) return
 
     setAddingToCart(true)
     try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
-
-      if (!session?.user) {
-        toast.warning('Login Required', 'Please login to add items to cart')
-        localStorage.setItem(
-          'redirect_after_login',
-          window.location.pathname || `/products/${product.slug}`
-        )
-        router.push('/auth/login')
-        setAddingToCart(false)
-        return
-      }
-
-      const { data: existingItem } = await supabase
-        .from('cart_items')
-        .select('*')
-        .eq('user_id', session.user.id)
-        .eq('product_id', product.id)
-        .single()
-
-      if (existingItem) {
-        const { error } = await supabase
-          .from('cart_items')
-          .update({ quantity: existingItem.quantity + quantity })
-          .eq('id', existingItem.id)
-
-        if (error) throw error
-      } else {
-        const { error } = await supabase.from('cart_items').insert({
-          user_id: session.user.id,
-          product_id: product.id,
-          quantity: quantity,
-        })
-
-        if (error) throw error
-      }
-
-      incrementCartCount(quantity)
+      addItem(
+        {
+          id: product.id,
+          name: product.name,
+          slug: product.slug,
+          price: product.price,
+          image_url: product.image_url,
+        },
+        quantity
+      )
       toast.success('Added to Cart!', `${quantity} x ${product.name} added to your cart`)
-      await refreshCartCount()
     } catch (error) {
       console.error('Error adding to cart:', error)
       toast.error('Failed to Add', 'Could not add product to cart. Please try again.')
-      await refreshCartCount()
     } finally {
       setAddingToCart(false)
     }
