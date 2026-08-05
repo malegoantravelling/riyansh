@@ -14,6 +14,7 @@ export interface CartItem {
 interface CartContextType {
   items: CartItem[]
   cartCount: number
+  isLoaded: boolean
   addItem: (product: Omit<CartItem, 'quantity'>, quantity?: number) => void
   updateQuantity: (productId: string, quantity: number) => void
   removeItem: (productId: string) => void
@@ -99,6 +100,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       value={{
         items,
         cartCount,
+        isLoaded,
         addItem,
         updateQuantity,
         removeItem,

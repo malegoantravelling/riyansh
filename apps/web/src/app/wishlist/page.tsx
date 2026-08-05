@@ -3,38 +3,25 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { useRouter } from 'next/navigation'
 import { Trash2, Package, Heart, ShoppingBag, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useWishlist, WishlistItem } from '@/contexts/WishlistContext'
-import { useCart } from '@/contexts/CartContext'
 import { useToast } from '@/contexts/ToastContext'
+import { openWhatsAppOrder } from '@/lib/whatsapp'
 
 export default function WishlistPage() {
   const { wishlistItems, removeFromWishlist } = useWishlist()
-  const { addItem } = useCart()
   const toast = useToast()
-  const router = useRouter()
   const [processingId, setProcessingId] = useState<string | null>(null)
   const [processingCheckout, setProcessingCheckout] = useState(false)
-
-  const toCartProduct = (item: WishlistItem) => ({
-    id: item.id,
-    name: item.name,
-    slug: item.slug,
-    price: item.price,
-    image_url: item.image_url,
-  })
 
   const handleCheckoutSingle = (item: WishlistItem) => {
     setProcessingId(item.id)
     try {
-      addItem(toCartProduct(item), 1)
-      router.push('/checkout')
+      openWhatsAppOrder([{ name: item.name, quantity: 1, price: item.price }])
     } catch (error) {
       console.error('Error adding item for checkout:', error)
       toast.error('Error', 'Could not process item. Please try again.')
-    } finally {
       setProcessingId(null)
     }
   }
@@ -44,15 +31,12 @@ export default function WishlistPage() {
 
     setProcessingCheckout(true)
     try {
-      for (const item of wishlistItems) {
-        addItem(toCartProduct(item), 1)
-      }
-      toast.success('Proceeding to Checkout', 'All wishlist items added to your cart.')
-      router.push('/checkout')
+      openWhatsAppOrder(
+        wishlistItems.map((item) => ({ name: item.name, quantity: 1, price: item.price }))
+      )
     } catch (error) {
       console.error('Error during checkout all:', error)
       toast.error('Error', 'Could not process checkout. Please try again.')
-    } finally {
       setProcessingCheckout(false)
     }
   }

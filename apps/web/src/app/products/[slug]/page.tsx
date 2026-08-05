@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import {
   Star,
@@ -14,6 +14,7 @@ import { useToast } from '@/contexts/ToastContext'
 import { useCart } from '@/contexts/CartContext'
 import ProductCard from '@/components/ProductCard'
 import ProductShare from '@/components/ProductShare'
+import { openWhatsAppOrder } from '@/lib/whatsapp'
 
 interface Product {
   id: string
@@ -32,7 +33,6 @@ interface Product {
 
 export default function ProductDetailsPage() {
   const params = useParams()
-  const router = useRouter()
   const toast = useToast()
   const { addItem } = useCart()
   const [product, setProduct] = useState<Product | null>(null)
@@ -85,17 +85,7 @@ export default function ProductDetailsPage() {
     if (!product) return
 
     try {
-      addItem(
-        {
-          id: product.id,
-          name: product.name,
-          slug: product.slug,
-          price: product.price,
-          image_url: product.image_url,
-        },
-        quantity
-      )
-      router.push('/checkout')
+      openWhatsAppOrder([{ name: product.name, quantity, price: product.price }])
     } catch (error) {
       console.error('Error processing Buy Now:', error)
       toast.error('Error', 'Could not process Buy Now. Please try again.')

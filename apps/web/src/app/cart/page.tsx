@@ -1,16 +1,15 @@
 'use client'
 
 import React, { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import Image from 'next/image'
 import Link from 'next/link'
 import { ShoppingBag, Package } from 'lucide-react'
 import { useCart } from '@/contexts/CartContext'
+import { openWhatsAppOrder } from '@/lib/whatsapp'
 
 export default function CartPage() {
-  const router = useRouter()
-  const { items, updateQuantity, removeItem } = useCart()
+  const { items, updateQuantity, removeItem, clearCart } = useCart()
   const [orderNote, setOrderNote] = useState('')
 
   const calculateSubtotal = () => {
@@ -19,12 +18,11 @@ export default function CartPage() {
 
   const handleCheckout = () => {
     if (items.length === 0) return
-    if (orderNote.trim()) {
-      localStorage.setItem('order_note', orderNote)
-    } else {
-      localStorage.removeItem('order_note')
-    }
-    router.push('/checkout')
+    openWhatsAppOrder(
+      items.map((item) => ({ name: item.name, quantity: item.quantity, price: item.price })),
+      orderNote
+    )
+    clearCart()
   }
 
   return (

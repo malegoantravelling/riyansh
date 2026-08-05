@@ -3,13 +3,13 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { ShoppingCart, Star, Heart } from 'lucide-react'
 import { useToast } from '@/contexts/ToastContext'
 import { useCart } from '@/contexts/CartContext'
 import { useWishlist } from '@/contexts/WishlistContext'
 import ProductShare from '@/components/ProductShare'
+import { openWhatsAppOrder } from '@/lib/whatsapp'
 
 interface ProductCardProps {
   product: {
@@ -31,7 +31,6 @@ interface ProductCardProps {
 export default function ProductCard({ product }: ProductCardProps) {
   const [addingToCart, setAddingToCart] = useState(false)
   const [buyingNow, setBuyingNow] = useState(false)
-  const router = useRouter()
   const toast = useToast()
   const { addItem } = useCart()
   const { isInWishlist, toggleWishlist } = useWishlist()
@@ -91,8 +90,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
     setBuyingNow(true)
     try {
-      addItem(cartProduct, 1)
-      router.push('/checkout')
+      openWhatsAppOrder([{ name: product.name, quantity: 1, price: product.price }])
     } catch (error) {
       console.error('Error processing Buy Now:', error)
       toast.error('Error', 'Could not process Buy Now. Please try again.')

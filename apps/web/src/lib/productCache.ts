@@ -17,6 +17,18 @@ interface CacheEntry {
 // 5-minute TTL (milliseconds)
 const TTL_MS = 5 * 60 * 1000
 
+function isAmritJuice(product: { name?: string; slug?: string }) {
+  const name = (product.name || '').toLowerCase()
+  const slug = (product.slug || '').toLowerCase()
+  return name.includes('amrit juice') || slug.includes('amrit-juice') || slug.includes('riyansh-amrit')
+}
+
+export function prioritizeAmritJuice<T extends { name?: string; slug?: string }>(products: T[]): T[] {
+  const featured = products.filter(isAmritJuice)
+  const rest = products.filter((product) => !isAmritJuice(product))
+  return [...featured, ...rest]
+}
+
 // Module-level singleton cache
 let cache: CacheEntry | null = null
 
@@ -46,8 +58,9 @@ export async function getCachedProducts(): Promise<any[]> {
         .order('created_at', { ascending: false })
 
       if (!error && Array.isArray(data) && data.length > 0) {
-        cache = { data, fetchedAt: Date.now() }
-        return data
+        const ordered = prioritizeAmritJuice(data)
+        cache = { data: ordered, fetchedAt: Date.now() }
+        return ordered
       }
 
       // Return stale cache if network error and we have old data

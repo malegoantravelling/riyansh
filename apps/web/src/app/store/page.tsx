@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import ProductCard from '@/components/ProductCard'
 import ProductCardSkeleton from '@/components/ProductCardSkeleton'
 import { Button } from '@/components/ui/button'
-import { getCachedProducts } from '@/lib/productCache'
+import { getCachedProducts, prioritizeAmritJuice } from '@/lib/productCache'
 import { Search, ArrowUpDown, SlidersHorizontal, X } from 'lucide-react'
 
 export default function StorePage() {
@@ -59,6 +59,8 @@ export default function StorePage() {
       result.sort((a, b) => b.price - a.price)
     } else if (sortBy === 'newest') {
       result.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+    } else {
+      result = prioritizeAmritJuice(result)
     }
 
     setProducts(result)
