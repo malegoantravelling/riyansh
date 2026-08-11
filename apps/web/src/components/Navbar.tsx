@@ -1,11 +1,12 @@
 'use client'
 
 import Link from 'next/link'
-import { ShoppingCart, Heart, Phone, Menu, X } from 'lucide-react'
+import { ShoppingCart, Heart, Phone, Menu, X, User, LogOut, Package } from 'lucide-react'
 import { useState } from 'react'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useCart } from '@/contexts/CartContext'
 import { useWishlist } from '@/contexts/WishlistContext'
+import { useAuth } from '@/contexts/AuthContext'
 
 const categoryLinks = [
   { href: '/', label: 'Home', match: (path: string) => path === '/' },
@@ -20,13 +21,22 @@ const categoryLinks = [
 
 export default function Navbar() {
   const pathname = usePathname()
+  const router = useRouter()
   const { cartCount } = useCart()
   const { wishlistCount } = useWishlist()
+  const { user, loading, signOut } = useAuth()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [accountOpen, setAccountOpen] = useState(false)
+
+  const handleSignOut = async () => {
+    setAccountOpen(false)
+    await signOut()
+    router.push('/')
+    router.refresh()
+  }
 
   return (
     <header className="w-full relative bg-white shadow-[0_1px_0_rgba(0,0,0,0.04)]">
-      {/* ── Tier 1: Utility bar ── */}
       <div className="bg-[#F6F0E2]">
         <div className="max-w-[1200px] mx-auto px-4 sm:px-6 h-9 flex items-center justify-between gap-4">
           <div className="flex items-center gap-4 sm:gap-5 min-w-0">
@@ -42,9 +52,55 @@ export default function Navbar() {
                 </span>
               )}
             </Link>
+
+            {!loading && (
+              <div className="relative">
+                {user ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => setAccountOpen((v) => !v)}
+                      className="inline-flex items-center gap-1.5 text-[12px] font-medium tracking-[0.08em] uppercase text-[#555555] hover:text-ayurveda-green transition-colors"
+                    >
+                      <User className="h-3.5 w-3.5" strokeWidth={1.5} />
+                      <span className="hidden sm:inline max-w-[120px] truncate">
+                        {user.user_metadata?.full_name || user.email?.split('@')[0] || 'Account'}
+                      </span>
+                    </button>
+                    {accountOpen && (
+                      <div className="absolute left-0 top-full mt-2 z-50 w-48 bg-white border border-[#EEEEEE] shadow-lg py-1">
+                        <Link
+                          href="/account/orders"
+                          onClick={() => setAccountOpen(false)}
+                          className="flex items-center gap-2 px-3 py-2 text-sm text-[#333] hover:bg-[#F6F0E2]"
+                        >
+                          <Package className="h-4 w-4" />
+                          My Orders
+                        </Link>
+                        <button
+                          type="button"
+                          onClick={handleSignOut}
+                          className="w-full flex items-center gap-2 px-3 py-2 text-sm text-[#333] hover:bg-[#F6F0E2]"
+                        >
+                          <LogOut className="h-4 w-4" />
+                          Sign out
+                        </button>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <Link
+                    href="/login"
+                    className="inline-flex items-center gap-1.5 text-[12px] font-medium tracking-[0.08em] uppercase text-[#555555] hover:text-ayurveda-green transition-colors"
+                  >
+                    <User className="h-3.5 w-3.5" strokeWidth={1.5} />
+                    <span className="hidden sm:inline">Login</span>
+                  </Link>
+                )}
+              </div>
+            )}
           </div>
 
-          {/* Cart — aligned to content container */}
           <Link
             href="/cart"
             className="shrink-0 h-9 inline-flex items-center gap-1.5 bg-ayurveda-green text-white px-4 text-[12px] font-semibold tracking-[0.1em] uppercase hover:bg-ayurveda-green-dark transition-colors"
@@ -60,10 +116,8 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* ── Tier 2: Brand + contact + mobile menu ── */}
       <div className="bg-white border-b border-[#EEEEEE]">
         <div className="max-w-[1200px] mx-auto px-4 sm:px-6 py-3.5 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-          {/* Logo */}
           <Link href="/" className="flex flex-col shrink-0">
             <span className="text-[26px] lg:text-[28px] leading-none font-extrabold tracking-tight">
               <span className="text-[#222222]">RIY</span>
@@ -74,7 +128,6 @@ export default function Navbar() {
             </span>
           </Link>
 
-          {/* Contact */}
           <div className="hidden lg:flex items-center gap-6 xl:gap-8 flex-1 justify-center">
             <a
               href="tel:+918605911293"
@@ -92,7 +145,6 @@ export default function Navbar() {
             </a>
           </div>
 
-          {/* Mobile menu toggle */}
           <div className="relative flex items-center gap-2 shrink-0 ml-auto sm:ml-0">
             <button
               type="button"
@@ -106,7 +158,6 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* ── Tier 3: Category nav ── */}
       <nav className="bg-ayurveda-green">
         <div className="max-w-[1200px] mx-auto px-2 sm:px-4">
           <ul className="hidden lg:flex items-stretch justify-center h-10">
@@ -129,7 +180,6 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* Mobile menu */}
       {mobileMenuOpen && (
         <div className="lg:hidden bg-white border-b border-gray-100 shadow-lg">
           <div className="px-4 py-4 space-y-1">
@@ -152,6 +202,35 @@ export default function Navbar() {
             })}
 
             <div className="pt-3 mt-2 border-t border-gray-100 space-y-1">
+              {user ? (
+                <>
+                  <Link
+                    href="/account/orders"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block px-3 py-2 text-sm text-[#666666]"
+                  >
+                    My Orders
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMobileMenuOpen(false)
+                      void handleSignOut()
+                    }}
+                    className="block w-full text-left px-3 py-2 text-sm text-[#666666]"
+                  >
+                    Sign out
+                  </button>
+                </>
+              ) : (
+                <Link
+                  href="/login"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block px-3 py-2 text-sm text-[#666666]"
+                >
+                  Login / Sign up
+                </Link>
+              )}
               <a
                 href="tel:+918605911293"
                 className="flex items-center gap-2 px-3 py-2 text-sm text-[#666666]"

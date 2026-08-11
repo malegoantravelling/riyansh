@@ -9,7 +9,8 @@ import { useToast } from '@/contexts/ToastContext'
 import { useCart } from '@/contexts/CartContext'
 import { useWishlist } from '@/contexts/WishlistContext'
 import ProductShare from '@/components/ProductShare'
-import { openWhatsAppOrder } from '@/lib/whatsapp'
+import { useRouter } from 'next/navigation'
+import { useAuth } from '@/contexts/AuthContext'
 
 interface ProductCardProps {
   product: {
@@ -32,6 +33,8 @@ export default function ProductCard({ product }: ProductCardProps) {
   const [addingToCart, setAddingToCart] = useState(false)
   const [buyingNow, setBuyingNow] = useState(false)
   const toast = useToast()
+  const router = useRouter()
+  const { user } = useAuth()
   const { addItem } = useCart()
   const { isInWishlist, toggleWishlist } = useWishlist()
 
@@ -90,7 +93,12 @@ export default function ProductCard({ product }: ProductCardProps) {
 
     setBuyingNow(true)
     try {
-      openWhatsAppOrder([{ name: product.name, quantity: 1, price: product.price }])
+      addItem(cartProduct, 1)
+      if (!user) {
+        router.push('/login?next=/checkout')
+        return
+      }
+      router.push('/checkout')
     } catch (error) {
       console.error('Error processing Buy Now:', error)
       toast.error('Error', 'Could not process Buy Now. Please try again.')

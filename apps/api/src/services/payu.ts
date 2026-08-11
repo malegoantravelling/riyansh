@@ -1,0 +1,244 @@
+import crypto from 'crypto'
+
+function trimEnv(value: string | undefined): string {
+  return (value || '').trim()
+}
+
+export type PayUMode = 'test' | 'production'
+
+const TEST_BASE_URL = 'https://test.payu.in'
+const PRODUCTION_BASE_URL = 'https://secure.payu.in'
+
+function resolvePayUMode(): PayUMode {
+  const explicit = trimEnv(process.env.PAYU_MODE).toLowerCase()
+  if (explicit === 'production' || explicit === 'live') return 'production'
+  if (explicit === 'test') return 'test'
+
+  const baseUrl = trimEnv(process.env.PAYU_BASE_URL).toLowerCase()
+  if (baseUrl.includes('secure.payu.in')) return 'production'
+  return 'test'
+}
+
+function resolveBaseUrl(mode: PayUMode): string {
+  const configured = trimEnv(process.env.PAYU_BASE_URL)
+  if (configured) {
+    const lower = configured.toLowerCase()
+    if (mode === 'test' && lower.includes('secure.payu.in')) {
+      throw new Error(
+        'PayU misconfiguration: PAYU_MODE=test requires https://test.payu.in, not secure.payu.in. ' +
+          'Use Test Mode key/salt from PayU Dashboard (Developer → API Keys).'
+      )
+    }
+    if (mode === 'production' && lower.includes('test.payu.in')) {
+      throw new Error(
+        'PayU misconfiguration: PAYU_MODE=production requires https://secure.payu.in, not test.payu.in. ' +
+          'Use Live Mode key/salt from PayU Dashboard.'
+      )
+    }
+    return configured.replace(/\/$/, '')
+  }
+  return mode === 'production' ? PRODUCTION_BASE_URL : TEST_BASE_URL
+}
+
+export function getPayUConfig() {
+  const mode = resolvePayUMode()
+  const key = trimEnv(process.env.PAYU_KEY)
+  const salt = trimEnv(process.env.PAYU_SALT)
+  const baseUrl = resolveBaseUrl(mode)
+  const surl = trimEnv(process.env.PAYU_SURL)
+  const furl = trimEnv(process.env.PAYU_FURL)
+  const siteUrl =
+    trimEnv(process.env.NEXT_PUBLIC_SITE_URL) ||
+    trimEnv(process.env.SITE_URL) ||
+    'http://localhost:3000'
+
+  if (!key || !salt) {
+    throw new Error('PAYU_KEY and PAYU_SALT must be configured')
+  }
+  if (!surl || !furl) {
+    throw new Error('PAYU_SURL and PAYU_FURL must be configured')
+  }
+
+  return {
+    mode,
+    key,
+    salt,
+    baseUrl,
+    paymentUrl: `${baseUrl}/_payment`,
+    surl,
+    furl,
+    siteUrl,
+  }
+}
+
+export interface PayUHashParams {
+  key: string
+  txnid: string
+  amount: string
+  productinfo: string
+  firstname: string
+  email: string
+  udf1?: string
+  udf2?: string
+  udf3?: string
+  udf4?: string
+  udf5?: string
+  salt: string
+}
+
+/** Request hash: sha512(key|txnid|amount|productinfo|firstname|email|udf1|udf2|udf3|udf4|udf5||||||SALT) */
+export function generatePaymentHash(params: PayUHashParams): string {
+  const parts = [
+    params.key,
+    params.txnid,
+    params.amount,
+    params.productinfo,
+    params.firstname,
+    params.email,
+    params.udf1 || '',
+    params.udf2 || '',
+    params.udf3 || '',
+    params.udf4 || '',
+    params.udf5 || '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    params.salt,
+  ]
+  return crypto.createHash('sha512').update(parts.join('|')).digest('hex')
+}
+
+export interface PayUCallbackFields {
+  key?: string
+  txnid?: string
+  amount?: string
+  productinfo?: string
+  firstname?: string
+  email?: string
+  status?: string
+  hash?: string
+  udf1?: string
+  udf2?: string
+  udf3?: string
+  udf4?: string
+  udf5?: string
+  additionalCharges?: string
+}
+
+/**
+ * Reverse hash:
+ * sha512(SALT|status||||||udf5|udf4|udf3|udf2|udf1|email|firstname|productinfo|amount|txnid|key)
+ * With additionalCharges: sha512(additionalCharges|SALT|status|...)
+ */
+export function verifyReverseHash(fields: PayUCallbackFields, salt: string): boolean {
+  if (!fields.hash || !fields.status || !fields.txnid || !fields.key) {
+    return false
+  }
+
+  const udf1 = fields.udf1 || ''
+  const udf2 = fields.udf2 || ''
+  const udf3 = fields.udf3 || ''
+  const udf4 = fields.udf4 || ''
+  const udf5 = fields.udf5 || ''
+  const email = fields.email || ''
+  const firstname = fields.firstname || ''
+  const productinfo = fields.productinfo || ''
+  const amount = fields.amount || ''
+
+  let hashString = `${salt}|${fields.status}||||||${udf5}|${udf4}|${udf3}|${udf2}|${udf1}|${email}|${firstname}|${productinfo}|${amount}|${fields.txnid}|${fields.key}`
+
+  if (fields.additionalCharges) {
+    hashString = `${fields.additionalCharges}|${hashString}`
+  }
+
+  const expected = crypto.createHash('sha512').update(hashString).digest('hex')
+  return expected.toLowerCase() === fields.hash.toLowerCase()
+}
+
+export function formatPayUAmount(amount: number): string {
+  return Number(amount).toFixed(2)
+}
+
+export function generateTxnId(): string {
+  return `RYN${Date.now()}${crypto.randomBytes(3).toString('hex')}`
+}
+
+export function getPayUInfoUrl(mode: PayUMode = resolvePayUMode()): string {
+  return mode === 'production'
+    ? 'https://info.payu.in/merchant/postservice.php?form=2'
+    : 'https://test.payu.in/merchant/postservice.php?form=2'
+}
+
+export function generateCommandHash(key: string, command: string, var1: string, salt: string): string {
+  return crypto.createHash('sha512').update(`${key}|${command}|${var1}|${salt}`).digest('hex')
+}
+
+export function isPayUSuccessStatus(status: string | undefined | null): boolean {
+  const s = String(status || '').toLowerCase()
+  return s === 'success' || s === 'captured'
+}
+
+export function isPayUPendingStatus(status: string | undefined | null): boolean {
+  const s = String(status || '').toLowerCase()
+  return s === 'pending' || s === 'in progress' || s === 'initiated' || s === 'auth'
+}
+
+export interface PayUVerifiedTxn {
+  txnid: string
+  status: string
+  unmappedstatus?: string
+  mihpayid?: string
+  mode?: string
+  amount?: string
+  bank_ref_num?: string
+  error_Message?: string
+  udf1?: string
+  raw: Record<string, unknown>
+}
+
+/** Verify txn status with PayU (needed when UPI Intent never redirects back). */
+export async function verifyPayUPayment(txnid: string): Promise<PayUVerifiedTxn | null> {
+  const payu = getPayUConfig()
+  const command = 'verify_payment'
+  const hash = generateCommandHash(payu.key, command, txnid, payu.salt)
+  const body = new URLSearchParams({
+    key: payu.key,
+    command,
+    var1: txnid,
+    hash,
+  })
+
+  const response = await fetch(getPayUInfoUrl(payu.mode), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body,
+  })
+
+  const text = await response.text()
+  let json: any
+  try {
+    json = JSON.parse(text)
+  } catch {
+    throw new Error(`PayU verify_payment returned non-JSON: ${text.slice(0, 200)}`)
+  }
+
+  const details = json?.transaction_details?.[txnid]
+  if (!details) {
+    return null
+  }
+
+  return {
+    txnid,
+    status: String(details.status || ''),
+    unmappedstatus: details.unmappedstatus ? String(details.unmappedstatus) : undefined,
+    mihpayid: details.mihpayid ? String(details.mihpayid) : undefined,
+    mode: details.mode ? String(details.mode) : undefined,
+    amount: details.amt || details.transaction_amount || details.amount,
+    bank_ref_num: details.bank_ref_num ? String(details.bank_ref_num) : undefined,
+    error_Message: details.error_Message ? String(details.error_Message) : undefined,
+    udf1: details.udf1 ? String(details.udf1) : undefined,
+    raw: details,
+  }
+}

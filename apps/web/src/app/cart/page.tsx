@@ -4,12 +4,15 @@ import React, { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { ShoppingBag, Package } from 'lucide-react'
 import { useCart } from '@/contexts/CartContext'
-import { openWhatsAppOrder } from '@/lib/whatsapp'
+import { useAuth } from '@/contexts/AuthContext'
 
 export default function CartPage() {
-  const { items, updateQuantity, removeItem, clearCart } = useCart()
+  const router = useRouter()
+  const { items, updateQuantity, removeItem } = useCart()
+  const { user } = useAuth()
   const [orderNote, setOrderNote] = useState('')
 
   const calculateSubtotal = () => {
@@ -18,11 +21,18 @@ export default function CartPage() {
 
   const handleCheckout = () => {
     if (items.length === 0) return
-    openWhatsAppOrder(
-      items.map((item) => ({ name: item.name, quantity: item.quantity, price: item.price })),
-      orderNote
-    )
-    clearCart()
+    if (orderNote) {
+      try {
+        sessionStorage.setItem('riyansh_checkout_note', orderNote)
+      } catch {
+        // ignore
+      }
+    }
+    if (!user) {
+      router.push('/login?next=/checkout')
+      return
+    }
+    router.push('/checkout')
   }
 
   return (

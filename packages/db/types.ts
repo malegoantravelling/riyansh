@@ -46,14 +46,35 @@ export interface CartItem {
   product?: Product
 }
 
+export interface WishlistItem {
+  id: string
+  user_id: string
+  product_id: string
+  created_at: string
+  product?: Product
+}
+
+export type OrderStatus =
+  | 'pending'
+  | 'paid'
+  | 'failed'
+  | 'processing'
+  | 'shipped'
+  | 'delivered'
+  | 'cancelled'
+
 export interface Order {
   id: string
   user_id: string
   total_amount: number
-  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled'
-  shipping_address?: any
-  billing_address?: any
+  status: OrderStatus
+  shipping_address?: Record<string, unknown>
+  billing_address?: Record<string, unknown>
   notes?: string
+  payu_txnid?: string
+  payu_mihpayid?: string
+  payu_status?: string
+  paid_at?: string
   created_at: string
   updated_at: string
   items?: OrderItem[]
@@ -68,4 +89,22 @@ export interface OrderItem {
   quantity: number
   price: number
   created_at: string
+}
+
+export interface Transaction {
+  id: string
+  user_id?: string
+  order_id?: string
+  amount: number
+  currency: string
+  status: string
+  payment_method?: string
+  description?: string
+  payu_txnid?: string
+  mihpayid?: string
+  mode?: string
+  raw_response?: Record<string, unknown>
+  metadata?: Record<string, unknown>
+  created_at: string
+  updated_at: string
 }

@@ -131,4 +131,51 @@ router.delete('/', async (req: AuthRequest, res) => {
   }
 })
 
+/** Merge local cart items into DB cart (set absolute quantities from client). */
+router.post('/sync', async (req: AuthRequest, res) => {
+  try {
+    const userId = req.user?.id
+    const items: Array<{ product_id: string; quantity: number }> = Array.isArray(req.body?.items)
+      ? req.body.items
+      : []
+
+    for (const item of items) {
+      if (!item.product_id || !item.quantity || item.quantity < 1) continue
+
+      const { data: existing } = await supabase
+        .from('cart_items')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('product_id', item.product_id)
+        .maybeSingle()
+
+      if (existing) {
+        await supabase
+          .from('cart_items')
+          .update({ quantity: Math.max(existing.quantity, item.quantity) })
+          .eq('id', existing.id)
+      } else {
+        await supabase.from('cart_items').insert({
+          user_id: userId,
+          product_id: item.product_id,
+          quantity: item.quantity,
+        })
+      }
+    }
+
+    const { data, error } = await supabase
+      .from('cart_items')
+      .select('*, product:products(*)')
+      .eq('user_id', userId)
+
+    if (error) {
+      return res.status(400).json({ error: error.message })
+    }
+
+    res.json(data)
+  } catch (error: any) {
+    res.status(500).json({ error: error.message })
+  }
+})
+
 export default router

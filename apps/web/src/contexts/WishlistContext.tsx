@@ -1,6 +1,15 @@
 'use client'
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react'
+import { useAuth } from '@/contexts/AuthContext'
 
 export interface WishlistItem {
   id: string
@@ -25,11 +34,31 @@ const WishlistContext = createContext<WishlistContextType | undefined>(undefined
 
 const WISHLIST_STORAGE_KEY = 'riyansh_wishlist_v1'
 
+const apiBase = () =>
+  process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || 'http://localhost:4000'
+
+function mapApiWishlist(rows: any[]): WishlistItem[] {
+  return (rows || [])
+    .filter((row) => row.product)
+    .map((row) => ({
+      id: row.product_id || row.product.id,
+      name: row.product.name,
+      slug: row.product.slug,
+      price: Number(row.product.price),
+      compare_at_price: row.product.compare_at_price
+        ? Number(row.product.compare_at_price)
+        : undefined,
+      image_url: row.product.image_url,
+      stock_quantity: row.product.stock_quantity,
+    }))
+}
+
 export function WishlistProvider({ children }: { children: ReactNode }) {
+  const { accessToken, user } = useAuth()
   const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([])
   const [isLoaded, setIsLoaded] = useState(false)
+  const syncedForUser = useRef<string | null>(null)
 
-  // Load wishlist from localStorage on mount
   useEffect(() => {
     try {
       const stored = localStorage.getItem(WISHLIST_STORAGE_KEY)
@@ -43,7 +72,6 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  // Sync with localStorage on changes
   useEffect(() => {
     if (!isLoaded) return
     try {
@@ -53,27 +81,94 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
     }
   }, [wishlistItems, isLoaded])
 
+  const syncWishlist = useCallback(async () => {
+    if (!accessToken) return
+    const localIds = (() => {
+      try {
+        const stored = JSON.parse(localStorage.getItem(WISHLIST_STORAGE_KEY) || '[]') as WishlistItem[]
+        return stored.map((i) => i.id)
+      } catch {
+        return wishlistItems.map((i) => i.id)
+      }
+    })()
+
+    const res = await fetch(`${apiBase()}/api/wishlist/sync`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ product_ids: localIds }),
+    })
+
+    if (!res.ok) return
+    const data = await res.json()
+    setWishlistItems(mapApiWishlist(data))
+  }, [accessToken, wishlistItems])
+
+  useEffect(() => {
+    if (!isLoaded || !accessToken || !user) {
+      if (!user) syncedForUser.current = null
+      return
+    }
+    if (syncedForUser.current === user.id) return
+    syncedForUser.current = user.id
+    void syncWishlist().catch(console.error)
+  }, [accessToken, user, isLoaded, syncWishlist])
+
   const isInWishlist = (productId: string): boolean => {
     return wishlistItems.some((item) => item.id === productId)
   }
 
   const toggleWishlist = (product: WishlistItem) => {
+    const exists = wishlistItems.some((item) => item.id === product.id)
     setWishlistItems((prev) => {
-      const exists = prev.some((item) => item.id === product.id)
       if (exists) {
         return prev.filter((item) => item.id !== product.id)
-      } else {
-        return [...prev, product]
       }
+      return [...prev, product]
     })
+
+    if (accessToken) {
+      if (exists) {
+        void fetch(`${apiBase()}/api/wishlist/${product.id}`, {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }).catch(console.error)
+      } else {
+        void fetch(`${apiBase()}/api/wishlist`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ product_id: product.id }),
+        }).catch(console.error)
+      }
+    }
   }
 
   const removeFromWishlist = (productId: string) => {
     setWishlistItems((prev) => prev.filter((item) => item.id !== productId))
+    if (accessToken) {
+      void fetch(`${apiBase()}/api/wishlist/${productId}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${accessToken}` },
+      }).catch(console.error)
+    }
   }
 
   const clearWishlist = () => {
+    const ids = wishlistItems.map((i) => i.id)
     setWishlistItems([])
+    if (accessToken) {
+      ids.forEach((id) => {
+        void fetch(`${apiBase()}/api/wishlist/${id}`, {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }).catch(console.error)
+      })
+    }
   }
 
   return (

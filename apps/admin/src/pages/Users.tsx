@@ -9,6 +9,7 @@ interface User {
   id: string
   full_name: string
   email: string
+  avatar_url?: string
   created_at: string
 }
 
@@ -303,7 +304,20 @@ export default function Users() {
               {filteredUsers.map((user) => (
                 <tr key={user.id}>
                   <td className="px-6 py-4 text-sm font-medium text-gray-900">
-                    {user.full_name || '-'}
+                    <div className="flex items-center gap-3">
+                      {user.avatar_url ? (
+                        <img
+                          src={user.avatar_url}
+                          alt=""
+                          className="h-8 w-8 rounded-full object-cover border border-gray-200"
+                        />
+                      ) : (
+                        <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center">
+                          <User className="h-4 w-4 text-gray-400" />
+                        </div>
+                      )}
+                      <span>{user.full_name || '-'}</span>
+                    </div>
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-500">{user.email}</td>
                   <td className="px-6 py-4 text-sm text-gray-500">

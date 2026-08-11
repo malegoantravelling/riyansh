@@ -14,7 +14,8 @@ import { useToast } from '@/contexts/ToastContext'
 import { useCart } from '@/contexts/CartContext'
 import ProductCard from '@/components/ProductCard'
 import ProductShare from '@/components/ProductShare'
-import { openWhatsAppOrder } from '@/lib/whatsapp'
+import { useRouter } from 'next/navigation'
+import { useAuth } from '@/contexts/AuthContext'
 
 interface Product {
   id: string
@@ -33,7 +34,9 @@ interface Product {
 
 export default function ProductDetailsPage() {
   const params = useParams()
+  const router = useRouter()
   const toast = useToast()
+  const { user } = useAuth()
   const { addItem } = useCart()
   const [product, setProduct] = useState<Product | null>(null)
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([])
@@ -85,7 +88,21 @@ export default function ProductDetailsPage() {
     if (!product) return
 
     try {
-      openWhatsAppOrder([{ name: product.name, quantity, price: product.price }])
+      addItem(
+        {
+          id: product.id,
+          name: product.name,
+          slug: product.slug,
+          price: product.price,
+          image_url: product.image_url,
+        },
+        quantity
+      )
+      if (!user) {
+        router.push('/login?next=/checkout')
+        return
+      }
+      router.push('/checkout')
     } catch (error) {
       console.error('Error processing Buy Now:', error)
       toast.error('Error', 'Could not process Buy Now. Please try again.')
@@ -450,7 +467,7 @@ export default function ProductDetailsPage() {
               <p>• <strong>Express Dispatch:</strong> Orders are processed and shipped within 24 hours of placement.</p>
               <p>• <strong>Free Delivery:</strong> Enjoy free express shipping on orders over ₹500 across all pin codes in India.</p>
               <p>• <strong>Easy Returns:</strong> 7-day hassle-free return and exchange policy for unopened products.</p>
-              <p>• <strong>Customer Support:</strong> Call or WhatsApp +91 8605911293 for tracking assistance.</p>
+              <p>• <strong>Customer Support:</strong> Call +91 8605911293 for tracking assistance.</p>
             </div>
           )}
         </div>

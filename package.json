@@ -23,6 +23,7 @@
     "packages/*"
   ],
   "dependencies": {
-    "nodemailer": "^7.0.10"
+    "next": "16.3.0",
+    "nodemailer": "^9.0.5"
   }
 }

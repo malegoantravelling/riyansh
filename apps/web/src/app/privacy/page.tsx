@@ -51,7 +51,7 @@ export default function PrivacyPage() {
       content: [
         'We implement industry-standard security measures to protect your personal information:',
         '• SSL encryption for all data transmissions',
-        '• Secure payment gateways (Razorpay)',
+        '• Secure payment gateways (PayU Hosted Checkout)',
         '• Regular security audits and updates',
         '• Access controls and authentication measures',
         '• Firewall and intrusion detection systems',

@@ -3,22 +3,46 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 import { Trash2, Package, Heart, ShoppingBag, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useWishlist, WishlistItem } from '@/contexts/WishlistContext'
+import { useCart } from '@/contexts/CartContext'
+import { useAuth } from '@/contexts/AuthContext'
 import { useToast } from '@/contexts/ToastContext'
-import { openWhatsAppOrder } from '@/lib/whatsapp'
 
 export default function WishlistPage() {
+  const router = useRouter()
   const { wishlistItems, removeFromWishlist } = useWishlist()
+  const { addItem } = useCart()
+  const { user } = useAuth()
   const toast = useToast()
   const [processingId, setProcessingId] = useState<string | null>(null)
   const [processingCheckout, setProcessingCheckout] = useState(false)
 
+  const moveToCart = (item: WishlistItem) => {
+    addItem(
+      {
+        id: item.id,
+        name: item.name,
+        slug: item.slug,
+        price: item.price,
+        image_url: item.image_url,
+      },
+      1
+    )
+    removeFromWishlist(item.id)
+  }
+
   const handleCheckoutSingle = (item: WishlistItem) => {
     setProcessingId(item.id)
     try {
-      openWhatsAppOrder([{ name: item.name, quantity: 1, price: item.price }])
+      moveToCart(item)
+      if (!user) {
+        router.push('/login?next=/checkout')
+        return
+      }
+      router.push('/checkout')
     } catch (error) {
       console.error('Error adding item for checkout:', error)
       toast.error('Error', 'Could not process item. Please try again.')
@@ -31,9 +55,12 @@ export default function WishlistPage() {
 
     setProcessingCheckout(true)
     try {
-      openWhatsAppOrder(
-        wishlistItems.map((item) => ({ name: item.name, quantity: 1, price: item.price }))
-      )
+      wishlistItems.forEach((item) => moveToCart(item))
+      if (!user) {
+        router.push('/login?next=/checkout')
+        return
+      }
+      router.push('/checkout')
     } catch (error) {
       console.error('Error during checkout all:', error)
       toast.error('Error', 'Could not process checkout. Please try again.')
@@ -41,11 +68,15 @@ export default function WishlistPage() {
     }
   }
 
+  const handleAddToCart = (item: WishlistItem) => {
+    moveToCart(item)
+    toast.success('Added to cart', `${item.name} moved to your cart.`)
+  }
+
   const subtotal = wishlistItems.reduce((acc, item) => acc + item.price, 0)
 
   return (
     <div className="min-h-screen bg-white text-[#1A1A1A]">
-      {/* Top Breadcrumb Header Bar */}
       <div className="bg-[#FAF9F5] border-b border-gray-200 py-3 text-center">
         <div className="max-w-7xl mx-auto px-4 text-xs sm:text-sm text-gray-600 font-medium">
           <Link href="/" className="hover:text-[#5B8C51] transition-colors">
@@ -56,9 +87,7 @@ export default function WishlistPage() {
         </div>
       </div>
 
-      {/* Main Page Content */}
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-        {/* Title */}
         <h1 className="text-3xl sm:text-4xl font-bold text-center text-[#1A1A1A] mb-8 sm:mb-12">
           Wishlist
         </h1>
@@ -80,7 +109,6 @@ export default function WishlistPage() {
           <div className="space-y-8">
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
-                {/* Table Header */}
                 <thead>
                   <tr className="bg-[#FAF9F5] border-b border-gray-200 text-xs sm:text-sm font-bold text-[#1A1A1A]">
                     <th className="py-4 px-6 w-5/12">Product</th>
@@ -89,12 +117,9 @@ export default function WishlistPage() {
                     <th className="py-4 px-6 w-3/12 text-right">Actions</th>
                   </tr>
                 </thead>
-
-                {/* Table Body */}
                 <tbody className="divide-y divide-gray-100 text-xs sm:text-sm">
                   {wishlistItems.map((item) => (
                     <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
-                      {/* Product Image & Info Column */}
                       <td className="py-6 px-6">
                         <div className="flex items-center gap-4">
                           <Link
@@ -112,7 +137,6 @@ export default function WishlistPage() {
                               <Package className="h-8 w-8 text-gray-300" />
                             )}
                           </Link>
-
                           <div className="space-y-1">
                             <Link
                               href={`/products/${item.slug}`}
@@ -120,26 +144,23 @@ export default function WishlistPage() {
                             >
                               {item.name}
                             </Link>
-                            <p className="text-[11px] sm:text-xs text-gray-400 font-medium">
-                              Size: {item.name.toLowerCase().includes('juice') ? '500ML' : '60 Capsules'}
-                            </p>
                           </div>
                         </div>
                       </td>
-
-                      {/* Price Column */}
                       <td className="py-6 px-6 font-bold text-[#1A1A1A] text-sm sm:text-base whitespace-nowrap">
                         ₹ {item.price.toLocaleString()}.00
                       </td>
-
-                      {/* Availability Column */}
                       <td className="py-6 px-6 font-semibold text-[#1A1A1A] text-xs sm:text-sm whitespace-nowrap">
                         Available
                       </td>
-
-                      {/* Actions Column */}
                       <td className="py-6 px-6 text-right whitespace-nowrap">
                         <div className="flex items-center justify-end gap-2.5">
+                          <Button
+                            onClick={() => handleAddToCart(item)}
+                            className="bg-white border border-[#5B8C51] text-[#5B8C51] hover:bg-[#edf5eb] font-semibold text-xs px-3 py-2 rounded"
+                          >
+                            Add to cart
+                          </Button>
                           <Button
                             onClick={() => handleCheckoutSingle(item)}
                             disabled={processingId === item.id}
@@ -150,20 +171,10 @@ export default function WishlistPage() {
                             ) : (
                               <>
                                 <ShoppingBag className="h-3.5 w-3.5" />
-                                <span>Checkout</span>
+                                <span>Buy</span>
                               </>
                             )}
                           </Button>
-
-                          <Link href={`/products/${item.slug}`}>
-                            <Button
-                              variant="outline"
-                              className="border-gray-300 text-gray-700 hover:bg-gray-100 font-semibold text-xs px-3 py-2 rounded"
-                            >
-                              View
-                            </Button>
-                          </Link>
-
                           <button
                             onClick={() => removeFromWishlist(item.id)}
                             className="text-[#E55353] hover:text-red-700 p-2 transition-colors rounded hover:bg-red-50"
@@ -180,7 +191,6 @@ export default function WishlistPage() {
               </table>
             </div>
 
-            {/* Bottom Checkout Summary Card */}
             <div className="bg-[#FAF9F5] rounded-xl border border-gray-200 p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
               <div>
                 <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
@@ -190,7 +200,6 @@ export default function WishlistPage() {
                   ₹ {subtotal.toLocaleString()}.00
                 </p>
               </div>
-
               <Button
                 onClick={handleCheckoutAll}
                 disabled={processingCheckout}
@@ -200,7 +209,7 @@ export default function WishlistPage() {
                   <span>Preparing Checkout...</span>
                 ) : (
                   <>
-                    <span>Proceed to Checkout</span>
+                    <span>Move all to cart & checkout</span>
                     <ArrowRight className="h-4 w-4" />
                   </>
                 )}

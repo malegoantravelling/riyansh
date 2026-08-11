@@ -52,12 +52,12 @@ export default function TermsPage() {
     },
     {
       icon: AlertCircle,
-      title: 'Guest Orders',
+      title: 'Account Orders',
       content: [
-        'You may place orders as a guest without creating an account.',
+        'You must sign in to place orders and complete payment.',
         'When ordering, you agree to:',
         '• Provide accurate contact and shipping details',
-        '• Confirm your order via WhatsApp when redirected',
+        '• Complete payment securely via our payment gateway',
         '• Keep your contact information available for order updates',
         'We are not liable for delays or issues caused by incorrect customer details.',
       ],

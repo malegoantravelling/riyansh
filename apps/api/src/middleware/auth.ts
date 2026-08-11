@@ -20,7 +20,12 @@ export const authenticateToken = async (req: AuthRequest, res: Response, next: N
     } = await supabase.auth.getUser(token)
 
     if (error || !user) {
-      return res.status(403).json({ error: 'Invalid or expired token' })
+      return res.status(401).json({
+        error: 'Invalid or expired token',
+        ...(process.env.NODE_ENV === 'development' && error?.message
+          ? { detail: error.message }
+          : {}),
+      })
     }
 
     req.user = user

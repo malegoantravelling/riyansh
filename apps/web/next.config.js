@@ -1,11 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  eslint: {
-    // Allow production builds to successfully complete even if there are ESLint errors
-    ignoreDuringBuilds: true,
-  },
+  // Allow LAN devices (phones) hitting the Next dev server by IP
+  allowedDevOrigins: ['http://192.168.1.8:3000', '192.168.1.8', '127.0.0.1', 'localhost'],
   images: {
-    domains: ['localhost', 'via.placeholder.com', 'images.pexels.com', 'images.unsplash.com'],
     remotePatterns: [
       {
         protocol: 'https',
@@ -23,6 +20,10 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'via.placeholder.com',
       },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+      },
     ],
   },
   // Tree-shake lucide-react so only used icons are bundled — reduces chunk size ~60%
@@ -32,4 +33,3 @@ const nextConfig = {
 }
 
 module.exports = nextConfig
-

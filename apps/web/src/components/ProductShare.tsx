@@ -5,7 +5,6 @@ import {
   Link2,
   Share2,
   Mail,
-  MessageCircle,
   Facebook,
   Twitter,
   Smartphone,
@@ -116,12 +115,6 @@ export default function ProductShare({
     setOpen(false)
   }
 
-  const handleWhatsApp = (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    openShareWindow(`https://wa.me/?text=${encodeURIComponent(`${shareText}\n${url}`)}`)
-  }
-
   const handleFacebook = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
@@ -183,15 +176,6 @@ export default function ProductShare({
       >
         {copied ? <Check className="h-4 w-4 text-[#5B8C51]" /> : <Link2 className="h-4 w-4" />}
         {copied ? 'Copied!' : 'Copy link'}
-      </button>
-      <button
-        type="button"
-        role="menuitem"
-        onClick={handleWhatsApp}
-        className="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-[#333333] hover:bg-[#F6F0E2] hover:text-[#5B8C51]"
-      >
-        <MessageCircle className="h-4 w-4" />
-        WhatsApp
       </button>
       <button
         type="button"

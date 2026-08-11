@@ -7,6 +7,7 @@ import Footer from '@/components/Footer'
 import { ToastProvider } from '@/contexts/ToastContext'
 import { CartProvider } from '@/contexts/CartContext'
 import { WishlistProvider } from '@/contexts/WishlistContext'
+import { AuthProvider } from '@/contexts/AuthContext'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -28,15 +29,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className} suppressHydrationWarning>
         <ToastProvider>
-          <WishlistProvider>
-            <CartProvider>
-              <div className="flex flex-col min-h-screen">
-                <Navbar />
-                <main className="flex-1">{children}</main>
-                <Footer />
-              </div>
-            </CartProvider>
-          </WishlistProvider>
+          <AuthProvider>
+            <WishlistProvider>
+              <CartProvider>
+                <div className="flex flex-col min-h-screen">
+                  <Navbar />
+                  <main className="flex-1">{children}</main>
+                  <Footer />
+                </div>
+              </CartProvider>
+            </WishlistProvider>
+          </AuthProvider>
         </ToastProvider>
       </body>
     </html>

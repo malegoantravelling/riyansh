@@ -33,8 +33,10 @@ export default function Orders() {
   }
 
   const getStatusColor = (status: string) => {
-    const colors: any = {
+    const colors: Record<string, string> = {
       pending: 'bg-yellow-100 text-yellow-800',
+      paid: 'bg-emerald-100 text-emerald-800',
+      failed: 'bg-red-100 text-red-800',
       processing: 'bg-blue-100 text-blue-800',
       shipped: 'bg-purple-100 text-purple-800',
       delivered: 'bg-green-100 text-green-800',
@@ -106,6 +108,8 @@ export default function Orders() {
             >
               <option value="all">All Status</option>
               <option value="pending">Pending</option>
+              <option value="paid">Paid</option>
+              <option value="failed">Failed</option>
               <option value="processing">Processing</option>
               <option value="shipped">Shipped</option>
               <option value="delivered">Delivered</option>
@@ -163,6 +167,9 @@ export default function Orders() {
                   Total
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  PayU
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                   Status
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
@@ -183,6 +190,14 @@ export default function Orders() {
                   <td className="px-6 py-4 text-sm font-semibold text-gray-900">
                     {formatCurrency(order.total_amount)}
                   </td>
+                  <td className="px-6 py-4 text-xs text-gray-600 font-mono">
+                    <div>{order.payu_mihpayid || order.payu_txnid || '—'}</div>
+                    {order.paid_at && (
+                      <div className="text-[10px] text-gray-400 mt-0.5">
+                        Paid {new Date(order.paid_at).toLocaleString('en-IN')}
+                      </div>
+                    )}
+                  </td>
                   <td className="px-6 py-4 text-sm">
                     <span
                       className={`px-2 py-1 rounded-full text-xs ${getStatusColor(order.status)}`}
@@ -200,6 +215,8 @@ export default function Orders() {
                       className="border rounded px-2 py-1 text-xs"
                     >
                       <option value="pending">Pending</option>
+                      <option value="paid">Paid</option>
+                      <option value="failed">Failed</option>
                       <option value="processing">Processing</option>
                       <option value="shipped">Shipped</option>
                       <option value="delivered">Delivered</option>
