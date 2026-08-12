@@ -5,13 +5,14 @@ import { Button } from '@/components/ui/button'
 import { Phone, Mail, Send, MessageSquare, ChevronRight, Sparkles } from 'lucide-react'
 import Link from 'next/link'
 import { useToast } from '@/contexts/ToastContext'
-import { api } from '@/lib/api'
+import { useApiClient } from '@/lib/api'
 
 const inputClass =
   'w-full h-12 px-4 text-sm text-[#1A1A1A] bg-[#F5F5F5] border border-[#E5E5E5] rounded-xl placeholder:text-[#A3A3A3] focus:outline-none focus:bg-white focus:border-[#5B8C51] focus:ring-1 focus:ring-[#5B8C51] transition-colors'
 
 export default function ContactPage() {
   const toast = useToast()
+  const { apiFetch } = useApiClient()
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -26,7 +27,10 @@ export default function ContactPage() {
     setIsSubmitting(true)
 
     try {
-      const response = await api.post('/api/contact/submit', formData)
+      const response = await apiFetch('/api/contact/submit', {
+        method: 'POST',
+        body: JSON.stringify(formData),
+      })
 
       if (response.success) {
         toast.success('Message Sent!', response.message)
@@ -40,16 +44,9 @@ export default function ContactPage() {
       } else {
         toast.error('Error', response.error || 'Failed to send message. Please try again.')
       }
-    } catch (error: any) {
-      let errorMessage = 'Failed to send message. Please try again.'
-      if (error.response) {
-        try {
-          const errorData = await error.response.json()
-          errorMessage = errorData.error || errorMessage
-        } catch {
-          /* ignore parse errors */
-        }
-      }
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Failed to send message. Please try again.'
       toast.error('Error', errorMessage)
     } finally {
       setIsSubmitting(false)
