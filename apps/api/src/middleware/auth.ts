@@ -70,10 +70,15 @@ export const authenticateToken = async (req: AuthRequest, res: Response, next: N
       }
     }
 
-    // 3) Fallback: local verify with JWT secret (Dashboard → Settings → API → JWT Secret).
+    // 3) Fallback: local verify with JWT secret, then hydrate full auth user.
     const fromSecret = userFromJwtSecret(token)
     if (fromSecret) {
-      req.user = fromSecret
+      try {
+        const { data } = await supabase.auth.admin.getUserById(fromSecret.id)
+        req.user = data.user || fromSecret
+      } catch {
+        req.user = fromSecret
+      }
       return next()
     }
 

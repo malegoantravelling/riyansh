@@ -2,6 +2,7 @@ import { Router } from 'express'
 import { supabase } from '../config/supabase'
 import { authenticateToken, AuthRequest } from '../middleware/auth'
 import { authenticateAdmin } from '../middleware/adminAuth'
+import { ensurePublicUser } from '../lib/ensurePublicUser'
 
 const router = Router()
 
@@ -69,33 +70,33 @@ router.get('/me', authenticateToken, async (req: AuthRequest, res) => {
 
 router.post('/ensure', authenticateToken, async (req: AuthRequest, res) => {
   try {
-    const userId = req.user?.id
-    const email = req.user?.email
-    if (!userId || !email) {
-      return res.status(400).json({ error: 'Missing auth user' })
+    const ensured = await ensurePublicUser({
+      id: req.user?.id,
+      email: req.user?.email,
+      user_metadata: {
+        ...((req.user as any)?.user_metadata || {}),
+        full_name: req.body?.full_name,
+        avatar_url: req.body?.avatar_url,
+      },
+    })
+    if (ensured.error || !ensured.user) {
+      return res.status(400).json({ error: ensured.error || 'Missing auth user' })
     }
 
-    const meta = (req.user as any)?.user_metadata || {}
-    const { data, error } = await supabase
-      .from('users')
-      .upsert(
-        {
-          id: userId,
-          email,
-          full_name: req.body?.full_name || meta.full_name || meta.name || email.split('@')[0],
-          avatar_url: req.body?.avatar_url || meta.avatar_url || meta.picture || null,
-          phone: req.body?.phone || null,
-        },
-        { onConflict: 'id' }
-      )
-      .select()
-      .single()
-
-    if (error) {
-      return res.status(400).json({ error: error.message })
+    if (req.body?.phone) {
+      const { data, error } = await supabase
+        .from('users')
+        .update({ phone: req.body.phone })
+        .eq('id', ensured.user.id)
+        .select()
+        .single()
+      if (error) {
+        return res.status(400).json({ error: error.message })
+      }
+      return res.json(data)
     }
 
-    res.json(data)
+    res.json(ensured.user)
   } catch (error: any) {
     res.status(500).json({ error: error.message })
   }

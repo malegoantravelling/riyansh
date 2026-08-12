@@ -1,16 +1,29 @@
 import { Router } from 'express'
 import { supabase } from '../config/supabase'
 import { authenticateToken, AuthRequest } from '../middleware/auth'
+import { ensurePublicUser } from '../lib/ensurePublicUser'
 
 const router = Router()
 
-// All cart routes require authentication
 router.use(authenticateToken)
 
-// Get user's cart
+async function requirePublicUser(req: AuthRequest, res: any): Promise<string | null> {
+  const ensured = await ensurePublicUser(req.user)
+  if (ensured.error || !ensured.user) {
+    res.status(400).json({
+      error: ensured.error || 'Could not ensure user profile',
+      code: 'user_profile_required',
+    })
+    return null
+  }
+  if (!req.user.email) req.user.email = ensured.user.email
+  return ensured.user.id as string
+}
+
 router.get('/', async (req: AuthRequest, res) => {
   try {
-    const userId = req.user?.id
+    const userId = await requirePublicUser(req, res)
+    if (!userId) return
 
     const { data, error } = await supabase
       .from('cart_items')
@@ -27,22 +40,20 @@ router.get('/', async (req: AuthRequest, res) => {
   }
 })
 
-// Add item to cart
 router.post('/', async (req: AuthRequest, res) => {
   try {
-    const userId = req.user?.id
+    const userId = await requirePublicUser(req, res)
+    if (!userId) return
     const { product_id, quantity } = req.body
 
-    // Check if item already exists in cart
     const { data: existing } = await supabase
       .from('cart_items')
       .select('*')
       .eq('user_id', userId)
       .eq('product_id', product_id)
-      .single()
+      .maybeSingle()
 
     if (existing) {
-      // Update quantity
       const { data, error } = await supabase
         .from('cart_items')
         .update({ quantity: existing.quantity + quantity })
@@ -57,7 +68,6 @@ router.post('/', async (req: AuthRequest, res) => {
       return res.json(data)
     }
 
-    // Insert new item
     const { data, error } = await supabase
       .from('cart_items')
       .insert({ user_id: userId, product_id, quantity })
@@ -74,9 +84,10 @@ router.post('/', async (req: AuthRequest, res) => {
   }
 })
 
-// Update cart item
 router.put('/:id', async (req: AuthRequest, res) => {
   try {
+    const userId = await requirePublicUser(req, res)
+    if (!userId) return
     const { id } = req.params
     const { quantity } = req.body
 
@@ -84,6 +95,7 @@ router.put('/:id', async (req: AuthRequest, res) => {
       .from('cart_items')
       .update({ quantity })
       .eq('id', id)
+      .eq('user_id', userId)
       .select('*, product:products(*)')
       .single()
 
@@ -97,12 +109,13 @@ router.put('/:id', async (req: AuthRequest, res) => {
   }
 })
 
-// Remove item from cart
 router.delete('/:id', async (req: AuthRequest, res) => {
   try {
+    const userId = await requirePublicUser(req, res)
+    if (!userId) return
     const { id } = req.params
 
-    const { error } = await supabase.from('cart_items').delete().eq('id', id)
+    const { error } = await supabase.from('cart_items').delete().eq('id', id).eq('user_id', userId)
 
     if (error) {
       return res.status(400).json({ error: error.message })
@@ -114,10 +127,10 @@ router.delete('/:id', async (req: AuthRequest, res) => {
   }
 })
 
-// Clear cart
 router.delete('/', async (req: AuthRequest, res) => {
   try {
-    const userId = req.user?.id
+    const userId = await requirePublicUser(req, res)
+    if (!userId) return
 
     const { error } = await supabase.from('cart_items').delete().eq('user_id', userId)
 
@@ -131,10 +144,12 @@ router.delete('/', async (req: AuthRequest, res) => {
   }
 })
 
-/** Merge local cart items into DB cart (set absolute quantities from client). */
+/** Merge local cart items into DB cart. */
 router.post('/sync', async (req: AuthRequest, res) => {
   try {
-    const userId = req.user?.id
+    const userId = await requirePublicUser(req, res)
+    if (!userId) return
+
     const items: Array<{ product_id: string; quantity: number }> = Array.isArray(req.body?.items)
       ? req.body.items
       : []
@@ -142,24 +157,34 @@ router.post('/sync', async (req: AuthRequest, res) => {
     for (const item of items) {
       if (!item.product_id || !item.quantity || item.quantity < 1) continue
 
-      const { data: existing } = await supabase
+      const { data: existing, error: existingError } = await supabase
         .from('cart_items')
         .select('*')
         .eq('user_id', userId)
         .eq('product_id', item.product_id)
         .maybeSingle()
 
+      if (existingError) {
+        return res.status(400).json({ error: existingError.message, code: 'cart_lookup_failed' })
+      }
+
       if (existing) {
-        await supabase
+        const { error: updateError } = await supabase
           .from('cart_items')
           .update({ quantity: Math.max(existing.quantity, item.quantity) })
           .eq('id', existing.id)
+        if (updateError) {
+          return res.status(400).json({ error: updateError.message, code: 'cart_update_failed' })
+        }
       } else {
-        await supabase.from('cart_items').insert({
+        const { error: insertError } = await supabase.from('cart_items').insert({
           user_id: userId,
           product_id: item.product_id,
           quantity: item.quantity,
         })
+        if (insertError) {
+          return res.status(400).json({ error: insertError.message, code: 'cart_insert_failed' })
+        }
       }
     }
 

@@ -270,6 +270,10 @@ export default function CheckoutPaymentPage() {
             upi_app: useUpi ? payOption : undefined,
             enforce_paymethod: other?.enforce,
             device_info: navigator.userAgent,
+            items: items.map((item) => ({
+              product_id: item.id,
+              quantity: item.quantity,
+            })),
           }),
         })
 

@@ -1,14 +1,29 @@
 import { Router } from 'express'
 import { supabase } from '../config/supabase'
 import { authenticateToken, AuthRequest } from '../middleware/auth'
+import { ensurePublicUser } from '../lib/ensurePublicUser'
 
 const router = Router()
 
 router.use(authenticateToken)
 
+async function requirePublicUser(req: AuthRequest, res: any): Promise<string | null> {
+  const ensured = await ensurePublicUser(req.user)
+  if (ensured.error || !ensured.user) {
+    res.status(400).json({
+      error: ensured.error || 'Could not ensure user profile',
+      code: 'user_profile_required',
+    })
+    return null
+  }
+  if (!req.user.email) req.user.email = ensured.user.email
+  return ensured.user.id as string
+}
+
 router.get('/', async (req: AuthRequest, res) => {
   try {
-    const userId = req.user?.id
+    const userId = await requirePublicUser(req, res)
+    if (!userId) return
 
     const { data, error } = await supabase
       .from('wishlist_items')
@@ -27,19 +42,29 @@ router.get('/', async (req: AuthRequest, res) => {
 
 router.post('/sync', async (req: AuthRequest, res) => {
   try {
-    const userId = req.user?.id
+    const userId = await requirePublicUser(req, res)
+    if (!userId) return
     const productIds: string[] = Array.isArray(req.body?.product_ids) ? req.body.product_ids : []
 
     for (const product_id of productIds) {
-      const { data: existing } = await supabase
+      const { data: existing, error: existingError } = await supabase
         .from('wishlist_items')
         .select('id')
         .eq('user_id', userId)
         .eq('product_id', product_id)
         .maybeSingle()
 
+      if (existingError) {
+        return res.status(400).json({ error: existingError.message })
+      }
+
       if (!existing) {
-        await supabase.from('wishlist_items').insert({ user_id: userId, product_id })
+        const { error: insertError } = await supabase
+          .from('wishlist_items')
+          .insert({ user_id: userId, product_id })
+        if (insertError) {
+          return res.status(400).json({ error: insertError.message })
+        }
       }
     }
 
@@ -60,7 +85,8 @@ router.post('/sync', async (req: AuthRequest, res) => {
 
 router.post('/', async (req: AuthRequest, res) => {
   try {
-    const userId = req.user?.id
+    const userId = await requirePublicUser(req, res)
+    if (!userId) return
     const { product_id } = req.body
 
     if (!product_id) {
@@ -96,7 +122,8 @@ router.post('/', async (req: AuthRequest, res) => {
 
 router.delete('/:productId', async (req: AuthRequest, res) => {
   try {
-    const userId = req.user?.id
+    const userId = await requirePublicUser(req, res)
+    if (!userId) return
     const { productId } = req.params
 
     const { error } = await supabase

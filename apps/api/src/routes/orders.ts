@@ -17,6 +17,7 @@ import {
   type PayUUpiApp,
 } from '../services/payu'
 import { resolveApiUrl, resolveSiteUrl } from '../config/urls'
+import { ensurePublicUser } from '../lib/ensurePublicUser'
 
 const router = Router()
 
@@ -91,9 +92,16 @@ router.get('/all', authenticateAdmin, async (req: AuthRequest, res) => {
  */
 router.post('/create-payu-order', authenticateToken, async (req: AuthRequest, res) => {
   try {
-    const userId = req.user?.id
-    if (!userId) {
-      return res.status(401).json({ error: 'Unauthorized' })
+    const ensured = await ensurePublicUser(req.user)
+    if (ensured.error || !ensured.user) {
+      return res.status(400).json({
+        error: ensured.error || 'Could not ensure user profile',
+        code: 'user_profile_required',
+      })
+    }
+    const userId = ensured.user.id as string
+    if (!req.user?.email) {
+      req.user = { ...(req.user || {}), email: ensured.user.email, id: userId }
     }
 
     const {
@@ -106,6 +114,7 @@ router.post('/create-payu-order', authenticateToken, async (req: AuthRequest, re
       upi_app,
       device_info,
       enforce_paymethod,
+      items: clientItems,
     } = req.body
     if (!shipping_address?.phone || !shipping_address?.address1 || !shipping_address?.city) {
       return res.status(400).json({ error: 'Complete shipping address is required' })
@@ -129,24 +138,60 @@ router.post('/create-payu-order', authenticateToken, async (req: AuthRequest, re
     const surl = `${apiBase}/api/orders/payu/success`
     const furl = `${apiBase}/api/orders/payu/failure`
 
-    const { data: cartItems, error: cartError } = await supabase
+    // Sync client cart into DB when provided (localStorage cart → server).
+    const syncItems: Array<{ product_id: string; quantity: number }> = Array.isArray(clientItems)
+      ? clientItems
+      : []
+    for (const item of syncItems) {
+      if (!item?.product_id || !item?.quantity || item.quantity < 1) continue
+      const { data: existing } = await supabase
+        .from('cart_items')
+        .select('id, quantity')
+        .eq('user_id', userId)
+        .eq('product_id', item.product_id)
+        .maybeSingle()
+      if (existing) {
+        await supabase
+          .from('cart_items')
+          .update({ quantity: Math.max(existing.quantity, item.quantity) })
+          .eq('id', existing.id)
+      } else {
+        const { error: insertError } = await supabase.from('cart_items').insert({
+          user_id: userId,
+          product_id: item.product_id,
+          quantity: item.quantity,
+        })
+        if (insertError) {
+          return res.status(400).json({
+            error: insertError.message,
+            code: 'cart_insert_failed',
+          })
+        }
+      }
+    }
+
+    const { data: cartRows, error: cartError } = await supabase
       .from('cart_items')
       .select('*, product:products(*)')
       .eq('user_id', userId)
 
-    if (cartError || !cartItems || cartItems.length === 0) {
-      return res.status(400).json({ error: 'Cart is empty. Sync your cart after login.' })
+    const cartItems = (cartRows || []).filter((row: any) => row.product)
+    if (cartError || cartItems.length === 0) {
+      return res.status(400).json({
+        error: cartError?.message || 'Cart is empty. Add products again, then retry payment.',
+        code: 'cart_empty',
+      })
     }
 
-    const { data: userProfile } = await supabase
-      .from('users')
-      .select('full_name, email, phone')
-      .eq('id', userId)
-      .single()
-
-    const email = userProfile?.email || req.user?.email
+    const email = ensured.user.email || req.user?.email
     if (!email) {
       return res.status(400).json({ error: 'User email is required for payment' })
+    }
+
+    const userProfile = {
+      full_name: ensured.user.full_name,
+      email,
+      phone: ensured.user.phone,
     }
 
     const totalAmount = cartItems.reduce(
