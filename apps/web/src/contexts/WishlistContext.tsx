@@ -10,6 +10,7 @@ import React, {
   type ReactNode,
 } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
+import { resolveApiBase } from '@/lib/apiBase'
 
 export interface WishlistItem {
   id: string
@@ -33,9 +34,6 @@ interface WishlistContextType {
 const WishlistContext = createContext<WishlistContextType | undefined>(undefined)
 
 const WISHLIST_STORAGE_KEY = 'riyansh_wishlist_v1'
-
-const apiBase = () =>
-  process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || 'http://localhost:4000'
 
 function mapApiWishlist(rows: any[]): WishlistItem[] {
   return (rows || [])
@@ -92,18 +90,25 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
       }
     })()
 
-    const res = await fetch(`${apiBase()}/api/wishlist/sync`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ product_ids: localIds }),
-    })
+    try {
+      const res = await fetch(`${resolveApiBase()}/api/wishlist/sync`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ product_ids: localIds }),
+      })
 
-    if (!res.ok) return
-    const data = await res.json()
-    setWishlistItems(mapApiWishlist(data))
+      if (!res.ok) {
+        syncedForUser.current = null
+        return
+      }
+      const data = await res.json()
+      setWishlistItems(mapApiWishlist(data))
+    } catch {
+      syncedForUser.current = null
+    }
   }, [accessToken, wishlistItems])
 
   useEffect(() => {
@@ -113,7 +118,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
     }
     if (syncedForUser.current === user.id) return
     syncedForUser.current = user.id
-    void syncWishlist().catch(console.error)
+    void syncWishlist()
   }, [accessToken, user, isLoaded, syncWishlist])
 
   const isInWishlist = (productId: string): boolean => {
@@ -131,19 +136,19 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
 
     if (accessToken) {
       if (exists) {
-        void fetch(`${apiBase()}/api/wishlist/${product.id}`, {
+        void fetch(`${resolveApiBase()}/api/wishlist/${product.id}`, {
           method: 'DELETE',
           headers: { Authorization: `Bearer ${accessToken}` },
-        }).catch(console.error)
+        }).catch(() => {})
       } else {
-        void fetch(`${apiBase()}/api/wishlist`, {
+        void fetch(`${resolveApiBase()}/api/wishlist`, {
           method: 'POST',
           headers: {
             Authorization: `Bearer ${accessToken}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ product_id: product.id }),
-        }).catch(console.error)
+        }).catch(() => {})
       }
     }
   }
@@ -151,10 +156,10 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
   const removeFromWishlist = (productId: string) => {
     setWishlistItems((prev) => prev.filter((item) => item.id !== productId))
     if (accessToken) {
-      void fetch(`${apiBase()}/api/wishlist/${productId}`, {
+      void fetch(`${resolveApiBase()}/api/wishlist/${productId}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${accessToken}` },
-      }).catch(console.error)
+      }).catch(() => {})
     }
   }
 
@@ -163,10 +168,10 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
     setWishlistItems([])
     if (accessToken) {
       ids.forEach((id) => {
-        void fetch(`${apiBase()}/api/wishlist/${id}`, {
+        void fetch(`${resolveApiBase()}/api/wishlist/${id}`, {
           method: 'DELETE',
           headers: { Authorization: `Bearer ${accessToken}` },
-        }).catch(console.error)
+        }).catch(() => {})
       })
     }
   }

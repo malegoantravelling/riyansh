@@ -23,9 +23,14 @@ const upload = multer({
 // Get all products
 router.get('/', async (req, res) => {
   try {
-    const { category, featured, search, limit = 50, offset = 0 } = req.query
+    const { category, featured, search, limit = 50, offset = 0, include_inactive } = req.query
 
-    let query = supabase.from('products').select('*, category:categories(*)').eq('is_active', true)
+    let query = supabase.from('products').select('*, category:categories(*)')
+
+    // Storefront only sees active products; admin can pass include_inactive=true
+    if (include_inactive !== 'true') {
+      query = query.eq('is_active', true)
+    }
 
     if (category) {
       query = query.eq('category_id', category)
@@ -39,7 +44,9 @@ router.get('/', async (req, res) => {
       query = query.ilike('name', `%${search}%`)
     }
 
-    query = query.range(Number(offset), Number(offset) + Number(limit) - 1)
+    query = query
+      .order('created_at', { ascending: false })
+      .range(Number(offset), Number(offset) + Number(limit) - 1)
 
     const { data, error } = await query
 

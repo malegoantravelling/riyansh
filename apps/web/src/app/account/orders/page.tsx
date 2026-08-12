@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { Package } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { Button } from '@/components/ui/button'
+import { resolveApiBase } from '@/lib/apiBase'
 
 interface OrderRow {
   id: string
@@ -27,18 +28,15 @@ export default function AccountOrdersPage() {
   const [fetching, setFetching] = useState(true)
   const [verifyingId, setVerifyingId] = useState<string | null>(null)
 
-  const apiBase =
-    process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || 'http://localhost:4000'
-
   const loadOrders = useCallback(async () => {
     if (!accessToken) return
-    const res = await fetch(`${apiBase}/api/orders`, {
+    const res = await fetch(`${resolveApiBase()}/api/orders`, {
       headers: { Authorization: `Bearer ${accessToken}` },
     })
     const data = await res.json()
     if (!res.ok) throw new Error(data.error || 'Failed to load orders')
     setOrders(data)
-  }, [accessToken, apiBase])
+  }, [accessToken])
 
   useEffect(() => {
     if (loading) return
@@ -57,7 +55,7 @@ export default function AccountOrdersPage() {
     setVerifyingId(order.id)
     setError(null)
     try {
-      const res = await fetch(`${apiBase}/api/orders/payu/verify`, {
+      const res = await fetch(`${resolveApiBase()}/api/orders/payu/verify`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${accessToken}`,

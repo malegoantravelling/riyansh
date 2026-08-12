@@ -6,6 +6,7 @@ import { Suspense, useEffect, useRef, useState } from 'react'
 import { Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/contexts/AuthContext'
+import { resolveApiBase } from '@/lib/apiBase'
 
 function PendingContent() {
   const router = useRouter()
@@ -31,8 +32,7 @@ function PendingContent() {
     }
 
     let cancelled = false
-    const apiBase =
-      process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || 'http://localhost:4000'
+    const apiBase = resolveApiBase()
 
     const poll = async () => {
       if (cancelled) return
@@ -66,14 +66,14 @@ function PendingContent() {
           setMessage(
             data.unmappedstatus
               ? `PayU status: ${data.payu_status} (${data.unmappedstatus}). Waiting for bank confirmation…`
-              : 'Payment is still pending at PayU. Waiting for confirmation…'
+              : 'Complete payment in your UPI app if it is still open. We are waiting for confirmation…'
           )
         }
       } catch {
         setMessage('Network error while verifying payment. Retrying…')
       }
 
-      if (attempts.current >= 40) {
+      if (attempts.current >= 60) {
         setStopped(true)
         setMessage(
           'Still waiting for PayU confirmation. You can tap Check payment later from My Orders.'
@@ -84,6 +84,7 @@ function PendingContent() {
       window.setTimeout(poll, 3000)
     }
 
+    setMessage('Waiting for you to finish payment in the UPI app…')
     poll()
     return () => {
       cancelled = true

@@ -11,6 +11,7 @@ import React, {
 } from 'react'
 import type { Session, User } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/client'
+import { resolveApiBase } from '@/lib/apiBase'
 
 interface AuthContextType {
   user: User | null
@@ -31,8 +32,8 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
-const apiBase = () =>
-  process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || 'http://localhost:4000'
+/** Prevents overlapping ensure-profile calls (getSession + onAuthStateChange). */
+let ensuringProfile = false
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const supabase = useMemo(() => createClient(), [])
@@ -57,11 +58,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [supabase])
 
   const ensureProfile = useCallback(async () => {
+    if (ensuringProfile) return
     const token = await getAccessToken()
     if (!token) return
 
+    ensuringProfile = true
     try {
-      await fetch(`${apiBase()}/api/users/ensure`, {
+      const res = await fetch(`${resolveApiBase()}/api/users/ensure`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -69,8 +72,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         },
         body: JSON.stringify({}),
       })
-    } catch (err) {
-      console.error('Failed to ensure user profile', err)
+      if (!res.ok) {
+        return
+      }
+    } catch {
+      // Soft-fail network blips (common during navigation / API restart).
+    } finally {
+      ensuringProfile = false
     }
   }, [getAccessToken])
 

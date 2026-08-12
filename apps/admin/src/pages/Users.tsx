@@ -151,9 +151,10 @@ export default function Users() {
   const fetchUsers = async () => {
     try {
       const data = await api.get('/api/users')
-      setUsers(data)
+      setUsers(Array.isArray(data) ? data : [])
     } catch (error) {
       console.error('Error fetching users:', error)
+      setUsers([])
     }
   }
 

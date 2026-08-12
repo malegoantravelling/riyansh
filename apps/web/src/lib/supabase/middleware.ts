@@ -2,7 +2,11 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function updateSession(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({ request })
+  let supabaseResponse = NextResponse.next({
+    request: {
+      headers: request.headers,
+    },
+  })
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -18,7 +22,11 @@ export async function updateSession(request: NextRequest) {
       },
       setAll(cookiesToSet) {
         cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-        supabaseResponse = NextResponse.next({ request })
+        supabaseResponse = NextResponse.next({
+          request: {
+            headers: request.headers,
+          },
+        })
         cookiesToSet.forEach(({ name, value, options }) =>
           supabaseResponse.cookies.set(name, value, options)
         )
@@ -26,15 +34,17 @@ export async function updateSession(request: NextRequest) {
     },
   })
 
+  // Refresh session cookies; getUser validates the JWT with Supabase.
   const {
     data: { user },
   } = await supabase.auth.getUser()
 
   const pathname = request.nextUrl.pathname
-  const protectedPaths = ['/checkout', '/account']
-  const isProtected = protectedPaths.some(
-    (p) => pathname === p || pathname.startsWith(`${p}/`)
-  )
+  const isProtected =
+    pathname === '/checkout' ||
+    pathname.startsWith('/checkout/') ||
+    pathname === '/account' ||
+    pathname.startsWith('/account/')
 
   if (isProtected && !user) {
     const redirectUrl = request.nextUrl.clone()

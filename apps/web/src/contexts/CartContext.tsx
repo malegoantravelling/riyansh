@@ -10,6 +10,7 @@ import React, {
   type ReactNode,
 } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
+import { resolveApiBase } from '@/lib/apiBase'
 
 export interface CartItem {
   id: string
@@ -37,18 +38,6 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined)
 
 const CART_STORAGE_KEY = 'riyansh_cart_v1'
-
-const apiBase = () => {
-  const configured =
-    process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || 'http://localhost:4000'
-  if (typeof window === 'undefined') return configured
-  try {
-    const conf = new URL(configured)
-    return `${window.location.protocol}//${window.location.hostname}:${conf.port || '4000'}`
-  } catch {
-    return configured
-  }
-}
 
 function mapApiCart(rows: any[]): CartItem[] {
   return (rows || [])
@@ -112,7 +101,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
 
     const postSync = (authToken: string) =>
-      fetch(`${apiBase()}/api/cart/sync`, {
+      fetch(`${resolveApiBase()}/api/cart/sync`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${authToken}`,
@@ -154,7 +143,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const persistRemoteAdd = async (productId: string, quantity: number) => {
     if (!accessToken) return
     try {
-      await fetch(`${apiBase()}/api/cart`, {
+      await fetch(`${resolveApiBase()}/api/cart`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -188,7 +177,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setItems((prev) => {
       const target = prev.find((item) => item.id === productId)
       if (accessToken && target?.cart_item_id) {
-        void fetch(`${apiBase()}/api/cart/${target.cart_item_id}`, {
+        void fetch(`${resolveApiBase()}/api/cart/${target.cart_item_id}`, {
           method: 'PUT',
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -205,7 +194,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setItems((prev) => {
       const target = prev.find((item) => item.id === productId)
       if (accessToken && target?.cart_item_id) {
-        void fetch(`${apiBase()}/api/cart/${target.cart_item_id}`, {
+        void fetch(`${resolveApiBase()}/api/cart/${target.cart_item_id}`, {
           method: 'DELETE',
           headers: { Authorization: `Bearer ${accessToken}` },
         }).catch(console.error)
@@ -224,7 +213,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       // ignore
     }
     if (!accessToken) return
-    void fetch(`${apiBase()}/api/cart`, {
+    void fetch(`${resolveApiBase()}/api/cart`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${accessToken}` },
     }).catch(() => {

@@ -64,13 +64,39 @@ export default function Dashboard() {
   const fetchData = async () => {
     try {
       setLoading(true)
-      const [products, orders, users] = await Promise.all([
-        api.get('/api/products'),
+      const [productsResult, ordersResult, usersResult] = await Promise.allSettled([
+        api.get('/api/products?include_inactive=true'),
         api.get('/api/orders/all'),
         api.get('/api/users'),
       ])
 
-      const revenue = orders.reduce((sum: number, order: any) => sum + order.total_amount, 0)
+      const products =
+        productsResult.status === 'fulfilled' && Array.isArray(productsResult.value)
+          ? productsResult.value
+          : []
+      const orders =
+        ordersResult.status === 'fulfilled' && Array.isArray(ordersResult.value)
+          ? ordersResult.value
+          : []
+      const users =
+        usersResult.status === 'fulfilled' && Array.isArray(usersResult.value)
+          ? usersResult.value
+          : []
+
+      if (productsResult.status === 'rejected') {
+        console.error('Error fetching products:', productsResult.reason)
+      }
+      if (ordersResult.status === 'rejected') {
+        console.error('Error fetching orders:', ordersResult.reason)
+      }
+      if (usersResult.status === 'rejected') {
+        console.error('Error fetching users:', usersResult.reason)
+      }
+
+      const revenue = orders.reduce(
+        (sum: number, order: any) => sum + (Number(order.total_amount) || 0),
+        0
+      )
 
       setStats({
         totalProducts: products.length,
@@ -79,7 +105,6 @@ export default function Dashboard() {
         totalRevenue: revenue,
       })
 
-      // Get last 5 orders
       setRecentOrders(orders.slice(0, 5))
     } catch (error) {
       console.error('Error fetching stats:', error)

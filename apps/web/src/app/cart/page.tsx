@@ -99,6 +99,7 @@ export default function CartPage() {
                                 src={item.image_url}
                                 alt={item.name}
                                 fill
+                                sizes="80px"
                                 className="object-contain p-1 group-hover:scale-105 transition-transform duration-300"
                               />
                             ) : (

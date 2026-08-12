@@ -1,34 +1,32 @@
 import { useEffect, useState } from 'react'
-import { Search, Filter, ShoppingCart } from 'lucide-react'
+import { Search, Filter, ShoppingCart, RefreshCw } from 'lucide-react'
 import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
 import { api } from '@/lib/api'
 import { formatCurrency } from '@/lib/utils'
 
 export default function Orders() {
   const [orders, setOrders] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
-  const [statusFilter, setStatusFilter] = useState<string>('all')
+  // Default: only completed (PayU-paid) orders — status is set by PayU, not admin dropdown.
+  const [statusFilter, setStatusFilter] = useState<string>('paid')
   const [dateFilter, setDateFilter] = useState<string>('all')
 
   useEffect(() => {
-    fetchOrders()
+    void fetchOrders()
   }, [])
 
   const fetchOrders = async () => {
+    setLoading(true)
     try {
       const data = await api.get('/api/orders/all')
-      setOrders(data)
+      setOrders(Array.isArray(data) ? data : [])
     } catch (error) {
       console.error('Error fetching orders:', error)
-    }
-  }
-
-  const updateStatus = async (orderId: string, status: string) => {
-    try {
-      await api.put(`/api/orders/${orderId}`, { status })
-      fetchOrders()
-    } catch (error) {
-      console.error('Error updating order:', error)
+      setOrders([])
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -45,12 +43,17 @@ export default function Orders() {
     return colors[status] || 'bg-gray-100 text-gray-800'
   }
 
-  // Filter orders based on search term and filters
   const filteredOrders = orders.filter((order) => {
     const matchesSearch =
       order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
       order.user?.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.user?.full_name?.toLowerCase().includes(searchTerm.toLowerCase())
+      order.user?.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      String(order.payu_txnid || '')
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      String(order.payu_mihpayid || '')
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase())
 
     const matchesStatus = statusFilter === 'all' || order.status === statusFilter
 
@@ -79,26 +82,43 @@ export default function Orders() {
     return matchesSearch && matchesStatus && matchesDate
   })
 
+  const paidCount = orders.filter((o) => o.status === 'paid').length
+
   return (
     <div>
-      <h1 className="text-3xl font-bold text-gray-800 mb-8">Orders</h1>
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-800">Orders</h1>
+          <p className="text-sm text-gray-500 mt-1">
+            Payment status updates automatically from PayU after checkout (UPI, cards, net banking,
+            etc.).
+          </p>
+        </div>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => void fetchOrders()}
+          disabled={loading}
+          className="gap-2"
+        >
+          <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+          Refresh
+        </Button>
+      </div>
 
-      {/* Search and Filters */}
       <div className="bg-white rounded-lg shadow p-6 mb-6 border border-gray-200">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Search */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
             <Input
               type="text"
-              placeholder="Search by order ID, customer..."
+              placeholder="Search by order ID, customer, PayU txn…"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
             />
           </div>
 
-          {/* Status Filter */}
           <div className="relative">
             <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
             <select
@@ -106,18 +126,14 @@ export default function Orders() {
               onChange={(e) => setStatusFilter(e.target.value)}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#8BC34A] focus:border-transparent"
             >
-              <option value="all">All Status</option>
-              <option value="pending">Pending</option>
-              <option value="paid">Paid</option>
+              <option value="paid">Completed payments (paid)</option>
+              <option value="pending">Pending (awaiting PayU)</option>
               <option value="failed">Failed</option>
-              <option value="processing">Processing</option>
-              <option value="shipped">Shipped</option>
-              <option value="delivered">Delivered</option>
               <option value="cancelled">Cancelled</option>
+              <option value="all">All statuses</option>
             </select>
           </div>
 
-          {/* Date Filter */}
           <div className="relative">
             <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
             <select
@@ -134,9 +150,9 @@ export default function Orders() {
           </div>
         </div>
 
-        {/* Results count */}
         <div className="mt-4 text-sm text-gray-600">
           Showing {filteredOrders.length} of {orders.length} orders
+          {statusFilter === 'paid' ? ` · ${paidCount} paid total` : null}
         </div>
       </div>
 
@@ -148,85 +164,82 @@ export default function Orders() {
             </div>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">No orders found</h3>
             <p className="text-gray-500 mb-6">
-              {searchTerm || statusFilter !== 'all' || dateFilter !== 'all'
-                ? 'No orders match your current filters. Try adjusting your search criteria.'
-                : 'No orders available. Orders will appear here when customers place them.'}
+              {searchTerm || statusFilter !== 'paid' || dateFilter !== 'all'
+                ? 'No orders match your current filters. Try “Completed payments” or All statuses.'
+                : 'No completed PayU payments yet. Paid orders appear here after customers finish checkout on PayU.'}
             </p>
           </div>
         ) : (
-          <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Order ID
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Customer
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Total
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  PayU
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Date
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {filteredOrders.map((order) => (
-                <tr key={order.id}>
-                  <td className="px-6 py-4 text-sm font-mono text-gray-500">
-                    {order.id.slice(0, 8)}...
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">{order.user?.email || 'N/A'}</td>
-                  <td className="px-6 py-4 text-sm font-semibold text-gray-900">
-                    {formatCurrency(order.total_amount)}
-                  </td>
-                  <td className="px-6 py-4 text-xs text-gray-600 font-mono">
-                    <div>{order.payu_mihpayid || order.payu_txnid || '—'}</div>
-                    {order.paid_at && (
-                      <div className="text-[10px] text-gray-400 mt-0.5">
-                        Paid {new Date(order.paid_at).toLocaleString('en-IN')}
-                      </div>
-                    )}
-                  </td>
-                  <td className="px-6 py-4 text-sm">
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs ${getStatusColor(order.status)}`}
-                    >
-                      {order.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-500">
-                    {new Date(order.created_at).toLocaleDateString()}
-                  </td>
-                  <td className="px-6 py-4 text-sm">
-                    <select
-                      value={order.status}
-                      onChange={(e) => updateStatus(order.id, e.target.value)}
-                      className="border rounded px-2 py-1 text-xs"
-                    >
-                      <option value="pending">Pending</option>
-                      <option value="paid">Paid</option>
-                      <option value="failed">Failed</option>
-                      <option value="processing">Processing</option>
-                      <option value="shipped">Shipped</option>
-                      <option value="delivered">Delivered</option>
-                      <option value="cancelled">Cancelled</option>
-                    </select>
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    Order ID
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    Customer
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    Total
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    PayU txn
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    PayU status
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    Payment
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    Date
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {filteredOrders.map((order) => (
+                  <tr key={order.id}>
+                    <td className="px-6 py-4 text-sm font-mono text-gray-500">
+                      {order.id.slice(0, 8)}…
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-900">
+                      {order.user?.email || 'N/A'}
+                    </td>
+                    <td className="px-6 py-4 text-sm font-semibold text-gray-900">
+                      {formatCurrency(order.total_amount)}
+                    </td>
+                    <td className="px-6 py-4 text-xs text-gray-600 font-mono">
+                      <div>{order.payu_txnid || '—'}</div>
+                      {order.payu_mihpayid && (
+                        <div className="text-[10px] text-gray-400 mt-0.5">
+                          mihpayid {order.payu_mihpayid}
+                        </div>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 text-xs text-gray-600">
+                      {order.payu_status || '—'}
+                    </td>
+                    <td className="px-6 py-4 text-sm">
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs ${getStatusColor(order.status)}`}
+                      >
+                        {order.status}
+                      </span>
+                      {order.paid_at && (
+                        <div className="text-[10px] text-gray-400 mt-1">
+                          Paid {new Date(order.paid_at).toLocaleString('en-IN')}
+                        </div>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-500">
+                      {new Date(order.created_at).toLocaleDateString('en-IN')}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </div>

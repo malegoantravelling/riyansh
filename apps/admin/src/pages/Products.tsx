@@ -3,7 +3,7 @@ import { Plus, Pencil, Trash2, Upload, X, Search, Filter } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { api, API_URL } from '@/lib/api'
+import { api, resolveApiUrl } from '@/lib/api'
 import { formatCurrency } from '@/lib/utils'
 import DeleteConfirmationModal from '@/components/DeleteConfirmationModal.tsx'
 import Toast, { ToastType } from '@/components/SuccessToast'
@@ -60,19 +60,21 @@ export default function Products() {
 
   const fetchProducts = async () => {
     try {
-      const data = await api.get('/api/products')
-      setProducts(data)
+      const data = await api.get('/api/products?include_inactive=true')
+      setProducts(Array.isArray(data) ? data : [])
     } catch (error) {
       console.error('Error fetching products:', error)
+      setProducts([])
     }
   }
 
   const fetchCategories = async () => {
     try {
       const data = await api.get('/api/categories')
-      setCategories(data)
+      setCategories(Array.isArray(data) ? data : [])
     } catch (error) {
       console.error('Error fetching categories:', error)
+      setCategories([])
     }
   }
 
@@ -107,7 +109,7 @@ export default function Products() {
       const formDataToSend = new FormData()
       formDataToSend.append('image', imageFile)
 
-      const response = await fetch(`${API_URL}/api/products/upload-image`, {
+      const response = await fetch(`${resolveApiUrl()}/api/products/upload-image`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${localStorage.getItem('admin_token')}`,

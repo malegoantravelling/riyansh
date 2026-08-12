@@ -1,9 +1,7 @@
 'use client'
 
 import { useAuth } from '@/contexts/AuthContext'
-
-const apiBase = () =>
-  process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || 'http://localhost:4000'
+import { resolveApiBase } from '@/lib/apiBase'
 
 export function useApiClient() {
   const { accessToken } = useAuth()
@@ -17,7 +15,7 @@ export function useApiClient() {
       headers.set('Content-Type', 'application/json')
     }
 
-    const res = await fetch(`${apiBase()}${path}`, {
+    const res = await fetch(`${resolveApiBase()}${path}`, {
       ...init,
       headers,
     })

@@ -198,6 +198,208 @@ export interface PayUVerifiedTxn {
   raw: Record<string, unknown>
 }
 
+/** Checkout UPI apps we expose on the merchant site (PayU upiAppName enums). */
+export type PayUUpiApp =
+  | 'phonepe'
+  | 'googlepay'
+  | 'paytm'
+  | 'bhim'
+  | 'amazonpay'
+  | 'genericintent'
+
+export const PAYU_UPI_APPS: readonly PayUUpiApp[] = [
+  'phonepe',
+  'googlepay',
+  'paytm',
+  'bhim',
+  'amazonpay',
+  'genericintent',
+] as const
+
+const UPI_ANDROID_PACKAGES: Record<PayUUpiApp, string | null> = {
+  phonepe: 'com.phonepe.app',
+  googlepay: 'com.google.android.apps.nbu.paisa.user',
+  paytm: 'net.one97.paytm',
+  bhim: 'in.org.npci.upiapp',
+  amazonpay: 'in.amazon.mShop.android.shopping',
+  genericintent: null,
+}
+
+const UPI_IOS_SCHEMES: Record<PayUUpiApp, string | null> = {
+  phonepe: 'phonepe://upi/pay?',
+  googlepay: 'gpay://upi/pay?',
+  paytm: 'paytmmp://upi/pay?',
+  bhim: 'bhim://upi/pay?',
+  amazonpay: null,
+  genericintent: null,
+}
+
+export function isPayUUpiApp(value: unknown): value is PayUUpiApp {
+  return typeof value === 'string' && (PAYU_UPI_APPS as readonly string[]).includes(value)
+}
+
+export interface PayUUpiIntentRequest {
+  txnid: string
+  amount: string
+  productinfo: string
+  firstname: string
+  lastname?: string
+  email: string
+  phone: string
+  surl: string
+  furl: string
+  udf1?: string
+  address1?: string
+  city?: string
+  state?: string
+  country?: string
+  zipcode?: string
+  upiApp: PayUUpiApp
+  clientIp: string
+  deviceInfo: string
+}
+
+export interface PayUUpiIntentResult {
+  txnid: string
+  paymentId?: string
+  intentUriData: string
+  /** Generic NPCI deep link */
+  deepLink: string
+  /** Prefer on Android Chrome for a specific app */
+  androidIntentUrl: string | null
+  /** Prefer on iOS Safari for a specific app */
+  iosDeepLink: string | null
+  acsTemplateHtml: string | null
+  raw: Record<string, unknown>
+}
+
+function normalizeIntentUriData(raw: string): string {
+  const trimmed = raw.trim()
+  if (trimmed.startsWith('upi://pay?')) return trimmed.slice('upi://pay?'.length)
+  if (trimmed.startsWith('upi://pay')) return trimmed.slice('upi://pay'.length).replace(/^\?/, '')
+  if (trimmed.startsWith('?')) return trimmed.slice(1)
+  return trimmed
+}
+
+export function buildUpiDeepLinks(intentUriData: string, upiApp: PayUUpiApp) {
+  const data = normalizeIntentUriData(intentUriData)
+  const deepLink = `upi://pay?${data}`
+  const androidPackage = UPI_ANDROID_PACKAGES[upiApp]
+  const iosScheme = UPI_IOS_SCHEMES[upiApp]
+
+  return {
+    deepLink,
+    androidIntentUrl: androidPackage
+      ? `intent://pay?${data}#Intent;scheme=upi;package=${androidPackage};end`
+      : null,
+    iosDeepLink: iosScheme ? `${iosScheme}${data}` : null,
+  }
+}
+
+/**
+ * PayU S2S UPI Intent (txn_s2s_flow=4). Returns deep-link payload to open PhonePe / GPay / etc.
+ * Docs: https://docs.payu.in/docs/upi-intent-server-to-server
+ */
+export async function initiatePayUUpiIntent(
+  params: PayUUpiIntentRequest
+): Promise<PayUUpiIntentResult> {
+  const payu = getPayUConfig()
+  const hash = generatePaymentHash({
+    key: payu.key,
+    txnid: params.txnid,
+    amount: params.amount,
+    productinfo: params.productinfo,
+    firstname: params.firstname,
+    email: params.email,
+    udf1: params.udf1 || '',
+    salt: payu.salt,
+  })
+
+  const body = new URLSearchParams({
+    key: payu.key,
+    txnid: params.txnid,
+    amount: params.amount,
+    productinfo: params.productinfo,
+    firstname: params.firstname,
+    lastname: params.lastname || 'Customer',
+    email: params.email,
+    phone: params.phone,
+    surl: params.surl,
+    furl: params.furl,
+    hash,
+    udf1: params.udf1 || '',
+    udf2: '',
+    udf3: '',
+    udf4: '',
+    udf5: '',
+    address1: params.address1 || '',
+    city: params.city || '',
+    state: params.state || '',
+    country: params.country || 'India',
+    zipcode: params.zipcode || '',
+    pg: 'UPI',
+    bankcode: 'INTENT',
+    upiAppName: params.upiApp,
+    txn_s2s_flow: '4',
+    s2s_client_ip: params.clientIp || '127.0.0.1',
+    s2s_device_info: params.deviceInfo.slice(0, 512) || 'Mozilla/5.0',
+  })
+
+  const response = await fetch(payu.paymentUrl, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      Accept: 'application/json',
+    },
+    body,
+  })
+
+  const text = await response.text()
+  let json: any
+  try {
+    json = JSON.parse(text)
+  } catch {
+    throw new Error(
+      `PayU UPI Intent returned non-JSON (${response.status}): ${text.slice(0, 240)}`
+    )
+  }
+
+  const meta = json?.metaData || json?.metadata || {}
+  const result = json?.result || {}
+  const intentUriData = String(result.intentURIData || result.intentUriData || '').trim()
+  const txnStatus = String(meta.txnStatus || meta.unmappedStatus || '').toLowerCase()
+
+  if (!intentUriData) {
+    const message =
+      meta.message ||
+      json?.message ||
+      json?.error ||
+      `PayU UPI Intent failed (status=${txnStatus || response.status})`
+    throw new Error(String(message))
+  }
+
+  const links = buildUpiDeepLinks(intentUriData, params.upiApp)
+  let acsTemplateHtml: string | null = null
+  if (result.acsTemplate) {
+    try {
+      acsTemplateHtml = Buffer.from(String(result.acsTemplate), 'base64').toString('utf8')
+    } catch {
+      acsTemplateHtml = null
+    }
+  }
+
+  return {
+    txnid: params.txnid,
+    paymentId: result.paymentId ? String(result.paymentId) : undefined,
+    intentUriData,
+    deepLink: links.deepLink,
+    androidIntentUrl: links.androidIntentUrl,
+    iosDeepLink: links.iosDeepLink,
+    acsTemplateHtml,
+    raw: json,
+  }
+}
+
 /** Verify txn status with PayU (needed when UPI Intent never redirects back). */
 export async function verifyPayUPayment(txnid: string): Promise<PayUVerifiedTxn | null> {
   const payu = getPayUConfig()

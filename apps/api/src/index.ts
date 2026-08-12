@@ -24,9 +24,20 @@ app.use(cors({ origin: true, credentials: true }))
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
+// Concise request log — visible when web/admin logs are hidden in `npm run dev`.
+app.use((req, res, next) => {
+  const started = Date.now()
+  res.on('finish', () => {
+    const ms = Date.now() - started
+    console.log(`${req.method} ${req.originalUrl} ${res.statusCode} ${ms}ms`)
+  })
+  next()
+})
+
 app.get('/', (req, res) => {
   res.json({ message: 'Riyansh E-Commerce API' })
 })
+
 
 app.use('/api/auth', authRoutes)
 app.use('/api/products', productsRoutes)
@@ -47,6 +58,8 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 app
   .listen(PORT, '0.0.0.0', () => {
     console.log(`API server running on http://0.0.0.0:${PORT}`)
+    console.log(`  local:   http://localhost:${PORT}`)
+    console.log(`  LAN:     http://<your-lan-ip>:${PORT}  (e.g. http://192.168.1.8:${PORT})`)
   })
   .on('error', (err: any) => {
     console.error('Server error:', err)

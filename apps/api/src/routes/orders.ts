@@ -7,10 +7,13 @@ import {
   generatePaymentHash,
   generateTxnId,
   getPayUConfig,
+  initiatePayUUpiIntent,
   isPayUPendingStatus,
   isPayUSuccessStatus,
+  isPayUUpiApp,
   verifyPayUPayment,
   verifyReverseHash,
+  type PayUUpiApp,
 } from '../services/payu'
 
 const router = Router()
@@ -78,8 +81,11 @@ router.get('/all', async (req: AuthRequest, res) => {
 })
 
 /**
- * Create pending order + PayU hosted checkout form fields.
- * Must be registered before /:id routes.
+ * Create pending order + PayU Hosted Checkout fields, or UPI Intent deep links.
+ * Body:
+ * - payment_method: 'hosted' (default) | 'upi_intent'
+ * - upi_app: phonepe | googlepay | paytm | genericintent (required for upi_intent)
+ * - device_info: User-Agent (recommended for UPI Intent)
  */
 router.post('/create-payu-order', authenticateToken, async (req: AuthRequest, res) => {
   try {
@@ -88,9 +94,31 @@ router.post('/create-payu-order', authenticateToken, async (req: AuthRequest, re
       return res.status(401).json({ error: 'Unauthorized' })
     }
 
-    const { shipping_address, billing_address, notes, site_url, api_base } = req.body
+    const {
+      shipping_address,
+      billing_address,
+      notes,
+      site_url,
+      api_base,
+      payment_method,
+      upi_app,
+      device_info,
+      enforce_paymethod,
+    } = req.body
     if (!shipping_address?.phone || !shipping_address?.address1 || !shipping_address?.city) {
       return res.status(400).json({ error: 'Complete shipping address is required' })
+    }
+
+    const method = String(payment_method || 'hosted').toLowerCase()
+    const useUpiIntent = method === 'upi_intent' || method === 'upi'
+    let upiApp: PayUUpiApp = 'genericintent'
+    if (useUpiIntent) {
+      if (!isPayUUpiApp(upi_app)) {
+        return res.status(400).json({
+          error: 'upi_app must be one of: phonepe, googlepay, paytm, bhim, amazonpay, genericintent',
+        })
+      }
+      upiApp = upi_app
     }
 
     const payu = getPayUConfig()
@@ -129,15 +157,22 @@ router.post('/create-payu-order', authenticateToken, async (req: AuthRequest, re
       shipping_address.firstname ||
       userProfile?.full_name?.split(' ')[0] ||
       email.split('@')[0]
-    const productinfo = cartItems
-      .map((item: any) => item.product.name)
-      .join(', ')
-      .replace(/[^\w\s.,\-]/g, '')
-      .slice(0, 100) || 'Order'
+    const nameParts = String(userProfile?.full_name || shipping_address.firstname || '').trim().split(/\s+/)
+    const lastname =
+      shipping_address.lastname ||
+      (nameParts.length > 1 ? nameParts.slice(1).join(' ') : '') ||
+      'Customer'
+    const productinfo =
+      cartItems
+        .map((item: any) => item.product.name)
+        .join(', ')
+        .replace(/[^\w\s.,\-]/g, '')
+        .slice(0, 100) || 'Order'
 
     const shippingWithReturn = {
       ...shipping_address,
       _return_origin: siteUrl,
+      _payment_method: useUpiIntent ? `upi_intent:${upiApp}` : 'hosted',
     }
 
     const { data: order, error: orderError } = await supabase
@@ -174,6 +209,82 @@ router.post('/create-payu-order', authenticateToken, async (req: AuthRequest, re
       return res.status(400).json({ error: itemsError.message })
     }
 
+    const phone = String(shipping_address.phone).replace(/\D/g, '').slice(-10)
+    const zipcode = String(shipping_address.zipcode || shipping_address.pincode || '').replace(
+      /\s+/g,
+      ''
+    )
+
+    if (useUpiIntent) {
+      const forwarded = req.headers['x-forwarded-for']
+      const clientIp =
+        (typeof forwarded === 'string' ? forwarded.split(',')[0] : '') ||
+        req.socket.remoteAddress ||
+        '127.0.0.1'
+      const deviceInfo =
+        (typeof device_info === 'string' && device_info.trim()) ||
+        (typeof req.headers['user-agent'] === 'string' ? req.headers['user-agent'] : '') ||
+        'Mozilla/5.0'
+
+      try {
+        const intent = await initiatePayUUpiIntent({
+          txnid,
+          amount,
+          productinfo,
+          firstname,
+          lastname,
+          email,
+          phone,
+          surl,
+          furl,
+          udf1: order.id,
+          address1: shipping_address.address1 || '',
+          city: shipping_address.city || '',
+          state: shipping_address.state || '',
+          country: shipping_address.country || 'India',
+          zipcode,
+          upiApp,
+          clientIp: clientIp.replace(/^::ffff:/, ''),
+          deviceInfo,
+        })
+
+        if (intent.paymentId) {
+          await supabase
+            .from('orders')
+            .update({ payu_mihpayid: intent.paymentId, payu_status: 'pending' })
+            .eq('id', order.id)
+        } else {
+          await supabase.from('orders').update({ payu_status: 'pending' }).eq('id', order.id)
+        }
+
+        console.log(
+          `[PayU] UPI Intent app=${upiApp} txnid=${txnid} order=${order.id} paymentId=${intent.paymentId || '-'}`
+        )
+
+        return res.status(201).json({
+          order_id: order.id,
+          txnid,
+          flow: 'upi_intent',
+          upi_app: upiApp,
+          deep_link: intent.deepLink,
+          android_intent_url: intent.androidIntentUrl,
+          ios_deep_link: intent.iosDeepLink,
+          pending_url: `${siteUrl}/orders/pending?order_id=${encodeURIComponent(order.id)}&txnid=${encodeURIComponent(txnid)}`,
+        })
+      } catch (intentError: any) {
+        console.error('[PayU] UPI Intent failed:', intentError?.message || intentError)
+        await supabase
+          .from('orders')
+          .update({ payu_status: 'intent_failed', status: 'cancelled' })
+          .eq('id', order.id)
+        return res.status(502).json({
+          error:
+            intentError?.message ||
+            'Could not start UPI app payment. Try Cards & more on PayU, or enable UPI Intent with PayU.',
+        })
+      }
+    }
+
     const hash = generatePaymentHash({
       key: payu.key,
       txnid,
@@ -185,9 +296,11 @@ router.post('/create-payu-order', authenticateToken, async (req: AuthRequest, re
       salt: payu.salt,
     })
 
-    const phone = String(shipping_address.phone).replace(/\D/g, '').slice(-10)
-
-    // PayU UDF fields must stay simple (no URLs). Return origin is stored on the order.
+    // Hosted: optional enforce from client (creditcard|debitcard|netbanking|cashcard) or env.
+    const fromClient =
+      typeof enforce_paymethod === 'string' ? enforce_paymethod.trim() : ''
+    const enforcePayMethods =
+      fromClient || (process.env.PAYU_ENFORCE_PAYMETHODS || '').trim()
     const fields: Record<string, string> = {
       key: payu.key,
       txnid,
@@ -208,16 +321,21 @@ router.post('/create-payu-order', authenticateToken, async (req: AuthRequest, re
       city: shipping_address.city || '',
       state: shipping_address.state || '',
       country: shipping_address.country || 'India',
-      zipcode: String(shipping_address.zipcode || shipping_address.pincode || '').replace(/\s+/g, ''),
+      zipcode,
+    }
+
+    if (enforcePayMethods) {
+      fields.enforce_paymethod = enforcePayMethods
     }
 
     console.log(
-      `[PayU] mode=${payu.mode} endpoint=${payu.paymentUrl} key=${payu.key.slice(0, 2)}*** txnid=${txnid} surl=${surl}`
+      `[PayU] mode=${payu.mode} endpoint=${payu.paymentUrl} key=${payu.key.slice(0, 2)}*** txnid=${txnid} surl=${surl} flow=hosted methods=${enforcePayMethods || 'all-enabled'}`
     )
 
     res.status(201).json({
       order_id: order.id,
       txnid,
+      flow: 'hosted',
       payment_url: payu.paymentUrl,
       fields,
     })

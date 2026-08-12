@@ -10,24 +10,13 @@ import { Label } from '@/components/ui/label'
 import { useCart } from '@/contexts/CartContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { useToast } from '@/contexts/ToastContext'
-
-function resolveApiBase(): string {
-  const configured =
-    process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || 'http://localhost:4000'
-  if (typeof window === 'undefined') return configured
-  try {
-    const conf = new URL(configured)
-    return `${window.location.protocol}//${window.location.hostname}:${conf.port || '4000'}`
-  } catch {
-    return configured
-  }
-}
+import { CHECKOUT_SHIPPING_KEY, type ShippingDraft } from '@/lib/checkout'
 
 export default function CheckoutPage() {
   const router = useRouter()
   const toast = useToast()
-  const { items, isLoaded, syncCart } = useCart()
-  const { user, accessToken, loading: authLoading } = useAuth()
+  const { items, isLoaded } = useCart()
+  const { user, loading: authLoading } = useAuth()
 
   const [firstname, setFirstname] = useState('')
   const [phone, setPhone] = useState('')
@@ -36,7 +25,6 @@ export default function CheckoutPage() {
   const [state, setState] = useState('')
   const [pincode, setPincode] = useState('')
   const [notes, setNotes] = useState('')
-  const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
     if (authLoading) return
@@ -50,6 +38,17 @@ export default function CheckoutPage() {
       setFirstname(String(user.user_metadata.full_name).split(' ')[0] || '')
     }
     try {
+      const saved = sessionStorage.getItem(CHECKOUT_SHIPPING_KEY)
+      if (saved) {
+        const draft = JSON.parse(saved) as ShippingDraft
+        if (draft.firstname) setFirstname(draft.firstname)
+        if (draft.phone) setPhone(draft.phone)
+        if (draft.address1) setAddress1(draft.address1)
+        if (draft.city) setCity(draft.city)
+        if (draft.state) setState(draft.state)
+        if (draft.pincode) setPincode(draft.pincode)
+        if (draft.notes) setNotes(draft.notes)
+      }
       const note = sessionStorage.getItem('riyansh_checkout_note')
       if (note) {
         setNotes(note)
@@ -62,88 +61,32 @@ export default function CheckoutPage() {
 
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
 
-  const onSubmit = async (e: FormEvent) => {
+  const onSubmit = (e: FormEvent) => {
     e.preventDefault()
-    if (!accessToken) {
-      router.replace('/login?next=/checkout')
-      return
-    }
     if (items.length === 0) {
       toast.error('Cart empty', 'Add products before checkout.')
       router.push('/cart')
       return
     }
 
-    setSubmitting(true)
-    try {
-      await syncCart()
-
-      const apiBase = resolveApiBase()
-      const siteUrl = window.location.origin
-
-      const shipping_address = {
-        firstname,
-        phone,
-        address1,
-        city,
-        state,
-        zipcode: pincode,
-        pincode,
-        country: 'India',
-      }
-
-      const res = await fetch(`${apiBase}/api/orders/create-payu-order`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          shipping_address,
-          billing_address: shipping_address,
-          notes,
-          site_url: siteUrl,
-          api_base: apiBase,
-        }),
-      })
-
-      const data = await res.json()
-      if (!res.ok) {
-        throw new Error(data.error || 'Failed to start payment')
-      }
-
-      try {
-        sessionStorage.setItem(
-          'riyansh_payu_pending',
-          JSON.stringify({
-            order_id: data.order_id,
-            txnid: data.txnid || data.fields?.txnid,
-            at: Date.now(),
-          })
-        )
-      } catch {
-        // ignore
-      }
-
-      const form = document.createElement('form')
-      form.method = 'POST'
-      form.action = data.payment_url
-
-      Object.entries(data.fields || {}).forEach(([key, value]) => {
-        const input = document.createElement('input')
-        input.type = 'hidden'
-        input.name = key
-        input.value = String(value ?? '')
-        form.appendChild(input)
-      })
-
-      document.body.appendChild(form)
-      form.submit()
-    } catch (err: any) {
-      console.error(err)
-      toast.error('Checkout failed', err.message || 'Could not start PayU payment')
-      setSubmitting(false)
+    const draft: ShippingDraft = {
+      firstname: firstname.trim(),
+      phone: phone.trim(),
+      address1: address1.trim(),
+      city: city.trim(),
+      state: state.trim(),
+      pincode: pincode.trim(),
+      notes: notes.trim(),
     }
+
+    try {
+      sessionStorage.setItem(CHECKOUT_SHIPPING_KEY, JSON.stringify(draft))
+    } catch {
+      toast.error('Could not save address', 'Please try again.')
+      return
+    }
+
+    router.push('/checkout/payment')
   }
 
   if (authLoading || !isLoaded) {
@@ -174,7 +117,9 @@ export default function CheckoutPage() {
           Cart
         </Link>
         <span className="mx-2">&gt;</span>
-        <span className="font-bold">Checkout</span>
+        <span className="font-bold">Shipping</span>
+        <span className="mx-2">&gt;</span>
+        <span className="text-[#787878]">Payment</span>
       </div>
 
       <div className="max-w-5xl mx-auto px-4 py-10 grid lg:grid-cols-5 gap-8">
@@ -220,16 +165,13 @@ export default function CheckoutPage() {
             <Label htmlFor="notes">Order notes (optional)</Label>
             <Input id="notes" value={notes} onChange={(e) => setNotes(e.target.value)} />
           </div>
-          <Button
-            type="submit"
-            disabled={submitting}
-            className="w-full h-11 bg-[#5B8C51] hover:bg-[#4E7A45] text-white"
-          >
-            {submitting ? 'Redirecting to PayU…' : `Pay ₹${subtotal.toLocaleString('en-IN')} with PayU`}
+
+          <Button type="submit" className="w-full h-11 bg-[#5B8C51] hover:bg-[#4E7A45] text-white">
+            Continue to payment
           </Button>
         </form>
 
-        <div className="lg:col-span-2 space-y-4">
+        <div className="lg:col-span-2">
           <div className="bg-[#FAF9F5] border border-[#EEEEEE] p-6 h-fit">
             <h2 className="font-bold text-lg mb-4">Order summary</h2>
             <ul className="space-y-3 mb-4">
@@ -237,7 +179,13 @@ export default function CheckoutPage() {
                 <li key={item.id} className="flex gap-3 text-sm">
                   <div className="relative w-14 h-14 bg-white border shrink-0 overflow-hidden">
                     {item.image_url ? (
-                      <Image src={item.image_url} alt={item.name} fill className="object-cover" />
+                      <Image
+                        src={item.image_url}
+                        alt={item.name}
+                        fill
+                        sizes="56px"
+                        className="object-cover"
+                      />
                     ) : null}
                   </div>
                   <div className="flex-1 min-w-0">

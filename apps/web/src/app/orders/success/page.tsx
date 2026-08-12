@@ -6,6 +6,7 @@ import { Suspense, useEffect, useRef, useState } from 'react'
 import { CheckCircle2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useCart } from '@/contexts/CartContext'
+import { CHECKOUT_SHIPPING_KEY } from '@/lib/checkout'
 
 function SuccessContent() {
   const router = useRouter()
@@ -22,6 +23,7 @@ function SuccessContent() {
     clearCart()
     try {
       sessionStorage.removeItem('riyansh_payu_pending')
+      sessionStorage.removeItem(CHECKOUT_SHIPPING_KEY)
     } catch {
       // ignore
     }
