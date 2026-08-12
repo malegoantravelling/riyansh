@@ -1,6 +1,7 @@
 /** Canonical production URLs (override via env on each host). */
 export const PRODUCTION_SITE_URL = 'https://riyanshamrit.com'
-export const PRODUCTION_API_URL = 'https://api.riyanshamrit.com'
+/** Live API on Vercel (api.riyanshamrit.com DNS is not configured). */
+export const PRODUCTION_API_URL = 'https://riyansh-api.vercel.app'
 export const PRODUCTION_ADMIN_URL = 'https://admin.riyanshamrit.com'
 
 function trim(value: string | undefined): string {

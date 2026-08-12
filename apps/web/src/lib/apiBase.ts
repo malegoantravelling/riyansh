@@ -3,7 +3,8 @@
  */
 
 const PRODUCTION_SITE_URL = 'https://riyanshamrit.com'
-const PRODUCTION_API_URL = 'https://api.riyanshamrit.com'
+/** Live API on Vercel — keep in sync with apps/web/.env.production */
+const PRODUCTION_API_URL = 'https://riyansh-api.vercel.app'
 
 function isLoopback(host: string): boolean {
   return host === 'localhost' || host === '127.0.0.1' || host === '::1'
