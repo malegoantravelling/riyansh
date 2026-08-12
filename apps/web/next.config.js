@@ -3,56 +3,58 @@ const path = require('path')
 /** @type {import('next').NextConfig} */
 const lanHost = process.env.NEXT_PUBLIC_DEV_LAN_HOST || '192.168.1.8'
 const monorepoRoot = path.join(__dirname, '../..')
+const isProd = process.env.NODE_ENV === 'production'
 
 const nextConfig = {
-  // Monorepo: Next is hoisted to repo root — pin Turbopack root so routes resolve.
+  output: 'standalone',
   outputFileTracingRoot: monorepoRoot,
   turbopack: {
     root: monorepoRoot,
   },
 
-  // Silence noisy GET / compile logs + browser→terminal spam in `npm run dev`.
-  logging: false,
+  logging: isProd ? false : false,
 
-  // Allow phones / other devices on the LAN to use the Next.js dev server.
-  allowedDevOrigins: [
-    `http://${lanHost}:3000`,
-    lanHost,
-    'http://127.0.0.1:3000',
-    '127.0.0.1',
-    'http://localhost:3000',
-    'localhost',
-  ],
+  ...(isProd
+    ? {}
+    : {
+        allowedDevOrigins: [
+          `http://${lanHost}:3000`,
+          lanHost,
+          'http://127.0.0.1:3000',
+          '127.0.0.1',
+          'http://localhost:3000',
+          'localhost',
+        ],
+      }),
+
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+        ],
+      },
+    ]
+  },
+
   images: {
     remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: '**.supabase.co',
-      },
-      {
-        protocol: 'https',
-        hostname: 'images.pexels.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'images.unsplash.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'via.placeholder.com',
-      },
-      {
-        protocol: 'http',
-        hostname: 'localhost',
-      },
-      {
-        protocol: 'http',
-        hostname: '127.0.0.1',
-      },
-      {
-        protocol: 'http',
-        hostname: lanHost,
-      },
+      { protocol: 'https', hostname: '**.supabase.co' },
+      { protocol: 'https', hostname: 'images.pexels.com' },
+      { protocol: 'https', hostname: 'images.unsplash.com' },
+      { protocol: 'https', hostname: 'via.placeholder.com' },
+      { protocol: 'https', hostname: 'riyanshamrit.com' },
+      { protocol: 'https', hostname: '**.riyanshamrit.com' },
+      ...(isProd
+        ? []
+        : [
+            { protocol: 'http', hostname: 'localhost' },
+            { protocol: 'http', hostname: '127.0.0.1' },
+            { protocol: 'http', hostname: lanHost },
+          ]),
     ],
   },
   experimental: {

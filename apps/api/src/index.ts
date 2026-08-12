@@ -12,6 +12,7 @@ import transactionsRoutes from './routes/transactions'
 import logsRoutes from './routes/logs'
 import contactRoutes from './routes/contact'
 import wishlistRoutes from './routes/wishlist'
+import { resolveAllowedOrigins } from './config/urls'
 
 dotenv.config()
 // Also load monorepo root .env (does not override keys already set from apps/api/.env).
@@ -19,25 +20,45 @@ dotenv.config({ path: path.resolve(__dirname, '../../../.env') })
 
 const app = express()
 const PORT = Number(process.env.PORT) || 4000
+const isProd = process.env.NODE_ENV === 'production'
 
-app.use(cors({ origin: true, credentials: true }))
+if (isProd) {
+  app.set('trust proxy', 1)
+}
+
+const allowedOrigins = resolveAllowedOrigins()
+
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (!origin) return callback(null, true)
+      if (allowedOrigins.includes(origin)) return callback(null, true)
+      callback(null, false)
+    },
+    credentials: true,
+  })
+)
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
-// Concise request log — visible when web/admin logs are hidden in `npm run dev`.
-app.use((req, res, next) => {
-  const started = Date.now()
-  res.on('finish', () => {
-    const ms = Date.now() - started
-    console.log(`${req.method} ${req.originalUrl} ${res.statusCode} ${ms}ms`)
+if (!isProd) {
+  app.use((req, res, next) => {
+    const started = Date.now()
+    res.on('finish', () => {
+      const ms = Date.now() - started
+      console.log(`${req.method} ${req.originalUrl} ${res.statusCode} ${ms}ms`)
+    })
+    next()
   })
-  next()
+}
+
+app.get('/health', (_req, res) => {
+  res.json({ ok: true, service: 'riyansh-api' })
 })
 
-app.get('/', (req, res) => {
+app.get('/', (_req, res) => {
   res.json({ message: 'Riyansh E-Commerce API' })
 })
-
 
 app.use('/api/auth', authRoutes)
 app.use('/api/products', productsRoutes)
@@ -57,9 +78,10 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 
 app
   .listen(PORT, '0.0.0.0', () => {
-    console.log(`API server running on http://0.0.0.0:${PORT}`)
-    console.log(`  local:   http://localhost:${PORT}`)
-    console.log(`  LAN:     http://<your-lan-ip>:${PORT}  (e.g. http://192.168.1.8:${PORT})`)
+    console.log(`API server running on port ${PORT} (${isProd ? 'production' : 'development'})`)
+    if (!isProd) {
+      console.log(`  local: http://localhost:${PORT}`)
+    }
   })
   .on('error', (err: any) => {
     console.error('Server error:', err)

@@ -13,6 +13,8 @@
     "build:web": "cd apps/web && npm run build",
     "build:admin": "cd apps/admin && npm run build",
     "build:api": "cd apps/api && npm run build",
+    "start:web": "cd apps/web && npm run start",
+    "start:api": "cd apps/api && npm run start",
     "install:all": "npm install && cd apps/web && npm install && cd ../admin && npm install && cd ../api && npm install && cd ../../packages/db && npm install && cd ../config && npm install && cd ../ui && npm install && cd ../utils && npm install"
   },
   "devDependencies": {

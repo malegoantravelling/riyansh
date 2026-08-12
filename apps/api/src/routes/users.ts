@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import { supabase } from '../config/supabase'
 import { authenticateToken, AuthRequest } from '../middleware/auth'
+import { authenticateAdmin } from '../middleware/adminAuth'
 
 const router = Router()
 
@@ -8,7 +9,7 @@ const router = Router()
 // Admin routes will be handled separately
 
 // Get all users (admin only)
-router.get('/', async (req, res) => {
+router.get('/', authenticateAdmin, async (req, res) => {
   try {
     const { data, error } = await supabase
       .from('users')
@@ -123,7 +124,7 @@ router.put('/me', authenticateToken, async (req: AuthRequest, res) => {
 })
 
 // Admin: Update any user
-router.put('/:id', async (req, res) => {
+router.put('/:id', authenticateAdmin, async (req, res) => {
   try {
     const { id } = req.params
     const { full_name, email } = req.body
@@ -146,7 +147,7 @@ router.put('/:id', async (req, res) => {
 })
 
 // Admin: Delete user
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', authenticateAdmin, async (req, res) => {
   try {
     const { id } = req.params
 

@@ -2,6 +2,9 @@
  * Shared environment helpers for localhost, LAN (e.g. 192.168.1.8), and production.
  */
 
+const PRODUCTION_SITE_URL = 'https://riyanshamrit.com'
+const PRODUCTION_API_URL = 'https://api.riyanshamrit.com'
+
 function isLoopback(host: string): boolean {
   return host === 'localhost' || host === '127.0.0.1' || host === '::1'
 }
@@ -19,7 +22,7 @@ function configuredApiUrl(): string {
   const raw = (
     process.env.NEXT_PUBLIC_API_URL ||
     process.env.API_URL ||
-    'http://localhost:4000'
+    (process.env.NODE_ENV === 'production' ? PRODUCTION_API_URL : 'http://localhost:4000')
   ).trim()
   return raw.replace(/\/$/, '')
 }
@@ -36,7 +39,7 @@ export function resolveSiteOrigin(): string {
   return (
     process.env.NEXT_PUBLIC_SITE_URL ||
     process.env.SITE_URL ||
-    'http://localhost:3000'
+    (process.env.NODE_ENV === 'production' ? PRODUCTION_SITE_URL : 'http://localhost:3000')
   ).replace(/\/$/, '')
 }
 

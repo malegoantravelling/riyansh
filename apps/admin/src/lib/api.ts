@@ -8,7 +8,9 @@ function isPrivateOrLanHost(host: string): boolean {
 
 /** Local/LAN: follow browser hostname. Production: keep VITE_API_URL as-is. */
 export function resolveApiUrl(): string {
-  const configured = (import.meta.env.VITE_API_URL || 'http://localhost:4000').replace(/\/$/, '')
+  const fallback =
+    import.meta.env.PROD ? 'https://api.riyanshamrit.com' : 'http://localhost:4000'
+  const configured = (import.meta.env.VITE_API_URL || fallback).replace(/\/$/, '')
   if (typeof window === 'undefined') return configured
   try {
     const conf = new URL(configured)

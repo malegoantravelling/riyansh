@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import { supabase } from '../config/supabase'
 import { authenticateToken, AuthRequest } from '../middleware/auth'
+import { authenticateAdmin } from '../middleware/adminAuth'
 import { sendOrderConfirmationEmail } from '../services/emailService'
 import {
   formatPayUAmount,
@@ -15,6 +16,7 @@ import {
   verifyReverseHash,
   type PayUUpiApp,
 } from '../services/payu'
+import { resolveApiUrl, resolveSiteUrl } from '../config/urls'
 
 const router = Router()
 
@@ -33,7 +35,7 @@ function defaultApiBaseFromSurl(surl: string): string {
   try {
     return new URL(surl).origin
   } catch {
-    return 'http://localhost:4000'
+    return resolveApiUrl()
   }
 }
 
@@ -63,7 +65,7 @@ router.get('/', authenticateToken, async (req: AuthRequest, res) => {
   }
 })
 
-router.get('/all', async (req: AuthRequest, res) => {
+router.get('/all', authenticateAdmin, async (req: AuthRequest, res) => {
   try {
     const { data, error } = await supabase
       .from('orders')
@@ -598,8 +600,7 @@ async function handlePayUCallback(req: any, res: any, kind: 'success' | 'failure
     )
   } catch (error: any) {
     console.error('PayU callback error:', error)
-    const siteUrl =
-      process.env.NEXT_PUBLIC_SITE_URL || process.env.SITE_URL || 'http://localhost:3000'
+    const siteUrl = resolveSiteUrl()
     return res.redirect(`${siteUrl}/orders/failure?reason=server_error`)
   }
 }
@@ -727,7 +728,7 @@ router.get('/:id', authenticateToken, async (req: AuthRequest, res) => {
   }
 })
 
-router.put('/:id', async (req: AuthRequest, res) => {
+router.put('/:id', authenticateAdmin, async (req: AuthRequest, res) => {
   try {
     const { id } = req.params
     const { status } = req.body

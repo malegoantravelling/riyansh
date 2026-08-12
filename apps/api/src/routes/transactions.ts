@@ -1,11 +1,12 @@
 import { Router } from 'express'
 import { supabase } from '../config/supabase'
 import { authenticateToken, AuthRequest } from '../middleware/auth'
+import { authenticateAdmin } from '../middleware/adminAuth'
 
 const router = Router()
 
 // Get all transactions (admin only)
-router.get('/', async (req, res) => {
+router.get('/', authenticateAdmin, async (req, res) => {
   try {
     const { data: transactions, error } = await supabase
       .from('transactions')
@@ -58,7 +59,7 @@ router.get('/my-transactions', authenticateToken, async (req: AuthRequest, res) 
 })
 
 // Get transaction by ID
-router.get('/:id', async (req, res) => {
+router.get('/:id', authenticateAdmin, async (req, res) => {
   try {
     const { id } = req.params
 

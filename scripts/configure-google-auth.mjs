@@ -39,7 +39,7 @@ async function main() {
     external_google_enabled: true,
     external_google_client_id: google.client_id,
     external_google_secret: google.client_secret,
-    site_url: 'http://localhost:3000',
+    site_url: process.env.SUPABASE_SITE_URL || 'https://riyanshamrit.com',
     uri_allow_list:
       'http://localhost:3000/**,http://localhost:3000/auth/callback,https://riyanshamrit.com/**,https://riyanshamrit.com/auth/callback',
   }

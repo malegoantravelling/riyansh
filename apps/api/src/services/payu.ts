@@ -1,4 +1,5 @@
 import crypto from 'crypto'
+import { resolveApiUrl, resolveSiteUrl } from '../config/urls'
 
 function trimEnv(value: string | undefined): string {
   return (value || '').trim()
@@ -47,10 +48,7 @@ export function getPayUConfig() {
   const baseUrl = resolveBaseUrl(mode)
   const surl = trimEnv(process.env.PAYU_SURL)
   const furl = trimEnv(process.env.PAYU_FURL)
-  const siteUrl =
-    trimEnv(process.env.NEXT_PUBLIC_SITE_URL) ||
-    trimEnv(process.env.SITE_URL) ||
-    'http://localhost:3000'
+  const siteUrl = resolveSiteUrl()
 
   if (!key || !salt) {
     throw new Error('PAYU_KEY and PAYU_SALT must be configured')

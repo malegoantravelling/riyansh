@@ -2,6 +2,7 @@ import { Router } from 'express'
 import multer from 'multer'
 import { supabase } from '../config/supabase'
 import { authenticateToken, AuthRequest } from '../middleware/auth'
+import { authenticateAdmin } from '../middleware/adminAuth'
 
 const router = Router()
 
@@ -103,7 +104,7 @@ router.get('/slug/:slug', async (req, res) => {
 })
 
 // Upload product image
-router.post('/upload-image', upload.single('image'), async (req, res) => {
+router.post('/upload-image', authenticateAdmin, upload.single('image'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No image file provided' })
@@ -139,7 +140,7 @@ router.post('/upload-image', upload.single('image'), async (req, res) => {
 })
 
 // Create product (admin only)
-router.post('/', async (req, res) => {
+router.post('/', authenticateAdmin, async (req, res) => {
   try {
     const { data, error } = await supabase.from('products').insert(req.body).select().single()
 
@@ -154,7 +155,7 @@ router.post('/', async (req, res) => {
 })
 
 // Update product (admin only)
-router.put('/:id', async (req, res) => {
+router.put('/:id', authenticateAdmin, async (req, res) => {
   try {
     const { id } = req.params
 
@@ -176,7 +177,7 @@ router.put('/:id', async (req, res) => {
 })
 
 // Delete product (admin only)
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', authenticateAdmin, async (req, res) => {
   try {
     const { id } = req.params
 

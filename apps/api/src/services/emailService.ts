@@ -2,20 +2,20 @@ import nodemailer from 'nodemailer'
 
 // Create reusable transporter
 const createTransporter = () => {
-  console.log('🔧 Creating email transporter...')
-  console.log('📧 Email User:', process.env.EMAIL_USER || 'riyanshamrit106@gmail.com')
-  console.log('🔑 Email Password:', process.env.EMAIL_PASSWORD ? '***SET***' : '***NOT SET***')
+  const user = process.env.EMAIL_USER
+  const pass = process.env.EMAIL_PASSWORD
+
+  if (!user || !pass) {
+    throw new Error('EMAIL_USER and EMAIL_PASSWORD must be configured')
+  }
 
   return nodemailer.createTransport({
     host: 'smtp.gmail.com',
     port: 587,
-    secure: false, // true for 465, false for other ports
-    auth: {
-      user: process.env.EMAIL_USER || 'riyanshamrit106@gmail.com',
-      pass: process.env.EMAIL_PASSWORD || 'xcjissfszpokgvfn', // Gmail App Password
-    },
+    secure: false,
+    auth: { user, pass },
     tls: {
-      rejectUnauthorized: false,
+      rejectUnauthorized: true,
     },
   })
 }
@@ -235,8 +235,8 @@ export const sendOrderConfirmationEmail = async (data: OrderEmailData) => {
 
     // Send email to admin
     const adminMailOptions = {
-      from: `"RIYANSH E-Commerce" <${process.env.EMAIL_USER || 'riyanshamrit106@gmail.com'}>`,
-      to: 'riyanshamrit106@gmail.com',
+      from: `"RIYANSH E-Commerce" <${process.env.EMAIL_USER}>`,
+      to: process.env.ORDER_NOTIFY_EMAIL || process.env.EMAIL_USER,
       subject: `🛒 New Order #${data.orderId
         .substring(0, 8)
         .toUpperCase()} - ₹${data.totalAmount.toFixed(2)}`,
@@ -383,8 +383,8 @@ export const sendContactFormEmail = async (data: ContactFormData) => {
 
     // Send email to admin
     const mailOptions = {
-      from: `"RIYANSH Contact Form" <${process.env.EMAIL_USER || 'riyanshamrit106@gmail.com'}>`,
-      to: 'riyanshamrit106@gmail.com',
+      from: `"RIYANSH Contact Form" <${process.env.EMAIL_USER}>`,
+      to: process.env.ORDER_NOTIFY_EMAIL || process.env.EMAIL_USER,
       subject: `📧 Contact Form: ${data.subject} - ${data.firstName} ${data.lastName}`,
       html: emailHtml,
       replyTo: data.email, // Allow direct reply to customer
@@ -633,8 +633,8 @@ export const sendWhatsAppOrderEmail = async (data: WhatsAppOrderData) => {
 
     // Send email to admin
     const mailOptions = {
-      from: `"RIYANSH WhatsApp Orders" <${process.env.EMAIL_USER || 'riyanshamrit106@gmail.com'}>`,
-      to: 'riyanshamrit106@gmail.com',
+      from: `"RIYANSH WhatsApp Orders" <${process.env.EMAIL_USER}>`,
+      to: process.env.ORDER_NOTIFY_EMAIL || process.env.EMAIL_USER,
       subject: `📱 ${subjectText} Order via WhatsApp - ${data.customerName}`,
       html: emailHtml,
     }

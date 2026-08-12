@@ -1,21 +1,26 @@
 DirectoryIndex disabled
 
-# Enable rewrite engine
+# Cloudways / Apache — subdomain setup (preferred):
+#   riyanshamrit.com       → Next.js :3000
+#   api.riyanshamrit.com   → Express :4000
+#   admin.riyanshamrit.com → admin dist :3001
+#
+# If you still proxy path-based /api on the main domain, point to the API subdomain:
+
 RewriteEngine On
 RewriteBase /
 
-# API endpoints - Route /api/* to port 4000 (Express API)
+# Optional: path-based API on main domain → API subdomain
 RewriteCond %{REQUEST_URI} ^/api/(.*)$
-RewriteRule ^api/(.*)$ https://riyanshamrit.com/api/$1 [P,L]
+RewriteRule ^api/(.*)$ https://api.riyanshamrit.com/api/$1 [P,L]
 
-# Admin panel - Route /admin/* to port 3001 (Vite Admin)
-# Forward the full path to preserve Vite base path
+# Optional: path-based admin → admin subdomain
 RewriteCond %{REQUEST_URI} ^/admin/
 RewriteRule ^admin/(.*)$ https://admin.riyanshamrit.com/$1 [P,L]
 
-# Next.js static files and HMR
+# Next.js static assets
 RewriteCond %{REQUEST_URI} ^/_next/
 RewriteRule ^_next/(.*)$ https://riyanshamrit.com/_next/$1 [P,L]
 
-# Main website - Everything else to port 3000 (Next.js)
+# Main site
 RewriteRule ^(.*)?$ https://riyanshamrit.com/$1 [P,L]

@@ -1,5 +1,6 @@
 import { Router } from 'express'
 import { supabase } from '../config/supabase'
+import { authenticateAdmin } from '../middleware/adminAuth'
 
 const router = Router()
 
@@ -36,7 +37,7 @@ router.get('/:id', async (req, res) => {
 })
 
 // Create category (admin only)
-router.post('/', async (req, res) => {
+router.post('/', authenticateAdmin, async (req, res) => {
   try {
     const { data, error } = await supabase.from('categories').insert(req.body).select().single()
 
@@ -51,7 +52,7 @@ router.post('/', async (req, res) => {
 })
 
 // Update category (admin only)
-router.put('/:id', async (req, res) => {
+router.put('/:id', authenticateAdmin, async (req, res) => {
   try {
     const { id } = req.params
 
@@ -73,7 +74,7 @@ router.put('/:id', async (req, res) => {
 })
 
 // Delete category (admin only)
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', authenticateAdmin, async (req, res) => {
   try {
     const { id } = req.params
 
