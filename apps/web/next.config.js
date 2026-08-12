@@ -4,9 +4,12 @@ const path = require('path')
 const lanHost = process.env.NEXT_PUBLIC_DEV_LAN_HOST || '192.168.1.8'
 const monorepoRoot = path.join(__dirname, '../..')
 const isProd = process.env.NODE_ENV === 'production'
+const isVercel = process.env.VERCEL === '1'
 
 const nextConfig = {
-  output: 'standalone',
+  // Vercel manages runtime packaging itself. Enabling standalone there can
+  // conflict with Vercel's onBuildComplete tracing step.
+  ...(isVercel ? {} : { output: 'standalone' }),
   outputFileTracingRoot: monorepoRoot,
   turbopack: {
     root: monorepoRoot,
