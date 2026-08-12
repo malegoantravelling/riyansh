@@ -8,7 +8,7 @@ const router = Router()
 router.use(authenticateToken)
 
 async function requirePublicUser(req: AuthRequest, res: any): Promise<string | null> {
-  const ensured = await ensurePublicUser(req.user)
+  const ensured = await ensurePublicUser(req.user, req.supabaseUser)
   if (ensured.error || !ensured.user) {
     res.status(400).json({
       error: ensured.error || 'Could not ensure user profile',
@@ -20,12 +20,16 @@ async function requirePublicUser(req: AuthRequest, res: any): Promise<string | n
   return ensured.user.id as string
 }
 
+function db(req: AuthRequest) {
+  return req.supabaseUser || supabase
+}
+
 router.get('/', async (req: AuthRequest, res) => {
   try {
     const userId = await requirePublicUser(req, res)
     if (!userId) return
 
-    const { data, error } = await supabase
+    const { data, error } = await db(req)
       .from('wishlist_items')
       .select('*, product:products(*)')
       .eq('user_id', userId)
@@ -44,10 +48,11 @@ router.post('/sync', async (req: AuthRequest, res) => {
   try {
     const userId = await requirePublicUser(req, res)
     if (!userId) return
+    const client = db(req)
     const productIds: string[] = Array.isArray(req.body?.product_ids) ? req.body.product_ids : []
 
     for (const product_id of productIds) {
-      const { data: existing, error: existingError } = await supabase
+      const { data: existing, error: existingError } = await client
         .from('wishlist_items')
         .select('id')
         .eq('user_id', userId)
@@ -59,7 +64,7 @@ router.post('/sync', async (req: AuthRequest, res) => {
       }
 
       if (!existing) {
-        const { error: insertError } = await supabase
+        const { error: insertError } = await client
           .from('wishlist_items')
           .insert({ user_id: userId, product_id })
         if (insertError) {
@@ -68,7 +73,7 @@ router.post('/sync', async (req: AuthRequest, res) => {
       }
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await client
       .from('wishlist_items')
       .select('*, product:products(*)')
       .eq('user_id', userId)
@@ -93,7 +98,8 @@ router.post('/', async (req: AuthRequest, res) => {
       return res.status(400).json({ error: 'product_id is required' })
     }
 
-    const { data: existing } = await supabase
+    const client = db(req)
+    const { data: existing } = await client
       .from('wishlist_items')
       .select('*, product:products(*)')
       .eq('user_id', userId)
@@ -104,7 +110,7 @@ router.post('/', async (req: AuthRequest, res) => {
       return res.json(existing)
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await client
       .from('wishlist_items')
       .insert({ user_id: userId, product_id })
       .select('*, product:products(*)')
@@ -126,7 +132,7 @@ router.delete('/:productId', async (req: AuthRequest, res) => {
     if (!userId) return
     const { productId } = req.params
 
-    const { error } = await supabase
+    const { error } = await db(req)
       .from('wishlist_items')
       .delete()
       .eq('user_id', userId)

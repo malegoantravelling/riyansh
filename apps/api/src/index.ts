@@ -67,10 +67,14 @@ app.get('/health/supabase', async (_req, res) => {
       urlHost: probe.urlHost,
       keyRole: probe.role,
       projectRef: probe.ref,
+      anonConfigured: probe.anonConfigured,
+      serviceConfigured: probe.serviceConfigured,
+      anonOk: probe.anonOk ?? null,
+      serviceOk: probe.serviceOk ?? null,
       error: probe.error || null,
       hint: probe.ok
         ? null
-        : 'Set SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY (service_role JWT) on the Vercel API project, then redeploy.',
+        : 'Set SUPABASE_URL + SUPABASE_ANON_KEY (same as web) on Vercel riyansh-api. Also set a valid SUPABASE_SERVICE_ROLE_KEY for PayU callbacks/admin.',
     },
   })
 })

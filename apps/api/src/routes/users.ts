@@ -70,21 +70,25 @@ router.get('/me', authenticateToken, async (req: AuthRequest, res) => {
 
 router.post('/ensure', authenticateToken, async (req: AuthRequest, res) => {
   try {
-    const ensured = await ensurePublicUser({
-      id: req.user?.id,
-      email: req.user?.email,
-      user_metadata: {
-        ...((req.user as any)?.user_metadata || {}),
-        full_name: req.body?.full_name,
-        avatar_url: req.body?.avatar_url,
+    const ensured = await ensurePublicUser(
+      {
+        id: req.user?.id,
+        email: req.user?.email,
+        user_metadata: {
+          ...((req.user as any)?.user_metadata || {}),
+          full_name: req.body?.full_name,
+          avatar_url: req.body?.avatar_url,
+        },
       },
-    })
+      req.supabaseUser
+    )
     if (ensured.error || !ensured.user) {
       return res.status(400).json({ error: ensured.error || 'Missing auth user' })
     }
 
     if (req.body?.phone) {
-      const { data, error } = await supabase
+      const db = req.supabaseUser || supabase
+      const { data, error } = await db
         .from('users')
         .update({ phone: req.body.phone })
         .eq('id', ensured.user.id)

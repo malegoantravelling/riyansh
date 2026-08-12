@@ -26,50 +26,104 @@ function decodeJwtPayload(token: string): Record<string, unknown> | null {
   }
 }
 
-const supabaseUrl = cleanEnv(process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL)
-const supabaseKey = cleanEnv(
+export const supabaseUrl = cleanEnv(
+  process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL
+)
+
+export const supabaseAnonKey = cleanEnv(
+  process.env.SUPABASE_ANON_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+    process.env.VITE_SUPABASE_ANON_KEY
+)
+
+export const supabaseServiceKey = cleanEnv(
   process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY
 )
 
-if (!supabaseUrl || !supabaseKey) {
+if (!supabaseUrl) {
+  throw new Error('Missing SUPABASE_URL on the API')
+}
+
+if (!supabaseAnonKey && !supabaseServiceKey) {
   throw new Error(
-    'Missing SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY on the API. Set them in Vercel → Project → Settings → Environment Variables.'
+    'Missing SUPABASE_ANON_KEY and SUPABASE_SERVICE_ROLE_KEY on the API. Set at least the anon key (same as the web app).'
   )
 }
 
-const payload = decodeJwtPayload(supabaseKey)
-const keyRole = typeof payload?.role === 'string' ? payload.role : null
-const keyRef = typeof payload?.ref === 'string' ? payload.ref : null
+const servicePayload = supabaseServiceKey ? decodeJwtPayload(supabaseServiceKey) : null
+export const supabaseProjectRef =
+  typeof servicePayload?.ref === 'string' ? servicePayload.ref : null
+export const supabaseKeyRole =
+  typeof servicePayload?.role === 'string' ? servicePayload.role : null
 
-if (keyRole && keyRole !== 'service_role') {
+if (supabaseKeyRole && supabaseKeyRole !== 'service_role') {
   console.error(
-    `[supabase] WARNING: key role is "${keyRole}" (expected "service_role"). Admin/cart FK writes will fail.`
+    `[supabase] WARNING: service key role is "${supabaseKeyRole}" (expected "service_role").`
   )
 }
 
-if (keyRef && !supabaseUrl.includes(keyRef)) {
+if (supabaseProjectRef && !supabaseUrl.includes(supabaseProjectRef)) {
   console.error(
-    `[supabase] WARNING: SUPABASE_URL does not match key project ref "${keyRef}". This causes "Invalid API key".`
+    `[supabase] WARNING: SUPABASE_URL does not match key project ref "${supabaseProjectRef}".`
   )
 }
 
-export const supabaseProjectRef = keyRef
-export const supabaseKeyRole = keyRole
+/**
+ * Privileged client (service role). May be unavailable if Vercel has a bad key.
+ * Prefer createUserClient() for end-user cart/checkout flows.
+ */
+export const supabase: SupabaseClient = createClient(
+  supabaseUrl,
+  supabaseServiceKey || supabaseAnonKey,
+  {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+    },
+  }
+)
 
-export const supabase: SupabaseClient = createClient(supabaseUrl, supabaseKey, {
-  auth: {
-    persistSession: false,
-    autoRefreshToken: false,
-  },
-})
+/** Anon client — used to validate user JWTs (does not need service_role). */
+export function createAnonClient(): SupabaseClient {
+  if (!supabaseAnonKey) {
+    throw new Error('Missing SUPABASE_ANON_KEY (or NEXT_PUBLIC_SUPABASE_ANON_KEY) on the API')
+  }
+  return createClient(supabaseUrl, supabaseAnonKey, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  })
+}
 
-/** Lightweight readiness check used by /health/supabase */
+/**
+ * User-scoped client: RLS applies as the logged-in shopper.
+ * This is the permanent path when service_role on Vercel is wrong/missing.
+ */
+export function createUserClient(accessToken: string): SupabaseClient {
+  if (!supabaseAnonKey) {
+    throw new Error('Missing SUPABASE_ANON_KEY on the API')
+  }
+  return createClient(supabaseUrl, supabaseAnonKey, {
+    global: {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    },
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+    },
+  })
+}
+
 export async function probeSupabase(): Promise<{
   ok: boolean
   error?: string
   role: string | null
   ref: string | null
   urlHost: string
+  anonConfigured: boolean
+  serviceConfigured: boolean
+  anonOk?: boolean
+  serviceOk?: boolean
 }> {
   const urlHost = (() => {
     try {
@@ -79,19 +133,36 @@ export async function probeSupabase(): Promise<{
     }
   })()
 
-  try {
-    const { error } = await supabase.from('products').select('id').limit(1)
-    if (error) {
-      return { ok: false, error: error.message, role: keyRole, ref: keyRef, urlHost }
-    }
-    return { ok: true, role: keyRole, ref: keyRef, urlHost }
-  } catch (err: any) {
-    return {
-      ok: false,
-      error: err?.message || 'Supabase probe failed',
-      role: keyRole,
-      ref: keyRef,
-      urlHost,
-    }
+  let serviceOk = false
+  let anonOk = false
+  let error: string | undefined
+
+  if (supabaseServiceKey) {
+    const admin = createClient(supabaseUrl, supabaseServiceKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    })
+    const { error: serviceError } = await admin.from('products').select('id').limit(1)
+    serviceOk = !serviceError
+    if (serviceError) error = `service_role: ${serviceError.message}`
+  }
+
+  if (supabaseAnonKey) {
+    const anon = createAnonClient()
+    const { error: anonError } = await anon.from('products').select('id').limit(1)
+    anonOk = !anonError
+    if (anonError) error = error ? `${error}; anon: ${anonError.message}` : `anon: ${anonError.message}`
+  }
+
+  const ok = serviceOk || anonOk
+  return {
+    ok,
+    error: ok ? undefined : error || 'No working Supabase key',
+    role: supabaseKeyRole,
+    ref: supabaseProjectRef,
+    urlHost,
+    anonConfigured: Boolean(supabaseAnonKey),
+    serviceConfigured: Boolean(supabaseServiceKey),
+    anonOk,
+    serviceOk,
   }
 }

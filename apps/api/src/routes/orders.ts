@@ -92,7 +92,8 @@ router.get('/all', authenticateAdmin, async (req: AuthRequest, res) => {
  */
 router.post('/create-payu-order', authenticateToken, async (req: AuthRequest, res) => {
   try {
-    const ensured = await ensurePublicUser(req.user)
+    const userDb = req.supabaseUser || supabase
+    const ensured = await ensurePublicUser(req.user, req.supabaseUser)
     if (ensured.error || !ensured.user) {
       return res.status(400).json({
         error: ensured.error || 'Could not ensure user profile',
@@ -144,19 +145,19 @@ router.post('/create-payu-order', authenticateToken, async (req: AuthRequest, re
       : []
     for (const item of syncItems) {
       if (!item?.product_id || !item?.quantity || item.quantity < 1) continue
-      const { data: existing } = await supabase
+      const { data: existing } = await userDb
         .from('cart_items')
         .select('id, quantity')
         .eq('user_id', userId)
         .eq('product_id', item.product_id)
         .maybeSingle()
       if (existing) {
-        await supabase
+        await userDb
           .from('cart_items')
           .update({ quantity: Math.max(existing.quantity, item.quantity) })
           .eq('id', existing.id)
       } else {
-        const { error: insertError } = await supabase.from('cart_items').insert({
+        const { error: insertError } = await userDb.from('cart_items').insert({
           user_id: userId,
           product_id: item.product_id,
           quantity: item.quantity,
@@ -170,7 +171,7 @@ router.post('/create-payu-order', authenticateToken, async (req: AuthRequest, re
       }
     }
 
-    const { data: cartRows, error: cartError } = await supabase
+    const { data: cartRows, error: cartError } = await userDb
       .from('cart_items')
       .select('*, product:products(*)')
       .eq('user_id', userId)
@@ -222,7 +223,7 @@ router.post('/create-payu-order', authenticateToken, async (req: AuthRequest, re
       _payment_method: useUpiIntent ? `upi_intent:${upiApp}` : 'hosted',
     }
 
-    const { data: order, error: orderError } = await supabase
+    const { data: order, error: orderError } = await userDb
       .from('orders')
       .insert({
         user_id: userId,
@@ -250,9 +251,9 @@ router.post('/create-payu-order', authenticateToken, async (req: AuthRequest, re
       price: item.product.price,
     }))
 
-    const { error: itemsError } = await supabase.from('order_items').insert(orderItems)
+    const { error: itemsError } = await userDb.from('order_items').insert(orderItems)
     if (itemsError) {
-      await supabase.from('orders').delete().eq('id', order.id)
+      await userDb.from('orders').delete().eq('id', order.id)
       return res.status(400).json({ error: itemsError.message })
     }
 
