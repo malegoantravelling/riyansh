@@ -35,13 +35,20 @@ async function main() {
   }
 
   const google = loadGoogleCreds()
+  const siteUrl = process.env.SUPABASE_SITE_URL || 'https://riyanshamrit.com'
   const body = {
     external_google_enabled: true,
     external_google_client_id: google.client_id,
     external_google_secret: google.client_secret,
-    site_url: process.env.SUPABASE_SITE_URL || 'https://riyanshamrit.com',
-    uri_allow_list:
-      'http://localhost:3000/**,http://localhost:3000/auth/callback,https://riyanshamrit.com/**,https://riyanshamrit.com/auth/callback',
+    site_url: siteUrl,
+    uri_allow_list: [
+      'http://localhost:3000/**',
+      'http://localhost:3000/auth/callback',
+      'https://riyanshamrit.com/**',
+      'https://riyanshamrit.com/auth/callback',
+      'https://www.riyanshamrit.com/**',
+      'https://www.riyanshamrit.com/auth/callback',
+    ].join(','),
   }
 
   const res = await fetch(`https://api.supabase.com/v1/projects/${PROJECT_REF}/config/auth`, {
@@ -60,7 +67,13 @@ async function main() {
   }
 
   console.log('Google OAuth enabled on Supabase project', PROJECT_REF)
-  console.log('Site URL + redirect allow list updated for localhost and riyanshamrit.com')
+  console.log('Site URL:', siteUrl)
+  console.log('Redirect allow list updated for localhost and riyanshamrit.com')
+  console.log('')
+  console.log('To show "Riyanshamrit.com" on the Google consent screen (not *.supabase.co):')
+  console.log('1. Supabase Dashboard → Project Settings → Custom Domains → add auth.riyanshamrit.com')
+  console.log('2. Google Cloud Console → OAuth consent screen → App name "Riyanshamrit"')
+  console.log('3. Add https://auth.riyanshamrit.com/auth/v1/callback to Google authorized redirect URIs')
 }
 
 main().catch((err) => {

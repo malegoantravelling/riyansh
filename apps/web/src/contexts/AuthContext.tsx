@@ -12,6 +12,7 @@ import React, {
 import type { Session, User } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/client'
 import { resolveApiBase } from '@/lib/apiBase'
+import { buildAuthCallbackUrl } from '@/lib/authRedirect'
 
 interface AuthContextType {
   user: User | null
@@ -129,19 +130,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const signInWithGoogle = async (next = '/') => {
-    const origin = window.location.origin
-    // Custom OIDC provider in Supabase: identifier must be exactly "custom:google"
+    // Supabase OAuth signs in existing users and creates new ones automatically.
     const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'custom:google' as 'google',
+      provider: 'google',
       options: {
-        redirectTo: `${origin}/auth/callback?next=${encodeURIComponent(next)}`,
+        redirectTo: buildAuthCallbackUrl(next),
+        queryParams: {
+          access_type: 'online',
+          prompt: 'select_account',
+        },
       },
     })
     return { error: error?.message ?? null }
   }
 
   const signOut = async () => {
-    await supabase.auth.signOut()
+    await supabase.auth.signOut({ scope: 'local' })
   }
 
   return (

@@ -4,6 +4,7 @@ import { FormEvent, useState, Suspense } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
+import { mapOAuthLoginError } from '@/lib/authRedirect'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -17,9 +18,7 @@ function LoginForm() {
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState<string | null>(
-    authError === 'auth_callback' ? 'Google sign-in failed. Please try again.' : null
-  )
+  const [error, setError] = useState<string | null>(mapOAuthLoginError(authError))
   const [submitting, setSubmitting] = useState(false)
 
   const onSubmit = async (e: FormEvent) => {

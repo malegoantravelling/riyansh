@@ -8,6 +8,7 @@ import { ToastProvider } from '@/contexts/ToastContext'
 import { CartProvider } from '@/contexts/CartContext'
 import { WishlistProvider } from '@/contexts/WishlistContext'
 import { AuthProvider } from '@/contexts/AuthContext'
+import { OAuthLandingHandler } from '@/components/OAuthLandingHandler'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -30,6 +31,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={inter.className} suppressHydrationWarning>
         <ToastProvider>
           <AuthProvider>
+            <OAuthLandingHandler />
             <WishlistProvider>
               <CartProvider>
                 <div className="flex flex-col min-h-screen">
