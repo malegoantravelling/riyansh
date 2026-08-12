@@ -130,9 +130,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const signInWithGoogle = async (next = '/') => {
-    // Supabase OAuth signs in existing users and creates new ones automatically.
+    // Custom OIDC provider in Supabase Dashboard (identifier: custom:google).
+    // Built-in provider "google" is disabled — using it returns "provider is not enabled".
+    // Supabase still signs in existing users and auto-registers new ones.
     const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
+      provider: 'custom:google' as 'google',
       options: {
         redirectTo: buildAuthCallbackUrl(next),
         queryParams: {
