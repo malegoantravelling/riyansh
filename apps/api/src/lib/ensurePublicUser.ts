@@ -22,9 +22,17 @@ export async function ensurePublicUser(authUser: AuthUserLike | null | undefined
   if (!email) {
     const { data, error } = await supabase.auth.admin.getUserById(userId)
     if (error || !data.user) {
+      const msg = error?.message || 'Could not load auth user for profile ensure'
+      if (/invalid api key/i.test(msg)) {
+        return {
+          user: null as null,
+          error:
+            'Invalid API key: API server SUPABASE_SERVICE_ROLE_KEY is wrong or missing on Vercel. Use the service_role key from Supabase → Settings → API.',
+        }
+      }
       return {
         user: null as null,
-        error: error?.message || 'Could not load auth user for profile ensure',
+        error: msg,
       }
     }
     email = (data.user.email || '').trim()

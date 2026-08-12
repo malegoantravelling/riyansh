@@ -54,6 +54,7 @@ export default function Dashboard() {
   })
   const [recentOrders, setRecentOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState<string | null>(null)
   const [dateFilterOpen, setDateFilterOpen] = useState(false)
   const [selectedDateRange, setSelectedDateRange] = useState('Last 30 days')
 
@@ -64,6 +65,7 @@ export default function Dashboard() {
   const fetchData = async () => {
     try {
       setLoading(true)
+      setLoadError(null)
       const [productsResult, ordersResult, usersResult] = await Promise.allSettled([
         api.get('/api/products?include_inactive=true'),
         api.get('/api/orders/all'),
@@ -83,14 +85,26 @@ export default function Dashboard() {
           ? usersResult.value
           : []
 
+      const failures: string[] = []
       if (productsResult.status === 'rejected') {
         console.error('Error fetching products:', productsResult.reason)
+        failures.push(`Products: ${productsResult.reason?.message || productsResult.reason}`)
       }
       if (ordersResult.status === 'rejected') {
         console.error('Error fetching orders:', ordersResult.reason)
+        failures.push(`Orders: ${ordersResult.reason?.message || ordersResult.reason}`)
       }
       if (usersResult.status === 'rejected') {
         console.error('Error fetching users:', usersResult.reason)
+        failures.push(`Users: ${usersResult.reason?.message || usersResult.reason}`)
+      }
+
+      if (failures.length === 3) {
+        setLoadError(
+          'Cannot reach the API or admin auth failed. Set VITE_API_URL=https://riyansh-api.vercel.app and ensure ADMIN_API_TOKEN is configured on the API.'
+        )
+      } else if (failures.length) {
+        setLoadError(failures.join(' · '))
       }
 
       const revenue = orders.reduce(
@@ -108,6 +122,7 @@ export default function Dashboard() {
       setRecentOrders(orders.slice(0, 5))
     } catch (error) {
       console.error('Error fetching stats:', error)
+      setLoadError(error instanceof Error ? error.message : 'Failed to load dashboard')
     } finally {
       setLoading(false)
     }
@@ -199,6 +214,20 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-8">
+      {loadError && (
+        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+          <p className="font-semibold">Dashboard data could not load</p>
+          <p className="mt-1">{loadError}</p>
+          <button
+            type="button"
+            onClick={() => void fetchData()}
+            className="mt-2 text-xs font-semibold underline"
+          >
+            Retry
+          </button>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

@@ -13,6 +13,7 @@ import logsRoutes from './routes/logs'
 import contactRoutes from './routes/contact'
 import wishlistRoutes from './routes/wishlist'
 import { resolveAllowedOrigins } from './config/urls'
+import { probeSupabase } from './config/supabase'
 
 dotenv.config()
 // Also load monorepo root .env (does not override keys already set from apps/api/.env).
@@ -54,6 +55,24 @@ if (!isProd) {
 
 app.get('/health', (_req, res) => {
   res.json({ ok: true, service: 'riyansh-api' })
+})
+
+/** Confirms Supabase credentials without exposing secrets. */
+app.get('/health/supabase', async (_req, res) => {
+  const probe = await probeSupabase()
+  res.status(probe.ok ? 200 : 503).json({
+    ok: probe.ok,
+    service: 'riyansh-api',
+    supabase: {
+      urlHost: probe.urlHost,
+      keyRole: probe.role,
+      projectRef: probe.ref,
+      error: probe.error || null,
+      hint: probe.ok
+        ? null
+        : 'Set SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY (service_role JWT) on the Vercel API project, then redeploy.',
+    },
+  })
 })
 
 app.get('/', (_req, res) => {
