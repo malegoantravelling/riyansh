@@ -20,10 +20,14 @@ export const authenticateToken = async (req: AuthRequest, res: Response, next: N
     } = await supabase.auth.getUser(token)
 
     if (error || !user) {
+      const detail = error?.message || 'No user for token'
+      console.warn('[auth] getUser failed:', detail)
       return res.status(401).json({
         error: 'Invalid or expired token',
-        ...(process.env.NODE_ENV === 'development' && error?.message
-          ? { detail: error.message }
+        // Help production debugging without exposing secrets.
+        code: 'auth_token_invalid',
+        ...(process.env.NODE_ENV === 'development' || process.env.AUTH_DEBUG === '1'
+          ? { detail }
           : {}),
       })
     }
@@ -31,6 +35,7 @@ export const authenticateToken = async (req: AuthRequest, res: Response, next: N
     req.user = user
     next()
   } catch (error) {
+    console.error('[auth] authenticateToken exception:', error)
     res.status(500).json({ error: 'Authentication failed' })
   }
 }

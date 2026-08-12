@@ -40,14 +40,18 @@ async function main() {
     external_google_enabled: true,
     external_google_client_id: google.client_id,
     external_google_secret: google.client_secret,
+    // Plan B uses OpenID nonce; keep check on unless debugging.
+    external_google_skip_nonce_check: false,
     site_url: siteUrl,
     uri_allow_list: [
       'http://localhost:3000/**',
       'http://localhost:3000/auth/callback',
+      'http://localhost:3000/auth/google/callback',
       'https://riyanshamrit.com/**',
       'https://riyanshamrit.com/auth/callback',
+      'https://riyanshamrit.com/auth/google/callback',
       'https://www.riyanshamrit.com/**',
-      'https://www.riyanshamrit.com/auth/callback',
+      'https://www.riyanshamrit.com/auth/google/callback',
     ].join(','),
   }
 
@@ -66,14 +70,17 @@ async function main() {
     process.exit(1)
   }
 
-  console.log('Google OAuth enabled on Supabase project', PROJECT_REF)
+  console.log('Built-in Google provider enabled on Supabase project', PROJECT_REF)
   console.log('Site URL:', siteUrl)
-  console.log('Redirect allow list updated for localhost and riyanshamrit.com')
+  console.log('Client ID:', google.client_id)
   console.log('')
-  console.log('To show "Riyanshamrit.com" on the Google consent screen (not *.supabase.co):')
-  console.log('1. Supabase Dashboard → Project Settings → Custom Domains → add auth.riyanshamrit.com')
-  console.log('2. Google Cloud Console → OAuth consent screen → App name "Riyanshamrit"')
-  console.log('3. Add https://auth.riyanshamrit.com/auth/v1/callback to Google authorized redirect URIs')
+  console.log('Plan B (app-owned Google login — shows riyanshamrit.com on consent):')
+  console.log('1. Google Cloud Console → Clients → Authorized redirect URIs must include:')
+  console.log('   - http://localhost:3000/auth/google/callback')
+  console.log('   - https://riyanshamrit.com/auth/google/callback')
+  console.log('2. Authorized JavaScript origins: http://localhost:3000 , https://riyanshamrit.com')
+  console.log('3. Web env: NEXT_PUBLIC_GOOGLE_CLIENT_ID=<same client id>')
+  console.log('4. Supabase Dashboard → Auth → Providers → Google → Enabled (this script does that)')
 }
 
 main().catch((err) => {

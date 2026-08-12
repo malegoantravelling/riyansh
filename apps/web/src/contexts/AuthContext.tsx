@@ -12,14 +12,14 @@ import React, {
 import type { Session, User } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/client'
 import { resolveApiBase } from '@/lib/apiBase'
-import { buildAuthCallbackUrl } from '@/lib/authRedirect'
+import { startGoogleIdTokenRedirect } from '@/lib/googleIdentity'
 
 interface AuthContextType {
   user: User | null
   session: Session | null
   loading: boolean
   accessToken: string | null
-  getAccessToken: () => Promise<string | null>
+  getAccessToken: (options?: { forceRefresh?: boolean }) => Promise<string | null>
   signInWithPassword: (email: string, password: string) => Promise<{ error: string | null }>
   signUpWithPassword: (
     email: string,
@@ -42,20 +42,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
 
-  const getAccessToken = useCallback(async () => {
+  const getAccessToken = useCallback(async (options?: { forceRefresh?: boolean }) => {
+    const forceRefresh = options?.forceRefresh === true
     const { data } = await supabase.auth.getSession()
     let next = data.session
     const expiresAtMs = (next?.expires_at ?? 0) * 1000
-    const needsRefresh = !next || expiresAtMs < Date.now() + 60_000
+    const needsRefresh = forceRefresh || !next || expiresAtMs < Date.now() + 120_000
+
     if (needsRefresh) {
       const refreshed = await supabase.auth.refreshSession()
-      next = refreshed.data.session ?? next
-      if (refreshed.data.session) {
+      if (refreshed.error || !refreshed.data.session) {
+        // Do not send a known-expired JWT to the API.
+        if (!next || expiresAtMs < Date.now()) {
+          setSession(null)
+          setUser(null)
+          return null
+        }
+      } else {
+        next = refreshed.data.session
         setSession(refreshed.data.session)
         setUser(refreshed.data.session.user)
       }
     }
-    return next?.access_token ?? null
+
+    if (!next?.access_token) return null
+    if ((next.expires_at ?? 0) * 1000 < Date.now()) {
+      setSession(null)
+      setUser(null)
+      return null
+    }
+    return next.access_token
   }, [supabase])
 
   const ensureProfile = useCallback(async () => {
@@ -130,20 +146,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const signInWithGoogle = async (next = '/') => {
-    // Custom OIDC provider in Supabase Dashboard (identifier: custom:google).
-    // Built-in provider "google" is disabled — using it returns "provider is not enabled".
-    // Supabase still signs in existing users and auto-registers new ones.
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'custom:google' as 'google',
-      options: {
-        redirectTo: buildAuthCallbackUrl(next),
-        queryParams: {
-          access_type: 'online',
-          prompt: 'select_account',
-        },
-      },
-    })
-    return { error: error?.message ?? null }
+    // Plan B: Google OAuth on our domain (shows riyanshamrit.com), then
+    // Supabase session via signInWithIdToken on /auth/google/callback.
+    // Requires built-in Google provider enabled in Supabase (same Client ID).
+    try {
+      await startGoogleIdTokenRedirect(next)
+      return { error: null }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Google sign-in failed'
+      return { error: message }
+    }
   }
 
   const signOut = async () => {

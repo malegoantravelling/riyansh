@@ -11,7 +11,7 @@ import { resolveApiBase } from '@/lib/apiBase'
 function PendingContent() {
   const router = useRouter()
   const params = useSearchParams()
-  const { accessToken, loading: authLoading } = useAuth()
+  const { getAccessToken, loading: authLoading } = useAuth()
   const orderId = params.get('order_id')
   const txnid = params.get('txnid')
   const [message, setMessage] = useState('Checking payment with PayU…')
@@ -21,10 +21,6 @@ function PendingContent() {
 
   useEffect(() => {
     if (authLoading) return
-    if (!accessToken) {
-      router.replace(`/login?next=${encodeURIComponent(`/orders/pending?order_id=${orderId || ''}&txnid=${txnid || ''}`)}`)
-      return
-    }
     if (!orderId && !txnid) {
       setMessage('Missing order details.')
       setStopped(true)
@@ -33,19 +29,43 @@ function PendingContent() {
 
     let cancelled = false
     const apiBase = resolveApiBase()
+    const loginNext = `/orders/pending?order_id=${orderId || ''}&txnid=${txnid || ''}`
 
     const poll = async () => {
       if (cancelled) return
       attempts.current += 1
       try {
-        const res = await fetch(`${apiBase}/api/orders/payu/verify`, {
+        let token = await getAccessToken()
+        if (!token) {
+          router.replace(`/login?next=${encodeURIComponent(loginNext)}`)
+          return
+        }
+
+        let res = await fetch(`${apiBase}/api/orders/payu/verify`, {
           method: 'POST',
           headers: {
-            Authorization: `Bearer ${accessToken}`,
+            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ order_id: orderId, txnid }),
         })
+
+        if (res.status === 401) {
+          token = await getAccessToken({ forceRefresh: true })
+          if (!token) {
+            router.replace(`/login?next=${encodeURIComponent(loginNext)}`)
+            return
+          }
+          res = await fetch(`${apiBase}/api/orders/payu/verify`, {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ order_id: orderId, txnid }),
+          })
+        }
+
         const data = await res.json()
         if (!res.ok) {
           setMessage(data.error || 'Could not verify payment yet.')
@@ -85,11 +105,11 @@ function PendingContent() {
     }
 
     setMessage('Waiting for you to finish payment in the UPI app…')
-    poll()
+    void poll()
     return () => {
       cancelled = true
     }
-  }, [accessToken, authLoading, orderId, router, txnid])
+  }, [authLoading, getAccessToken, orderId, router, txnid])
 
   return (
     <div className="min-h-[60vh] flex items-center justify-center px-4 bg-[linear-gradient(160deg,#FAF8F2,#fff)]">

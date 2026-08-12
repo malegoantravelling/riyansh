@@ -96,7 +96,7 @@ export default function CheckoutPaymentPage() {
   const router = useRouter()
   const toast = useToast()
   const { items, isLoaded, syncCart } = useCart()
-  const { user, accessToken, loading: authLoading } = useAuth()
+  const { user, getAccessToken, loading: authLoading } = useAuth()
 
   const [shipping, setShipping] = useState<ShippingDraft | null>(null)
   const [payOption, setPayOption] = useState<PayOption>('phonepe')
@@ -123,7 +123,15 @@ export default function CheckoutPaymentPage() {
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
 
   const startPayment = async () => {
-    if (!accessToken || !shipping) {
+    if (!shipping) {
+      router.replace('/checkout')
+      return
+    }
+
+    // Always refresh before PayU — stale React-state JWTs cause "Invalid or expired token".
+    const token = await getAccessToken({ forceRefresh: true })
+    if (!token) {
+      toast.error('Session expired', 'Please sign in again to pay.')
       router.replace('/login?next=/checkout/payment')
       return
     }
@@ -153,27 +161,48 @@ export default function CheckoutPaymentPage() {
         country: 'India',
       }
 
-      const res = await fetch(`${apiBase}/api/orders/create-payu-order`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          shipping_address,
-          billing_address: shipping_address,
-          notes: shipping.notes,
-          site_url: siteUrl,
-          api_base: apiBase,
-          payment_method: useUpi ? 'upi_intent' : 'hosted',
-          upi_app: useUpi ? payOption : undefined,
-          enforce_paymethod: other?.enforce,
-          device_info: navigator.userAgent,
-        }),
-      })
+      const postOrder = (authToken: string) =>
+        fetch(`${apiBase}/api/orders/create-payu-order`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            shipping_address,
+            billing_address: shipping_address,
+            notes: shipping.notes,
+            site_url: siteUrl,
+            api_base: apiBase,
+            payment_method: useUpi ? 'upi_intent' : 'hosted',
+            upi_app: useUpi ? payOption : undefined,
+            enforce_paymethod: other?.enforce,
+            device_info: navigator.userAgent,
+          }),
+        })
+
+      let authToken = token
+      let res = await postOrder(authToken)
+      if (res.status === 401) {
+        const refreshed = await getAccessToken({ forceRefresh: true })
+        if (!refreshed) {
+          toast.error('Session expired', 'Please sign in again to pay.')
+          router.replace('/login?next=/checkout/payment')
+          setSubmitting(false)
+          return
+        }
+        authToken = refreshed
+        res = await postOrder(authToken)
+      }
 
       const data = await res.json()
       if (!res.ok) {
+        if (res.status === 401) {
+          toast.error('Session expired', 'Please sign in again to pay.')
+          router.replace('/login?next=/checkout/payment')
+          setSubmitting(false)
+          return
+        }
         throw new Error(data.error || 'Failed to start payment')
       }
 
