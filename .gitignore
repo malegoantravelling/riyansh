@@ -57,3 +57,6 @@ logs/
 *.lock
 
 .env.example
+.env
+.env
+apps/api/.env

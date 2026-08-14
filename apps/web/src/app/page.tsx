@@ -37,9 +37,9 @@ export default function Home() {
       <HomeHero />
       <HomeFeatures />
       <HomeProducts products={featuredProducts} loading={loading} />
-      <HomeNewsletter />
       <HomeTestimonials />
       <HomeSeoContent />
+      <HomeNewsletter />
       <JsonLd
         data={faqJsonLd(homeFaqs.map((item) => ({ question: item.q, answer: item.a })))}
       />
