@@ -40,6 +40,9 @@ export const metadata: Metadata = {
   authors: [{ name: 'Riyansh Multitrade Private Limited' }],
   creator: SITE_NAME,
   publisher: 'Riyansh Multitrade Private Limited',
+  verification: {
+    google: 'aklo0tXP3sWJPVG5OwhuzMpTS-Beppgo7lgyXNJHcAM',
+  },
   alternates: {
     canonical: './',
   },
