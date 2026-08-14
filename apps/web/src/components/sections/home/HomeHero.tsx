@@ -116,7 +116,7 @@ export function HomeHero() {
               priority
               sizes="100vw"
               quality={90}
-              className="object-cover object-[72%_center]"
+              className="object-cover object-[88%_center]"
             />
           </div>
         </div>
