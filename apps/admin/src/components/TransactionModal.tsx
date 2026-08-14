@@ -160,7 +160,7 @@ export default function TransactionModal({ transaction, isOpen, onClose }: Trans
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="bg-gradient-to-r from-[#27AE60] via-[#229954] to-[#1E8449] px-8 py-6 flex items-center justify-between">
+          <div className="bg-gradient-to-r from-[#5B8C51] via-[#4E7A46] to-[#3D5D36] px-8 py-6 flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <div className="bg-white/20 backdrop-blur-sm p-3 rounded-xl shadow-lg">
                 <CreditCard className="h-7 w-7 text-white" />
@@ -203,7 +203,7 @@ export default function TransactionModal({ transaction, isOpen, onClose }: Trans
               </div>
               <div className="text-right">
                 <p className="text-sm font-medium text-gray-600 mb-2">Total Amount</p>
-                <p className="text-3xl font-extrabold text-[#27AE60]">
+                <p className="text-3xl font-extrabold text-[#5B8C51]">
                   ₹{transaction.amount.toFixed(2)}
                 </p>
                 <p className="text-xs text-gray-500 mt-1 uppercase">{transaction.currency}</p>
@@ -218,7 +218,7 @@ export default function TransactionModal({ transaction, isOpen, onClose }: Trans
                 {transaction.user && (
                   <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
                     <div className="flex items-center space-x-3 mb-5">
-                      <div className="bg-gradient-to-br from-[#27AE60] to-[#229954] p-2.5 rounded-xl">
+                      <div className="bg-gradient-to-br from-[#5B8C51] to-[#4E7A46] p-2.5 rounded-xl">
                         <User className="h-5 w-5 text-white" />
                       </div>
                       <h3 className="text-lg font-bold text-gray-800">Customer Information</h3>
@@ -504,7 +504,7 @@ export default function TransactionModal({ transaction, isOpen, onClose }: Trans
           <div className="px-8 py-5 bg-gradient-to-r from-gray-50 to-white border-t border-gray-200 flex justify-end">
             <button
               onClick={onClose}
-              className="px-8 py-3 bg-gradient-to-r from-[#27AE60] to-[#229954] text-white font-semibold rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-200 flex items-center space-x-2"
+              className="px-8 py-3 bg-gradient-to-r from-[#5B8C51] to-[#4E7A46] text-white font-semibold rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-200 flex items-center space-x-2"
             >
               <span>Close</span>
               <X className="h-4 w-4" />

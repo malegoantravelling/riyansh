@@ -11,6 +11,10 @@ export default {
       },
     },
     extend: {
+      fontFamily: {
+        display: ['Fraunces', 'Georgia', 'serif'],
+        sans: ['DM Sans', 'system-ui', 'sans-serif'],
+      },
       colors: {
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
@@ -18,17 +22,27 @@ export default {
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
         primary: {
-          DEFAULT: '#8BC34A',
-          hover: '#7CB342',
+          DEFAULT: '#5B8C51',
+          hover: '#4E7A46',
           foreground: '#FFFFFF',
         },
         secondary: {
-          DEFAULT: '#A5D6A7',
-          foreground: '#333333',
+          DEFAULT: '#F6F0E2',
+          foreground: '#1A1A1A',
         },
         accent: {
-          DEFAULT: '#FF69B4',
+          DEFAULT: '#7BA672',
           foreground: '#FFFFFF',
+        },
+        ayurveda: {
+          green: '#5B8C51',
+          'green-dark': '#4E7A46',
+          'green-darker': '#3D5D36',
+          'green-light': '#7BA672',
+          cream: '#F6F0E2',
+          'cream-light': '#FAFAF2',
+          black: '#1A1A1A',
+          gray: '#737373',
         },
         destructive: {
           DEFAULT: 'hsl(var(--destructive))',

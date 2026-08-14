@@ -53,14 +53,14 @@ export default function Layout({ children, onLogout }: LayoutProps) {
           {sidebarOpen ? (
             <div>
               <h1 className="text-2xl font-bold">
-                <span className="text-[#2C3E50]">RIY</span>
-                <span className="text-[#27AE60]">ANSH</span>
+                <span className="text-[#1A1A1A]">RIY</span>
+                <span className="text-[#5B8C51]">ANSH</span>
               </h1>
               <p className="text-sm text-gray-500 mt-1 font-medium">Admin Panel</p>
             </div>
           ) : (
             <div className="flex justify-center">
-              <div className="w-10 h-10 bg-gradient-to-br from-[#27AE60] to-[#229954] rounded-lg flex items-center justify-center text-white font-bold text-lg">
+              <div className="w-10 h-10 bg-gradient-to-br from-[#5B8C51] to-[#4E7A46] rounded-lg flex items-center justify-center text-white font-bold text-lg">
                 R
               </div>
             </div>
@@ -80,7 +80,7 @@ export default function Layout({ children, onLogout }: LayoutProps) {
                   sidebarOpen ? 'space-x-3 px-4' : 'justify-center px-2'
                 } py-3 rounded-xl transition-all duration-200 group relative ${
                   isActive
-                    ? 'bg-gradient-to-r from-[#27AE60] to-[#229954] text-white shadow-lg shadow-green-500/30'
+                    ? 'bg-gradient-to-r from-[#5B8C51] to-[#4E7A46] text-white shadow-lg shadow-green-500/30'
                     : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                 }`}
               >
@@ -128,7 +128,7 @@ export default function Layout({ children, onLogout }: LayoutProps) {
             <div className="flex items-center space-x-4">
               {/* Admin User */}
               <div className="flex items-center space-x-3 px-4 py-2">
-                <div className="w-9 h-9 bg-gradient-to-br from-[#27AE60] to-[#229954] rounded-full flex items-center justify-center text-white font-semibold">
+                <div className="w-9 h-9 bg-gradient-to-br from-[#5B8C51] to-[#4E7A46] rounded-full flex items-center justify-center text-white font-semibold">
                   A
                 </div>
                 <div className="text-left hidden md:block">

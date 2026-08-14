@@ -124,7 +124,7 @@ export default function Orders() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#8BC34A] focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#5B8C51] focus:border-transparent"
             >
               <option value="paid">Completed payments (paid)</option>
               <option value="pending">Pending (awaiting PayU)</option>
@@ -139,7 +139,7 @@ export default function Orders() {
             <select
               value={dateFilter}
               onChange={(e) => setDateFilter(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#8BC34A] focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#5B8C51] focus:border-transparent"
             >
               <option value="all">All Time</option>
               <option value="today">Today</option>

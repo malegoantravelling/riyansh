@@ -88,7 +88,7 @@ export const sendOrderConfirmationEmail = async (data: OrderEmailData) => {
           
           <!-- Header -->
           <tr>
-            <td style="background: linear-gradient(135deg, #8BC34A 0%, #7CB342 100%); padding: 30px; text-align: center;">
+            <td style="background: linear-gradient(135deg, #5B8C51 0%, #4E7A46 100%); padding: 30px; text-align: center;">
               <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: bold;">🎉 New Order Received!</h1>
               <p style="margin: 10px 0 0 0; color: #ffffff; font-size: 16px;">RIYANSH Ayurvedic Center</p>
             </td>
@@ -97,7 +97,7 @@ export const sendOrderConfirmationEmail = async (data: OrderEmailData) => {
           <!-- Order Summary -->
           <tr>
             <td style="padding: 30px;">
-              <h2 style="margin: 0 0 20px 0; color: #333; font-size: 22px; border-bottom: 2px solid #8BC34A; padding-bottom: 10px;">Order Details</h2>
+              <h2 style="margin: 0 0 20px 0; color: #333; font-size: 22px; border-bottom: 2px solid #5B8C51; padding-bottom: 10px;">Order Details</h2>
               
               <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 20px;">
                 <tr>
@@ -113,7 +113,7 @@ export const sendOrderConfirmationEmail = async (data: OrderEmailData) => {
                 <tr>
                   <td style="padding: 8px 0; color: #666;">Payment Status:</td>
                   <td style="padding: 8px 0; text-align: right;">
-                    <span style="background-color: #4CAF50; color: white; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: bold;">PAID</span>
+                    <span style="background-color: #5B8C51; color: white; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: bold;">PAID</span>
                   </td>
                 </tr>
               </table>
@@ -123,7 +123,7 @@ export const sendOrderConfirmationEmail = async (data: OrderEmailData) => {
           <!-- Customer Details -->
           <tr>
             <td style="padding: 0 30px 30px 30px;">
-              <h2 style="margin: 0 0 20px 0; color: #333; font-size: 22px; border-bottom: 2px solid #8BC34A; padding-bottom: 10px;">Customer Information</h2>
+              <h2 style="margin: 0 0 20px 0; color: #333; font-size: 22px; border-bottom: 2px solid #5B8C51; padding-bottom: 10px;">Customer Information</h2>
               
               <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 20px;">
                 <tr>
@@ -143,7 +143,7 @@ export const sendOrderConfirmationEmail = async (data: OrderEmailData) => {
               </table>
 
               <h3 style="margin: 20px 0 10px 0; color: #333; font-size: 16px;">Shipping Address:</h3>
-              <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; border-left: 4px solid #8BC34A; color: #666; line-height: 1.6;">
+              <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; border-left: 4px solid #5B8C51; color: #666; line-height: 1.6;">
                 ${addressHtml}
               </div>
             </td>
@@ -152,7 +152,7 @@ export const sendOrderConfirmationEmail = async (data: OrderEmailData) => {
           <!-- Order Items -->
           <tr>
             <td style="padding: 0 30px 30px 30px;">
-              <h2 style="margin: 0 0 20px 0; color: #333; font-size: 22px; border-bottom: 2px solid #8BC34A; padding-bottom: 10px;">Order Items</h2>
+              <h2 style="margin: 0 0 20px 0; color: #333; font-size: 22px; border-bottom: 2px solid #5B8C51; padding-bottom: 10px;">Order Items</h2>
               
               <table width="100%" cellpadding="0" cellspacing="0" style="border: 1px solid #eee; border-radius: 5px; overflow: hidden;">
                 <thead>
@@ -169,7 +169,7 @@ export const sendOrderConfirmationEmail = async (data: OrderEmailData) => {
                 <tfoot>
                   <tr style="background-color: #f9f9f9;">
                     <td colspan="3" style="padding: 15px; text-align: right; font-weight: bold; color: #333; font-size: 18px;">Total Amount:</td>
-                    <td style="padding: 15px; text-align: right; font-weight: bold; color: #8BC34A; font-size: 20px;">₹${data.totalAmount.toFixed(
+                    <td style="padding: 15px; text-align: right; font-weight: bold; color: #5B8C51; font-size: 20px;">₹${data.totalAmount.toFixed(
                       2
                     )}</td>
                   </tr>
@@ -181,7 +181,7 @@ export const sendOrderConfirmationEmail = async (data: OrderEmailData) => {
           <!-- Payment Details -->
           <tr>
             <td style="padding: 0 30px 30px 30px;">
-              <h2 style="margin: 0 0 20px 0; color: #333; font-size: 22px; border-bottom: 2px solid #8BC34A; padding-bottom: 10px;">Payment Details</h2>
+              <h2 style="margin: 0 0 20px 0; color: #333; font-size: 22px; border-bottom: 2px solid #5B8C51; padding-bottom: 10px;">Payment Details</h2>
               
               <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f9f9f9; padding: 15px; border-radius: 5px;">
                 <tr>
@@ -198,7 +198,7 @@ export const sendOrderConfirmationEmail = async (data: OrderEmailData) => {
                 </tr>
                 <tr>
                   <td style="padding: 8px 0; color: #666;">Amount Paid:</td>
-                  <td style="padding: 8px 0; color: #8BC34A; font-weight: bold; font-size: 18px; text-align: right;">₹${data.totalAmount.toFixed(
+                  <td style="padding: 8px 0; color: #5B8C51; font-weight: bold; font-size: 18px; text-align: right;">₹${data.totalAmount.toFixed(
                     2
                   )}</td>
                 </tr>
@@ -296,7 +296,7 @@ export const sendContactFormEmail = async (data: ContactFormData) => {
           
           <!-- Header -->
           <tr>
-            <td style="background: linear-gradient(135deg, #8BC34A 0%, #7CB342 100%); padding: 30px; text-align: center;">
+            <td style="background: linear-gradient(135deg, #5B8C51 0%, #4E7A46 100%); padding: 30px; text-align: center;">
               <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: bold;">📧 New Contact Form Submission</h1>
               <p style="margin: 10px 0 0 0; color: #ffffff; font-size: 16px;">RIYANSH Ayurvedic Center</p>
             </td>
@@ -305,7 +305,7 @@ export const sendContactFormEmail = async (data: ContactFormData) => {
           <!-- Contact Details -->
           <tr>
             <td style="padding: 30px;">
-              <h2 style="margin: 0 0 20px 0; color: #333; font-size: 22px; border-bottom: 2px solid #8BC34A; padding-bottom: 10px;">Contact Information</h2>
+              <h2 style="margin: 0 0 20px 0; color: #333; font-size: 22px; border-bottom: 2px solid #5B8C51; padding-bottom: 10px;">Contact Information</h2>
               
               <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 20px;">
                 <tr>
@@ -317,7 +317,7 @@ export const sendContactFormEmail = async (data: ContactFormData) => {
                 <tr>
                   <td style="padding: 8px 0; color: #666;">Email:</td>
                   <td style="padding: 8px 0; color: #333;">
-                    <a href="mailto:${data.email}" style="color: #8BC34A; text-decoration: none;">${
+                    <a href="mailto:${data.email}" style="color: #5B8C51; text-decoration: none;">${
       data.email
     }</a>
                   </td>
@@ -344,9 +344,9 @@ export const sendContactFormEmail = async (data: ContactFormData) => {
           <!-- Message -->
           <tr>
             <td style="padding: 0 30px 30px 30px;">
-              <h2 style="margin: 0 0 20px 0; color: #333; font-size: 22px; border-bottom: 2px solid #8BC34A; padding-bottom: 10px;">Message</h2>
+              <h2 style="margin: 0 0 20px 0; color: #333; font-size: 22px; border-bottom: 2px solid #5B8C51; padding-bottom: 10px;">Message</h2>
               
-              <div style="background-color: #f9f9f9; padding: 20px; border-radius: 8px; border-left: 4px solid #8BC34A; color: #333; line-height: 1.6; white-space: pre-wrap;">${
+              <div style="background-color: #f9f9f9; padding: 20px; border-radius: 8px; border-left: 4px solid #5B8C51; color: #333; line-height: 1.6; white-space: pre-wrap;">${
                 data.message
               }</div>
             </td>
@@ -479,7 +479,7 @@ export const sendWhatsAppOrderEmail = async (data: WhatsAppOrderData) => {
           <tfoot>
             <tr style="background-color: #f9f9f9;">
               <td colspan="3" style="padding: 15px; text-align: right; font-weight: bold; color: #333; font-size: 18px;">Subtotal:</td>
-              <td style="padding: 15px; text-align: right; font-weight: bold; color: #8BC34A; font-size: 20px;">₹${data.subtotal.toLocaleString(
+              <td style="padding: 15px; text-align: right; font-weight: bold; color: #5B8C51; font-size: 20px;">₹${data.subtotal.toLocaleString(
                 'en-IN'
               )}</td>
             </tr>
@@ -516,7 +516,7 @@ export const sendWhatsAppOrderEmail = async (data: WhatsAppOrderData) => {
           
           <!-- Header -->
           <tr>
-            <td style="background: linear-gradient(135deg, #8BC34A 0%, #7CB342 100%); padding: 30px; text-align: center;">
+            <td style="background: linear-gradient(135deg, #5B8C51 0%, #4E7A46 100%); padding: 30px; text-align: center;">
               <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: bold;">📱 New WhatsApp Order</h1>
               <p style="margin: 10px 0 0 0; color: #ffffff; font-size: 16px;">RIYANSH Ayurvedic Center</p>
             </td>
@@ -525,7 +525,7 @@ export const sendWhatsAppOrderEmail = async (data: WhatsAppOrderData) => {
           <!-- Order Summary -->
           <tr>
             <td style="padding: 30px;">
-              <h2 style="margin: 0 0 20px 0; color: #333; font-size: 22px; border-bottom: 2px solid #8BC34A; padding-bottom: 10px;">Order Details</h2>
+              <h2 style="margin: 0 0 20px 0; color: #333; font-size: 22px; border-bottom: 2px solid #5B8C51; padding-bottom: 10px;">Order Details</h2>
               
               <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 20px;">
                 <tr>
@@ -559,7 +559,7 @@ export const sendWhatsAppOrderEmail = async (data: WhatsAppOrderData) => {
           <!-- Customer Details -->
           <tr>
             <td style="padding: 0 30px 30px 30px;">
-              <h2 style="margin: 0 0 20px 0; color: #333; font-size: 22px; border-bottom: 2px solid #8BC34A; padding-bottom: 10px;">Customer Information</h2>
+              <h2 style="margin: 0 0 20px 0; color: #333; font-size: 22px; border-bottom: 2px solid #5B8C51; padding-bottom: 10px;">Customer Information</h2>
               
               <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 20px;">
                 <tr>
@@ -573,7 +573,7 @@ export const sendWhatsAppOrderEmail = async (data: WhatsAppOrderData) => {
                   <td style="padding: 8px 0; color: #333;">
                     <a href="mailto:${
                       data.customerEmail
-                    }" style="color: #8BC34A; text-decoration: none;">${data.customerEmail}</a>
+                    }" style="color: #5B8C51; text-decoration: none;">${data.customerEmail}</a>
                   </td>
                 </tr>
                 <tr>
@@ -581,13 +581,13 @@ export const sendWhatsAppOrderEmail = async (data: WhatsAppOrderData) => {
                   <td style="padding: 8px 0; color: #333;">
                     <a href="tel:${
                       data.customerPhone
-                    }" style="color: #8BC34A; text-decoration: none;">${data.customerPhone}</a>
+                    }" style="color: #5B8C51; text-decoration: none;">${data.customerPhone}</a>
                   </td>
                 </tr>
               </table>
 
               <h3 style="margin: 20px 0 10px 0; color: #333; font-size: 16px;">Shipping Address:</h3>
-              <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; border-left: 4px solid #8BC34A; color: #666; line-height: 1.6;">
+              <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; border-left: 4px solid #5B8C51; color: #666; line-height: 1.6;">
                 ${data.customerAddress}
               </div>
             </td>
@@ -596,9 +596,9 @@ export const sendWhatsAppOrderEmail = async (data: WhatsAppOrderData) => {
           <!-- Order Items / Bill -->
           <tr>
             <td style="padding: 0 30px 30px 30px;">
-              <h2 style="margin: 0 0 20px 0; color: #333; font-size: 22px; border-bottom: 2px solid #8BC34A; padding-bottom: 10px;">Order Bill</h2>
+              <h2 style="margin: 0 0 20px 0; color: #333; font-size: 22px; border-bottom: 2px solid #5B8C51; padding-bottom: 10px;">Order Bill</h2>
               
-              <div style="background-color: #f9f9f9; padding: 20px; border-radius: 8px; border-left: 4px solid #8BC34A;">
+              <div style="background-color: #f9f9f9; padding: 20px; border-radius: 8px; border-left: 4px solid #5B8C51;">
                 ${productsHtml}
               </div>
             </td>

@@ -172,7 +172,7 @@ export default function ProductShare({
         type="button"
         role="menuitem"
         onClick={handleCopy}
-        className="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-[#333333] hover:bg-[#F6F0E2] hover:text-[#5B8C51]"
+        className="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-[#1A1A1A] hover:bg-[#F6F0E2] hover:text-[#5B8C51]"
       >
         {copied ? <Check className="h-4 w-4 text-[#5B8C51]" /> : <Link2 className="h-4 w-4" />}
         {copied ? 'Copied!' : 'Copy link'}
@@ -181,7 +181,7 @@ export default function ProductShare({
         type="button"
         role="menuitem"
         onClick={handleFacebook}
-        className="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-[#333333] hover:bg-[#F6F0E2] hover:text-[#5B8C51]"
+        className="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-[#1A1A1A] hover:bg-[#F6F0E2] hover:text-[#5B8C51]"
       >
         <Facebook className="h-4 w-4" />
         Facebook
@@ -190,7 +190,7 @@ export default function ProductShare({
         type="button"
         role="menuitem"
         onClick={handleTwitter}
-        className="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-[#333333] hover:bg-[#F6F0E2] hover:text-[#5B8C51]"
+        className="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-[#1A1A1A] hover:bg-[#F6F0E2] hover:text-[#5B8C51]"
       >
         <Twitter className="h-4 w-4" />
         X / Twitter
@@ -199,7 +199,7 @@ export default function ProductShare({
         type="button"
         role="menuitem"
         onClick={handleEmail}
-        className="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-[#333333] hover:bg-[#F6F0E2] hover:text-[#5B8C51]"
+        className="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-[#1A1A1A] hover:bg-[#F6F0E2] hover:text-[#5B8C51]"
       >
         <Mail className="h-4 w-4" />
         Email
@@ -209,7 +209,7 @@ export default function ProductShare({
           type="button"
           role="menuitem"
           onClick={handleNativeShare}
-          className="flex w-full items-center gap-2.5 border-t border-gray-100 px-3 py-2 text-left text-sm text-[#333333] hover:bg-[#F6F0E2] hover:text-[#5B8C51]"
+          className="flex w-full items-center gap-2.5 border-t border-gray-100 px-3 py-2 text-left text-sm text-[#1A1A1A] hover:bg-[#F6F0E2] hover:text-[#5B8C51]"
         >
           <Smartphone className="h-4 w-4" />
           More options
@@ -241,7 +241,7 @@ export default function ProductShare({
       <button
         type="button"
         onClick={handleCopy}
-        className="inline-flex items-center gap-1.5 h-9 px-3 rounded-md border border-gray-300 bg-white text-xs sm:text-sm font-semibold text-[#333333] hover:border-[#5B8C51] hover:text-[#5B8C51] transition-colors"
+        className="inline-flex items-center gap-1.5 h-9 px-3 rounded-md border border-gray-300 bg-white text-xs sm:text-sm font-semibold text-[#1A1A1A] hover:border-[#5B8C51] hover:text-[#5B8C51] transition-colors"
         aria-label="Copy product link"
       >
         {copied ? (

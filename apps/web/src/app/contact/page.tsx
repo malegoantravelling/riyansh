@@ -8,7 +8,7 @@ import { useToast } from '@/contexts/ToastContext'
 import { useApiClient } from '@/lib/api'
 
 const inputClass =
-  'w-full h-12 px-4 text-sm text-[#1A1A1A] bg-[#F5F5F5] border border-[#E5E5E5] rounded-xl placeholder:text-[#A3A3A3] focus:outline-none focus:bg-white focus:border-[#5B8C51] focus:ring-1 focus:ring-[#5B8C51] transition-colors'
+  'w-full h-12 px-4 text-sm text-evergreen bg-white border border-evergreen/15 rounded-xl placeholder:text-dusty-olive focus:outline-none focus:border-evergreen/40 focus:ring-2 focus:ring-evergreen/15 transition-shadow glass-1'
 
 export default function ContactPage() {
   const toast = useToast()
@@ -61,9 +61,9 @@ export default function ContactPage() {
   }
 
   return (
-    <div className="bg-white text-[#1A1A1A]">
+    <div className="page-shell text-evergreen">
       {/* Hero */}
-      <section className="relative bg-[#5B8C51] py-16 sm:py-20 overflow-hidden">
+      <section className="relative overflow-hidden bg-evergreen py-16 sm:py-20">
         <div
           className="absolute inset-0 opacity-30"
           style={{
@@ -103,27 +103,27 @@ export default function ContactPage() {
       </section>
 
       {/* Get In Touch — form */}
-      <section className="relative bg-[#FAF8F2] py-16 sm:py-20 overflow-hidden">
-        <div className="absolute top-0 left-0 right-0 h-16 bg-white rounded-b-[50%] scale-x-150 opacity-60 pointer-events-none" />
+      <section className="surface-mist relative overflow-hidden py-16 sm:py-20">
+        <div className="pointer-events-none absolute left-0 right-0 top-0 h-16 scale-x-150 rounded-b-[50%] bg-white/60 opacity-60" />
 
         <div className="relative z-10 max-w-3xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-10 space-y-3">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#5B8C51]/10 rounded-full border border-[#5B8C51]/20">
-              <Send className="h-4 w-4 text-[#5B8C51]" />
-              <span className="text-sm font-semibold text-[#5B8C51]">Send Us a Message</span>
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#013220]/10 rounded-full border border-[#013220]/20">
+              <Send className="h-4 w-4 text-[#013220]" />
+              <span className="text-sm font-semibold text-[#013220]">Send Us a Message</span>
             </div>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-[#1A1A1A]">Get In Touch</h2>
-            <p className="text-[#666666] text-base max-w-lg mx-auto">
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-[#013220]">Get In Touch</h2>
+            <p className="text-[#80866e] text-base max-w-lg mx-auto">
               Fill out the form below and our team will get back to you within 24 hours
             </p>
           </div>
 
-          <div className="bg-white rounded-2xl border border-[#EEEEEE] shadow-[0_8px_30px_rgba(0,0,0,0.06)] p-6 sm:p-8 md:p-10">
+          <div className="glass-2 rounded-2xl border border-evergreen/10 shadow-lift p-6 sm:p-8 md:p-10">
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div className="space-y-1.5">
-                  <label htmlFor="firstName" className="text-sm font-semibold text-[#1A1A1A]">
-                    First Name <span className="text-[#5B8C51]">*</span>
+                  <label htmlFor="firstName" className="text-sm font-semibold text-[#013220]">
+                    First Name <span className="text-[#013220]">*</span>
                   </label>
                   <input
                     id="firstName"
@@ -136,8 +136,8 @@ export default function ContactPage() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label htmlFor="lastName" className="text-sm font-semibold text-[#1A1A1A]">
-                    Last Name <span className="text-[#5B8C51]">*</span>
+                  <label htmlFor="lastName" className="text-sm font-semibold text-[#013220]">
+                    Last Name <span className="text-[#013220]">*</span>
                   </label>
                   <input
                     id="lastName"
@@ -152,11 +152,11 @@ export default function ContactPage() {
               </div>
 
               <div className="space-y-1.5">
-                <label htmlFor="email" className="text-sm font-semibold text-[#1A1A1A]">
-                  Email Address <span className="text-[#5B8C51]">*</span>
+                <label htmlFor="email" className="text-sm font-semibold text-[#013220]">
+                  Email Address <span className="text-[#013220]">*</span>
                 </label>
                 <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#A3A3A3] text-sm font-medium">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#80866e] text-sm font-medium">
                     @
                   </span>
                   <input
@@ -173,7 +173,7 @@ export default function ContactPage() {
               </div>
 
               <div className="space-y-1.5">
-                <label htmlFor="subject" className="text-sm font-semibold text-[#1A1A1A]">
+                <label htmlFor="subject" className="text-sm font-semibold text-[#013220]">
                   Subject
                 </label>
                 <input
@@ -187,7 +187,7 @@ export default function ContactPage() {
               </div>
 
               <div className="space-y-1.5">
-                <label htmlFor="message" className="text-sm font-semibold text-[#1A1A1A]">
+                <label htmlFor="message" className="text-sm font-semibold text-[#013220]">
                   Message
                 </label>
                 <textarea
@@ -197,14 +197,14 @@ export default function ContactPage() {
                   onChange={handleChange}
                   rows={6}
                   placeholder="Tell us more about your inquiry..."
-                  className="w-full px-4 py-3 text-sm text-[#1A1A1A] bg-[#F5F5F5] border border-[#E5E5E5] rounded-xl placeholder:text-[#A3A3A3] focus:outline-none focus:bg-white focus:border-[#5B8C51] focus:ring-1 focus:ring-[#5B8C51] transition-colors resize-none"
+                  className="w-full px-4 py-3 text-sm text-[#013220] bg-[#F5F5F5] border border-[#E5E5E5] rounded-xl placeholder:text-[#80866e] focus:outline-none focus:bg-white focus:border-[#013220] focus:ring-1 focus:ring-[#013220] transition-colors resize-none"
                 />
               </div>
 
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full h-13 sm:h-14 text-base font-bold bg-[#5B8C51] hover:bg-[#4E7A45] text-white rounded-xl shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full h-13 sm:h-14 text-base font-bold bg-[#013220] hover:bg-[#012418] text-white rounded-xl shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSubmitting ? (
                   <span className="inline-flex items-center gap-2">
@@ -224,49 +224,49 @@ export default function ContactPage() {
       </section>
 
       {/* Let's Connect */}
-      <section className="py-16 sm:py-20 bg-white">
+      <section className="surface-band py-16 sm:py-20">
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-12 space-y-3">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#5B8C51]/10 rounded-full border border-[#5B8C51]/20">
-              <Sparkles className="h-4 w-4 text-[#5B8C51]" />
-              <span className="text-sm font-semibold text-[#5B8C51]">Contact Information</span>
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#013220]/10 rounded-full border border-[#013220]/20">
+              <Sparkles className="h-4 w-4 text-[#013220]" />
+              <span className="text-sm font-semibold text-[#013220]">Contact Information</span>
             </div>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-[#1A1A1A]">
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-[#013220]">
               Let&apos;s Connect
             </h2>
-            <p className="text-[#666666] text-base max-w-lg mx-auto">
+            <p className="text-[#80866e] text-base max-w-lg mx-auto">
               We&apos;re available 24/7 to assist you with any questions or concerns
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Phone */}
-            <div className="bg-white rounded-2xl border border-[#EEEEEE] shadow-[0_4px_20px_rgba(0,0,0,0.04)] p-8 sm:p-10 text-center hover:border-[#5B8C51]/35 transition-colors">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-[#5B8C51] rounded-2xl mb-6">
+            <div className="surface-glass rounded-2xl border-evergreen/10 p-8 sm:p-10 text-center hover:border-evergreen/30 transition-colors">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-[#013220] rounded-2xl mb-6">
                 <Phone className="h-7 w-7 text-white" />
               </div>
-              <h3 className="text-xl font-bold text-[#1A1A1A] mb-3">Call Us</h3>
+              <h3 className="text-xl font-bold text-[#013220] mb-3">Call Us</h3>
               <a
                 href="tel:+918605911293"
-                className="block text-lg font-semibold text-[#666666] hover:text-[#5B8C51] transition-colors mb-3"
+                className="block text-lg font-semibold text-[#80866e] hover:text-[#013220] transition-colors mb-3"
               >
                 +91 8605911293
               </a>
               <div className="inline-flex items-center gap-2 text-sm text-gray-500">
-                <span className="w-2 h-2 bg-[#5B8C51] rounded-full" />
+                <span className="w-2 h-2 bg-[#013220] rounded-full" />
                 Mon-Sat, 9AM-6PM IST
               </div>
             </div>
 
             {/* Email */}
-            <div className="bg-white rounded-2xl border border-[#EEEEEE] shadow-[0_4px_20px_rgba(0,0,0,0.04)] p-8 sm:p-10 text-center hover:border-[#5B8C51]/35 transition-colors">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-[#5B8C51] rounded-2xl mb-6">
+            <div className="surface-glass rounded-2xl border-evergreen/10 p-8 sm:p-10 text-center hover:border-evergreen/30 transition-colors">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-[#013220] rounded-2xl mb-6">
                 <Mail className="h-7 w-7 text-white" />
               </div>
-              <h3 className="text-xl font-bold text-[#1A1A1A] mb-3">Email Us</h3>
+              <h3 className="text-xl font-bold text-[#013220] mb-3">Email Us</h3>
               <a
                 href="mailto:riyanshamrit106@gmail.com"
-                className="block text-base sm:text-lg font-semibold text-[#666666] hover:text-[#5B8C51] transition-colors mb-3 break-all"
+                className="block text-base sm:text-lg font-semibold text-[#80866e] hover:text-[#013220] transition-colors mb-3 break-all"
               >
                 riyanshamrit106@gmail.com
               </a>

@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { getCachedProducts, prioritizeAmritJuice } from '@/lib/productCache'
 import { Search, ArrowUpDown, SlidersHorizontal, X } from 'lucide-react'
 import Link from 'next/link'
+import { cn } from '@/lib/utils'
 
 export default function StorePage() {
   const [products, setProducts] = useState<any[]>([])
@@ -23,7 +24,6 @@ export default function StorePage() {
   const fetchProducts = useCallback(async () => {
     setLoading(true)
     try {
-      // Use in-memory cached products — 0ms on repeated loads, ~300ms only on first cold load
       const data = await getCachedProducts()
       if (Array.isArray(data) && data.length > 0) {
         setAllProducts(data)
@@ -45,21 +45,16 @@ export default function StorePage() {
     if (query) setSearchQuery(query)
   }, [])
 
-  // Filter & Search Logic
   useEffect(() => {
     let result = [...allProducts]
 
-    // Search filter
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase()
       result = result.filter(
-        (p) =>
-          p.name?.toLowerCase().includes(query) ||
-          p.description?.toLowerCase().includes(query)
+        (p) => p.name?.toLowerCase().includes(query) || p.description?.toLowerCase().includes(query)
       )
     }
 
-    // Sort filter
     if (sortBy === 'price-low-high') {
       result.sort((a, b) => a.price - b.price)
     } else if (sortBy === 'price-high-low') {
@@ -83,61 +78,130 @@ export default function StorePage() {
 
   const popularProduct = allProducts.length > 0 ? allProducts[0] : null
 
+  const FilterSidebar = (
+    <div className="space-y-5">
+      <div className="glass-panel rounded-2xl p-5">
+        <h3 className="mb-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-charcoal">
+          Product Category
+        </h3>
+        <div className="space-y-2.5 text-sm text-stone">
+          {[
+            'Ayurvedic Juices & Tonics',
+            'Capsules & Supplements',
+            'Personal Care & Herbal Oils',
+            'Health & Nutrition',
+          ].map((cat) => (
+            <label key={cat} className="flex cursor-pointer items-center gap-2.5 hover:text-forest">
+              <input
+                type="checkbox"
+                checked={selectedTypes.includes(cat)}
+                onChange={() => toggleFilterItem(cat, selectedTypes, setSelectedTypes)}
+                className="h-3.5 w-3.5 rounded border-forest/30 text-forest focus:ring-forest"
+              />
+              <span>{cat}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <div className="glass-panel rounded-2xl p-5">
+        <h3 className="mb-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-charcoal">
+          Health Concern
+        </h3>
+        <div className="space-y-2.5 text-sm text-stone">
+          {[
+            'Immunity & Digestion',
+            'Joint Pain & Mobility',
+            'Diabetes & Blood Sugar',
+            "Women's Health",
+            'Strength & Stamina',
+          ].map((concern) => (
+            <label
+              key={concern}
+              className="flex cursor-pointer items-center gap-2.5 hover:text-forest"
+            >
+              <input
+                type="checkbox"
+                checked={selectedAilments.includes(concern)}
+                onChange={() => toggleFilterItem(concern, selectedAilments, setSelectedAilments)}
+                className="h-3.5 w-3.5 rounded border-forest/30 text-forest focus:ring-forest"
+              />
+              <span>{concern}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      {popularProduct && (
+        <div className="glass-panel rounded-2xl p-5">
+          <h3 className="mb-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-charcoal">
+            Popular Products
+          </h3>
+          <ProductCard product={popularProduct} />
+        </div>
+      )}
+
+      <div className="rounded-2xl border border-forest/10 bg-ivory-deep/80 p-5">
+        <h3 className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-charcoal">
+          Warning Information
+        </h3>
+        <p className="text-[11px] leading-relaxed text-stone">
+          In compliance with Drug and Cosmetic Act standards, all Riyansh Multitrade Ayurvedic
+          formulations are manufactured under certified GMP lab conditions. Consume as per directed
+          dosage or consult an Ayurvedic physician for tailored wellness guidance.
+        </p>
+      </div>
+    </div>
+  )
+
   return (
-    <div className="min-h-screen bg-white text-[#1A1A1A]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
-        <header className="mb-8 max-w-3xl">
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-[#1A1A1A] tracking-tight">
+    <div className="page-shell surface-band pb-16">
+      <div className="container-editorial py-10 sm:py-14">
+        <div className="mb-10 max-w-2xl">
+          <p className="eyebrow mb-2">Catalog</p>
+          <h1 className="font-display text-3xl font-medium tracking-tight text-charcoal sm:text-4xl lg:text-5xl">
             Shop Ayurvedic supplements
           </h1>
-          <p className="mt-3 text-[#555555] leading-relaxed text-sm sm:text-base">
+          <p className="mt-3 text-stone">
             Juices, capsules, and herbal formulas for immunity, joint comfort, digestion, stamina,
             and women’s wellness — made by Riyansh Multitrade in Maharashtra. Use search and
             filters, or read our{' '}
-            <Link href="/wellness" className="text-[#4E7A45] font-semibold hover:underline">
+            <Link href="/wellness" className="font-semibold text-forest hover:underline">
               wellness guides
             </Link>{' '}
             before you buy.
           </p>
-        </header>
+        </div>
 
-        {/* Top Controls Bar: Search & Sort Dropdown */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 mb-8">
-          {/* Mobile Filter Toggle */}
-          <div className="md:hidden flex justify-between items-center mb-2">
+        <div className="mb-8 grid grid-cols-1 gap-3 md:grid-cols-12 md:gap-4">
+          <div className="flex items-center justify-between md:hidden">
             <Button
-              onClick={() => setShowMobileSidebar(!showMobileSidebar)}
+              onClick={() => setShowMobileSidebar(true)}
               variant="outline"
-              className="border-gray-300 text-gray-700"
+              className="rounded-full"
             >
-              <SlidersHorizontal className="h-4 w-4 mr-2" />
+              <SlidersHorizontal className="mr-2 h-4 w-4" />
               Filters
             </Button>
           </div>
 
-          {/* Search Input (Left 9 columns on desktop) */}
-          <div className="md:col-span-9 relative">
-            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-              <Search className="h-4 w-4 text-gray-400" />
-            </div>
+          <div className="relative md:col-span-9">
+            <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-stone" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search Ayurvedic Product"
-              className="w-full pl-10 pr-4 py-2.5 bg-[#F7F7F5] border border-transparent rounded-md text-sm text-[#1A1A1A] placeholder-gray-400 focus:bg-white focus:border-gray-300 focus:outline-none transition-all"
+              className="surface-glass w-full rounded-full border-evergreen/10 py-3 pl-11 pr-4 text-sm text-charcoal placeholder:text-stone focus:border-forest/30 focus:outline-none"
             />
           </div>
 
-          {/* Sort Dropdown (Right 3 columns on desktop) */}
-          <div className="md:col-span-3 relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <ArrowUpDown className="h-3.5 w-3.5 text-gray-500" />
-            </div>
+          <div className="relative md:col-span-3">
+            <ArrowUpDown className="pointer-events-none absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-stone" />
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="w-full pl-9 pr-8 py-2.5 bg-[#F7F7F5] border border-transparent rounded-md text-sm text-[#1A1A1A] font-medium appearance-none focus:bg-white focus:border-gray-300 focus:outline-none cursor-pointer transition-all"
+              className="surface-glass w-full appearance-none rounded-full border-evergreen/10 py-3 pl-9 pr-8 text-sm font-medium text-charcoal focus:border-forest/30 focus:outline-none"
             >
               <option value="default">Sort</option>
               <option value="price-low-high">Price: Low to High</option>
@@ -147,85 +211,26 @@ export default function StorePage() {
           </div>
         </div>
 
-        {/* Main Content: Left Sidebar + Right Products Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          
-          {/* Left Sidebar Widgets */}
-          <aside className={`lg:col-span-3 space-y-6 ${showMobileSidebar ? 'block' : 'hidden lg:block'}`}>
-            
-            {/* Widget 1: FILTER BY CATEGORY */}
-            <div className="bg-[#F9F9F7] p-5 rounded-md border border-gray-100">
-              <h3 className="font-bold text-xs uppercase tracking-wider text-[#1A1A1A] mb-3">
-                PRODUCT CATEGORY
-              </h3>
-              <div className="space-y-2 text-xs text-gray-600">
-                {['Ayurvedic Juices & Tonics', 'Capsules & Supplements', 'Personal Care & Herbal Oils', 'Health & Nutrition'].map((cat) => (
-                  <label key={cat} className="flex items-center gap-2.5 cursor-pointer hover:text-[#5B8C51]">
-                    <input
-                      type="checkbox"
-                      checked={selectedTypes.includes(cat)}
-                      onChange={() => toggleFilterItem(cat, selectedTypes, setSelectedTypes)}
-                      className="rounded border-gray-300 text-[#5B8C51] focus:ring-[#5B8C51] h-3.5 w-3.5"
-                    />
-                    <span>{cat}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            {/* Widget 2: FILTER BY HEALTH CONCERN */}
-            <div className="bg-[#F9F9F7] p-5 rounded-md border border-gray-100">
-              <h3 className="font-bold text-xs uppercase tracking-wider text-[#1A1A1A] mb-3">
-                HEALTH CONCERN
-              </h3>
-              <div className="space-y-2 text-xs text-gray-600">
-                {['Immunity & Digestion', 'Joint Pain & Mobility', 'Diabetes & Blood Sugar', "Women's Health", 'Strength & Stamina'].map((concern) => (
-                  <label key={concern} className="flex items-center gap-2.5 cursor-pointer hover:text-[#5B8C51]">
-                    <input
-                      type="checkbox"
-                      checked={selectedAilments.includes(concern)}
-                      onChange={() => toggleFilterItem(concern, selectedAilments, setSelectedAilments)}
-                      className="rounded border-gray-300 text-[#5B8C51] focus:ring-[#5B8C51] h-3.5 w-3.5"
-                    />
-                    <span>{concern}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            {/* Widget 4: POPULAR PRODUCTS */}
-            {popularProduct && (
-              <div className="bg-[#F9F9F7] p-5 rounded-md border border-gray-100">
-                <h3 className="font-bold text-xs uppercase tracking-wider text-[#1A1A1A] mb-3">
-                  POPULAR PRODUCTS
-                </h3>
-                <ProductCard product={popularProduct} />
-              </div>
-            )}
-
-            {/* Widget 5: WARNING INFORMATION */}
-            <div className="bg-[#F9F9F7] p-5 rounded-md border border-gray-100 space-y-2">
-              <h3 className="font-bold text-xs uppercase tracking-wider text-[#1A1A1A] mb-1">
-                WARNING INFORMATION
-              </h3>
-              <p className="text-[11px] text-gray-500 leading-relaxed">
-                In compliance with Drug and Cosmetic Act standards, all Riyansh Multitrade Ayurvedic formulations are manufactured under certified GMP lab conditions. Consume as per directed dosage or consult an Ayurvedic physician for tailored wellness guidance.
-              </p>
-            </div>
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
+          <aside className="sticky top-24 hidden self-start lg:col-span-3 lg:block">
+            {FilterSidebar}
           </aside>
 
-          {/* Right Product Grid Column */}
-          <div className="lg:col-span-9">
+          <main className="lg:col-span-9">
             {loading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {[...Array(6)].map((_, i) => (
                   <ProductCardSkeleton key={i} />
                 ))}
               </div>
             ) : products.length === 0 ? (
-              <div className="text-center py-16 bg-[#F9F9F7] rounded-md border border-gray-100">
-                <h3 className="text-lg font-bold text-[#1A1A1A] mb-2">No Products Found</h3>
-                <p className="text-xs text-gray-500 mb-4">Try clearing search filters or browse all wellness items.</p>
+              <div className="rounded-3xl border border-forest/10 bg-white/70 py-16 text-center">
+                <h3 className="font-display text-xl font-medium text-charcoal">
+                  No Products Found
+                </h3>
+                <p className="mt-2 text-sm text-stone">
+                  Try clearing search filters or browse all wellness items.
+                </p>
                 <Button
                   onClick={() => {
                     setSearchQuery('')
@@ -234,26 +239,24 @@ export default function StorePage() {
                     setSelectedBrands([])
                     setSelectedAilments([])
                   }}
-                  className="bg-[#5B8C51] text-white hover:bg-[#4E7A45] text-xs px-4 py-2"
+                  className="mt-5 rounded-full"
                 >
                   Reset All Filters
                 </Button>
               </div>
             ) : (
               <>
-                {/* Product Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+                <div className="mb-10 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                   {products.slice(0, displayCount).map((product) => (
                     <ProductCard key={product.id} product={product} />
                   ))}
                 </div>
 
-                {/* Show More Button */}
                 {displayCount < products.length && (
-                  <div className="text-center pt-4 pb-8">
+                  <div className="pb-8 pt-4 text-center">
                     <Button
                       onClick={() => setDisplayCount((prev) => prev + 6)}
-                      className="bg-[#5B8C51] text-white hover:bg-[#4E7A45] font-semibold text-xs px-6 py-2.5 rounded-md shadow-sm transition-all"
+                      className="rounded-full px-8"
                     >
                       Show More
                     </Button>
@@ -261,7 +264,44 @@ export default function StorePage() {
                 )}
               </>
             )}
+          </main>
+        </div>
+      </div>
+
+      <div
+        className={cn(
+          'fixed inset-0 z-[50] lg:hidden',
+          showMobileSidebar ? 'pointer-events-auto' : 'pointer-events-none'
+        )}
+      >
+        <div
+          className={cn(
+            'absolute inset-0 bg-charcoal/40 transition-opacity',
+            showMobileSidebar ? 'opacity-100' : 'opacity-0'
+          )}
+          onClick={() => setShowMobileSidebar(false)}
+        />
+        <div
+          className={cn(
+            'absolute bottom-0 left-0 right-0 max-h-[85vh] overflow-y-auto rounded-t-3xl bg-ivory p-6 shadow-lift transition-transform duration-500 ease-premium',
+            showMobileSidebar ? 'translate-y-0' : 'translate-y-full'
+          )}
+        >
+          <div className="mb-5 flex items-center justify-between">
+            <h2 className="font-display text-xl font-medium">Filters</h2>
+            <button
+              type="button"
+              onClick={() => setShowMobileSidebar(false)}
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-forest/15"
+              aria-label="Close filters"
+            >
+              <X className="h-4 w-4" />
+            </button>
           </div>
+          {FilterSidebar}
+          <Button className="mt-6 w-full rounded-full" onClick={() => setShowMobileSidebar(false)}>
+            Apply Filters
+          </Button>
         </div>
       </div>
     </div>

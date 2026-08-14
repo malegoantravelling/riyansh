@@ -17,6 +17,9 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { BackgroundBeams } from '@/components/aceternity/background-beams'
+import { NumberTicker } from '@/components/magicui/number-ticker'
+import { Reveal } from '@/components/motion/Reveal'
 
 const products = [
   {
@@ -89,9 +92,10 @@ const milestones = [
 
 export default function AboutPage() {
   return (
-    <div className="bg-[#FAFBF8]">
+    <div className="page-shell">
       {/* Hero */}
-      <section className="relative overflow-hidden bg-[#4E7A45]">
+      <section className="relative overflow-hidden bg-evergreen">
+        <BackgroundBeams className="opacity-50" />
         <div
           className="absolute inset-0 opacity-30"
           style={{
@@ -99,7 +103,7 @@ export default function AboutPage() {
             backgroundSize: '18px 18px',
           }}
         />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(165,214,167,0.25),transparent_55%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(193,195,172,0.25),transparent_55%)]" />
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
           <div className="max-w-3xl">
@@ -110,9 +114,9 @@ export default function AboutPage() {
               </span>
             </div>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-tight tracking-tight mb-5">
+            <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-medium text-white leading-tight tracking-tight mb-5">
               Ayurveda for Everyday
-              <span className="block text-[#D4E8C8]">Health & Happiness</span>
+              <span className="block text-jade italic">Health & Happiness</span>
             </h1>
 
             <p className="text-lg md:text-xl text-white/90 leading-relaxed max-w-2xl mb-8">
@@ -133,23 +137,23 @@ export default function AboutPage() {
       </section>
 
       {/* Company story */}
-      <section className="py-16 md:py-20 bg-white">
+      <section className="surface-band py-16 md:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             <div className="space-y-6">
-              <p className="text-sm font-bold uppercase tracking-[0.2em] text-[#5B8C51]">
+              <p className="text-sm font-bold uppercase tracking-[0.2em] text-[#013220]">
                 Who We Are
               </p>
-              <h2 className="text-3xl md:text-4xl font-extrabold text-[#1A1A1A] leading-tight">
+              <h2 className="text-3xl md:text-4xl font-extrabold text-[#013220] leading-tight">
                 Built in Maharashtra.
-                <span className="text-[#4E7A45]"> Trusted across India.</span>
+                <span className="text-[#012418]"> Trusted across India.</span>
               </h2>
-              <div className="space-y-4 text-[#555555] leading-relaxed text-base md:text-lg">
+              <div className="space-y-4 text-[#80866e] leading-relaxed text-base md:text-lg">
                 <p>
-                  <strong className="text-[#1A1A1A]">Riyansh Amrit</strong> is marketed by{' '}
-                  <strong className="text-[#1A1A1A]">Riyansh Multitrade Private Limited</strong>, an
+                  <strong className="text-[#013220]">Riyansh Amrit</strong> is marketed by{' '}
+                  <strong className="text-[#013220]">Riyansh Multitrade Private Limited</strong>, an
                   Ayurvedic wellness company that began operations in{' '}
-                  <strong className="text-[#1A1A1A]">2019</strong>. Headquartered in the Sangamner /
+                  <strong className="text-[#013220]">2019</strong>. Headquartered in the Sangamner /
                   Ahmednagar region of Maharashtra, we manufacture and trade herbal juices,
                   capsules, and specialized care formulations for families across India.
                 </p>
@@ -157,12 +161,12 @@ export default function AboutPage() {
                   Under visionary leadership, Riyansh grew from a focused health-product venture
                   into a pan-India brand with online and offline sales centres and an expanding
                   distributor network. We are an{' '}
-                  <strong className="text-[#1A1A1A]">ISO 9001:2015</strong> certified organisation,
+                  <strong className="text-[#013220]">ISO 9001:2015</strong> certified organisation,
                   committed to world-class service and consistent product quality.
                 </p>
                 <p>
                   Our belief is simple:{' '}
-                  <em className="text-[#4E7A45] not-italic font-semibold">
+                  <em className="text-[#012418] not-italic font-semibold">
                     Har Ghar Sehat, Har Ghar Rozgar
                   </em>{' '}
                   — healthier homes and opportunity through authentic Ayurvedic products and a
@@ -172,27 +176,28 @@ export default function AboutPage() {
 
               <div className="grid grid-cols-2 gap-3 pt-2">
                 {milestones.map(({ icon: Icon, label, value }) => (
-                  <div
-                    key={label}
-                    className="flex items-start gap-3 rounded-2xl border border-[#E8EFE4] bg-[#FAFBF8] p-4"
-                  >
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#5B8C51]/10">
-                      <Icon className="h-5 w-5 text-[#5B8C51]" />
+                  <Reveal key={label}>
+                    <div className="flex items-start gap-3 rounded-2xl border border-evergreen/10 bg-white p-4 shadow-soft">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-jade/50">
+                        <Icon className="h-5 w-5 text-evergreen" />
+                      </div>
+                      <div>
+                        <p className="text-xs font-medium uppercase tracking-wide text-dusty-olive">
+                          {label}
+                        </p>
+                        <p className="mt-0.5 font-display text-sm font-semibold text-evergreen">
+                          {value === '2019' ? <NumberTicker value={2019} /> : value}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-xs font-medium uppercase tracking-wide text-[#888888]">
-                        {label}
-                      </p>
-                      <p className="text-sm font-bold text-[#1A1A1A] mt-0.5">{value}</p>
-                    </div>
-                  </div>
+                  </Reveal>
                 ))}
               </div>
             </div>
 
             <div className="relative">
-              <div className="relative overflow-hidden rounded-[2rem] border-[8px] border-[#C8E0C0] shadow-xl">
-                <div className="relative aspect-[4/5] sm:aspect-square bg-[#EAF4E6]">
+              <div className="relative overflow-hidden rounded-[2rem] border-[8px] border-[#c1c3ac] shadow-xl">
+                <div className="relative aspect-[4/5] sm:aspect-square bg-[#f3f4f0]">
                   <Image
                     src="/image/ayurveda_hero_bg.png"
                     alt="Riyansh Ayurvedic wellness"
@@ -203,14 +208,14 @@ export default function AboutPage() {
                   />
                 </div>
               </div>
-              <div className="absolute -bottom-5 left-4 right-4 sm:left-auto sm:right-6 sm:w-64 rounded-2xl bg-white shadow-xl border border-[#E8EFE4] p-5">
+              <div className="absolute -bottom-5 left-4 right-4 sm:left-auto sm:right-6 sm:w-64 rounded-2xl bg-white shadow-xl border border-[rgba(1,50,32,0.08)] p-5">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#5B8C51]/10">
-                    <Shield className="h-6 w-6 text-[#5B8C51]" />
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#013220]/10">
+                    <Shield className="h-6 w-6 text-[#013220]" />
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-[#1A1A1A]">ISO 9001:2015</p>
-                    <p className="text-xs text-[#666666]">Certified quality systems</p>
+                    <p className="text-sm font-bold text-[#013220]">ISO 9001:2015</p>
+                    <p className="text-xs text-[#80866e]">Certified quality systems</p>
                   </div>
                 </div>
               </div>
@@ -223,13 +228,13 @@ export default function AboutPage() {
       <section className="py-16 md:py-20 bg-[#F3F7F0]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-12">
-            <p className="text-sm font-bold uppercase tracking-[0.2em] text-[#5B8C51] mb-3">
+            <p className="text-sm font-bold uppercase tracking-[0.2em] text-[#013220] mb-3">
               Our Promise
             </p>
-            <h2 className="text-3xl md:text-4xl font-extrabold text-[#1A1A1A] mb-4">
+            <h2 className="text-3xl md:text-4xl font-extrabold text-[#013220] mb-4">
               Why families choose Riyansh
             </h2>
-            <p className="text-[#666666] text-lg leading-relaxed">
+            <p className="text-[#80866e] text-lg leading-relaxed">
               We combine traditional herbal knowledge with disciplined manufacturing — so every
               bottle and capsule supports everyday wellness you can trust.
             </p>
@@ -239,13 +244,13 @@ export default function AboutPage() {
             {values.map(({ icon: Icon, title, description }) => (
               <div
                 key={title}
-                className="rounded-2xl bg-white border border-[#E5EDE1] p-6 hover:border-[#5B8C51]/40 hover:shadow-lg transition-all duration-300"
+                className="rounded-2xl bg-white border border-[#E5EDE1] p-6 hover:border-[#013220]/40 hover:shadow-lg transition-all duration-300"
               >
-                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#5B8C51]/10">
-                  <Icon className="h-6 w-6 text-[#5B8C51]" />
+                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#013220]/10">
+                  <Icon className="h-6 w-6 text-[#013220]" />
                 </div>
-                <h3 className="text-lg font-bold text-[#1A1A1A] mb-2">{title}</h3>
-                <p className="text-sm text-[#666666] leading-relaxed">{description}</p>
+                <h3 className="text-lg font-bold text-[#013220] mb-2">{title}</h3>
+                <p className="text-sm text-[#80866e] leading-relaxed">{description}</p>
               </div>
             ))}
           </div>
@@ -253,23 +258,23 @@ export default function AboutPage() {
       </section>
 
       {/* Product range */}
-      <section className="py-16 md:py-20 bg-white">
+      <section className="surface-band py-16 md:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-12">
             <div className="max-w-2xl">
-              <p className="text-sm font-bold uppercase tracking-[0.2em] text-[#5B8C51] mb-3">
+              <p className="text-sm font-bold uppercase tracking-[0.2em] text-[#013220] mb-3">
                 Our Range
               </p>
-              <h2 className="text-3xl md:text-4xl font-extrabold text-[#1A1A1A] mb-4">
+              <h2 className="text-3xl md:text-4xl font-extrabold text-[#013220] mb-4">
                 Signature Riyansh products
               </h2>
-              <p className="text-[#666666] text-lg leading-relaxed">
+              <p className="text-[#80866e] text-lg leading-relaxed">
                 From daily immunity tonic to targeted care formulas — each product is developed for
                 real-life wellness needs of Indian families.
               </p>
             </div>
             <Link href="/store">
-              <Button className="bg-[#4E7A45] hover:bg-[#3f6638] text-white font-semibold rounded-full px-6">
+              <Button className="bg-[#012418] hover:bg-[#3f6638] text-white font-semibold rounded-full px-6">
                 View all products
                 <ChevronRight className="h-4 w-4 ml-1" />
               </Button>
@@ -281,7 +286,7 @@ export default function AboutPage() {
               <Link
                 key={product.slug}
                 href={`/products/${product.slug}`}
-                className="group grid grid-cols-1 sm:grid-cols-[180px_1fr] gap-5 rounded-3xl border border-[#E8EFE4] bg-[#FAFBF8] p-5 sm:p-6 hover:border-[#5B8C51] hover:shadow-xl transition-all duration-300"
+                className="group grid grid-cols-1 sm:grid-cols-[180px_1fr] gap-5 rounded-3xl border border-[rgba(1,50,32,0.08)] bg-[#ffffff] p-5 sm:p-6 hover:border-[#013220] hover:shadow-xl transition-all duration-300"
               >
                 <div className="relative mx-auto sm:mx-0 h-44 w-44 sm:h-full sm:w-full sm:min-h-[160px] rounded-2xl bg-white border border-[#EEF3EA] overflow-hidden">
                   <Image
@@ -293,16 +298,16 @@ export default function AboutPage() {
                   />
                 </div>
                 <div className="flex flex-col justify-center">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-[#5B8C51] mb-1">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-[#013220] mb-1">
                     {product.tagline}
                   </p>
-                  <h3 className="text-xl font-extrabold text-[#1A1A1A] mb-2 group-hover:text-[#4E7A45] transition-colors">
+                  <h3 className="text-xl font-extrabold text-[#013220] mb-2 group-hover:text-[#012418] transition-colors">
                     {product.name}
                   </h3>
-                  <p className="text-sm text-[#666666] leading-relaxed mb-4">
+                  <p className="text-sm text-[#80866e] leading-relaxed mb-4">
                     {product.description}
                   </p>
-                  <span className="inline-flex items-center text-sm font-semibold text-[#4E7A45]">
+                  <span className="inline-flex items-center text-sm font-semibold text-[#012418]">
                     Learn more
                     <ChevronRight className="h-4 w-4 ml-0.5 group-hover:translate-x-1 transition-transform" />
                   </span>
@@ -314,11 +319,11 @@ export default function AboutPage() {
       </section>
 
       {/* Quality strip */}
-      <section className="py-14 bg-[#4E7A45]">
+      <section className="py-14 bg-[#012418]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
             <div className="flex flex-col md:flex-row items-center md:items-start gap-4">
-              <CheckCircle2 className="h-8 w-8 text-[#D4E8C8] shrink-0" />
+              <CheckCircle2 className="h-8 w-8 text-[#c1c3ac] shrink-0" />
               <div>
                 <h3 className="text-lg font-bold text-white mb-1">Herbal formulations</h3>
                 <p className="text-sm text-white/85 leading-relaxed">
@@ -328,7 +333,7 @@ export default function AboutPage() {
               </div>
             </div>
             <div className="flex flex-col md:flex-row items-center md:items-start gap-4">
-              <Award className="h-8 w-8 text-[#D4E8C8] shrink-0" />
+              <Award className="h-8 w-8 text-[#c1c3ac] shrink-0" />
               <div>
                 <h3 className="text-lg font-bold text-white mb-1">Certified company</h3>
                 <p className="text-sm text-white/85 leading-relaxed">
@@ -338,7 +343,7 @@ export default function AboutPage() {
               </div>
             </div>
             <div className="flex flex-col md:flex-row items-center md:items-start gap-4">
-              <Truck className="h-8 w-8 text-[#D4E8C8] shrink-0" />
+              <Truck className="h-8 w-8 text-[#c1c3ac] shrink-0" />
               <div>
                 <h3 className="text-lg font-bold text-white mb-1">Delivered to your door</h3>
                 <p className="text-sm text-white/85 leading-relaxed">
@@ -352,7 +357,7 @@ export default function AboutPage() {
       </section>
 
       {/* Stats */}
-      <section className="py-16 bg-white">
+      <section className="surface-mist py-16 bg-transparent">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
             {[
@@ -363,13 +368,13 @@ export default function AboutPage() {
             ].map(({ icon: Icon, value, label }) => (
               <div
                 key={label}
-                className="rounded-2xl border border-[#E8EFE4] bg-[#FAFBF8] p-6 text-center"
+                className="rounded-2xl border border-[rgba(1,50,32,0.08)] bg-[#ffffff] p-6 text-center"
               >
-                <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#5B8C51]/10">
-                  <Icon className="h-6 w-6 text-[#5B8C51]" />
+                <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#013220]/10">
+                  <Icon className="h-6 w-6 text-[#013220]" />
                 </div>
-                <p className="text-2xl md:text-3xl font-extrabold text-[#4E7A45] mb-1">{value}</p>
-                <p className="text-sm font-medium text-[#666666]">{label}</p>
+                <p className="text-2xl md:text-3xl font-extrabold text-[#012418] mb-1">{value}</p>
+                <p className="text-sm font-medium text-[#80866e]">{label}</p>
               </div>
             ))}
           </div>
@@ -377,7 +382,7 @@ export default function AboutPage() {
       </section>
 
       {/* CTA */}
-      <section className="relative py-20 overflow-hidden bg-[#5B8C51]">
+      <section className="relative py-20 overflow-hidden bg-[#013220]">
         <div
           className="absolute inset-0 opacity-40"
           style={{

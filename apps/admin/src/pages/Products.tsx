@@ -312,7 +312,7 @@ export default function Products() {
             <select
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#8BC34A] focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#5B8C51] focus:border-transparent"
             >
               <option value="all">All Categories</option>
               {categories.map((category) => (
@@ -329,7 +329,7 @@ export default function Products() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#8BC34A] focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#5B8C51] focus:border-transparent"
             >
               <option value="all">All Status</option>
               <option value="active">Active</option>
@@ -343,7 +343,7 @@ export default function Products() {
             <select
               value={priceRangeFilter}
               onChange={(e) => setPriceRangeFilter(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#8BC34A] focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#5B8C51] focus:border-transparent"
             >
               <option value="all">All Prices</option>
               <option value="under-100">Under ₹100</option>

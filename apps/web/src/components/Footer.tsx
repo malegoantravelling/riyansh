@@ -3,7 +3,6 @@ import {
   MapPin,
   Phone,
   Mail,
-  Heart,
   Facebook,
   Twitter,
   Instagram,
@@ -18,45 +17,49 @@ export default function Footer() {
   const currentYear = new Date().getFullYear()
 
   return (
-    <footer className="bg-gradient-to-br from-[#1A1A1A] via-[#111111] to-[#1A1A1A] text-white mt-auto relative overflow-hidden">
-      {/* Decorative Background Elements */}
-      <div className="absolute inset-0 opacity-5">
-        <div className="absolute top-0 left-0 w-96 h-96 bg-[#5B8C51] rounded-full blur-3xl" />
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-[#5B8C51] rounded-full blur-3xl" />
+    <footer className="relative mt-auto overflow-hidden bg-charcoal text-white">
+      <div className="pointer-events-none absolute inset-0 opacity-40">
+        <div className="absolute -left-24 top-0 h-80 w-80 rounded-full bg-forest/40 blur-3xl" />
+        <div className="absolute -right-24 bottom-0 h-80 w-80 rounded-full bg-brass/20 blur-3xl" />
       </div>
 
-      {/* Main Footer Content */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
-          {/* About Section */}
-          <div className="space-y-6 text-center md:text-left">
+      <div className="relative z-10 container-editorial pt-20 pb-10">
+        <div className="mb-16 max-w-2xl">
+          <p className="eyebrow text-sage mb-4">Riyansh Multitrade</p>
+          <h2 className="font-display text-4xl font-medium leading-tight tracking-tight text-white sm:text-5xl">
+            Wellness, delivered with quiet confidence.
+          </h2>
+        </div>
+
+        <div className="mb-14 grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-4">
+          <div className="space-y-6">
             <div>
-              <p className="text-3xl font-extrabold mb-2">
+              <h3 className="font-display text-2xl font-semibold">
                 <span className="text-white">RIY</span>
-                <span className="text-[#5B8C51]">ANSH</span>
-              </p>
-              <p className="text-gray-400 text-sm leading-relaxed">
+                <span className="text-forest-soft">ANSH</span>
+              </h3>
+              <p className="mt-3 text-sm leading-relaxed text-white/55">
                 Authentic Ayurvedic juices and herbal supplements from Maharashtra — immunity,
                 joints, digestion, and women’s wellness, delivered across India.
               </p>
             </div>
 
-            {/* Trust Badges */}
-            <div className="flex flex-wrap gap-3 justify-center md:justify-start">
-              <div className="flex items-center gap-2 px-3 py-2 bg-white/5 rounded-lg border border-white/10">
-                <Shield className="h-4 w-4 text-[#5B8C51]" />
-                <span className="text-xs font-semibold">100% Secure</span>
+            <div className="flex flex-wrap gap-2">
+              <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5">
+                <Shield className="h-3.5 w-3.5 text-forest-soft" />
+                <span className="text-[11px] font-medium tracking-wide">100% Secure</span>
               </div>
-              <div className="flex items-center gap-2 px-3 py-2 bg-white/5 rounded-lg border border-white/10">
-                <Award className="h-4 w-4 text-[#5B8C51]" />
-                <span className="text-xs font-semibold">Certified</span>
+              <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5">
+                <Award className="h-3.5 w-3.5 text-forest-soft" />
+                <span className="text-[11px] font-medium tracking-wide">Certified</span>
               </div>
             </div>
 
-            {/* Social Links */}
             <div>
-              <h4 className="font-bold text-sm mb-3 text-gray-300">Follow Us</h4>
-              <div className="flex gap-3 justify-center md:justify-start">
+              <h4 className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-white/40">
+                Follow Us
+              </h4>
+              <div className="flex gap-2">
                 {[
                   { icon: Facebook, href: '#', label: 'Facebook' },
                   { icon: Twitter, href: '#', label: 'Twitter' },
@@ -67,19 +70,18 @@ export default function Footer() {
                     key={social.label}
                     href={social.href}
                     aria-label={social.label}
-                    className="w-10 h-10 bg-white/5 hover:bg-[#5B8C51] border border-white/10 hover:border-[#5B8C51] rounded-full flex items-center justify-center transition-all duration-300 group"
+                    className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 transition-colors hover:border-forest-soft hover:bg-forest"
                   >
-                    <social.icon className="h-4 w-4 text-gray-400 group-hover:text-white transition-colors" />
+                    <social.icon className="h-4 w-4 text-white/60" />
                   </a>
                 ))}
               </div>
             </div>
           </div>
 
-          {/* Quick Links */}
-          <div className="text-center md:text-left">
-            <h3 className="font-bold text-lg mb-6 text-white">Quick Links</h3>
-            <ul className="space-y-3 flex flex-col items-center md:items-start">
+          <div>
+            <h3 className="mb-5 font-display text-lg font-medium">Quick Links</h3>
+            <ul className="space-y-3">
               {[
                 { href: '/', label: 'Home' },
                 { href: '/store', label: 'Shop' },
@@ -92,9 +94,8 @@ export default function Footer() {
                 <li key={link.label}>
                   <Link
                     href={link.href}
-                    className="text-gray-400 hover:text-[#5B8C51] text-sm transition-colors duration-300 flex items-center gap-2 group"
+                    className="link-underline text-sm text-white/55 transition-colors hover:text-forest-soft"
                   >
-                    <span className="w-0 h-0.5 bg-[#5B8C51] group-hover:w-4 transition-all duration-300" />
                     {link.label}
                   </Link>
                 </li>
@@ -102,10 +103,9 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Customer Service */}
-          <div className="text-center md:text-left">
-            <h3 className="font-bold text-lg mb-6 text-white">Customer Service</h3>
-            <ul className="space-y-3 flex flex-col items-center md:items-start">
+          <div>
+            <h3 className="mb-5 font-display text-lg font-medium">Customer Service</h3>
+            <ul className="space-y-3">
               {[
                 { href: '/shipping', label: 'Shipping Policy' },
                 { href: '/cancellation-refund', label: 'Returns & Refunds' },
@@ -116,9 +116,8 @@ export default function Footer() {
                 <li key={link.label}>
                   <Link
                     href={link.href}
-                    className="text-gray-400 hover:text-[#5B8C51] text-sm transition-colors duration-300 flex items-center gap-2 group"
+                    className="link-underline text-sm text-white/55 transition-colors hover:text-forest-soft"
                   >
-                    <span className="w-0 h-0.5 bg-[#5B8C51] group-hover:w-4 transition-all duration-300" />
                     {link.label}
                   </Link>
                 </li>
@@ -126,60 +125,59 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Contact & Newsletter */}
-          <div className="space-y-6 text-center md:text-left">
+          <div className="space-y-6">
             <div>
-              <h3 className="font-bold text-lg mb-6 text-white">Contact Us</h3>
-              <ul className="space-y-4 flex flex-col items-center md:items-start">
-                <li className="flex items-start gap-3 text-sm group w-full md:w-auto justify-center md:justify-start">
-                  <div className="p-2 bg-[#5B8C51]/10 rounded-lg group-hover:bg-[#5B8C51] transition-colors">
-                    <MapPin className="h-4 w-4 text-[#5B8C51] group-hover:text-white" />
-                  </div>
-                  <span className="text-gray-400 leading-relaxed flex-1">
+              <h3 className="mb-5 font-display text-lg font-medium">Contact Us</h3>
+              <ul className="space-y-4">
+                <li className="flex items-start gap-3 text-sm">
+                  <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-forest-soft" />
+                  <span className="text-white/55 leading-relaxed">
                     Jijamata Pride, Sangamner / Malegaon, Maharashtra, 422608, India
                   </span>
                 </li>
-                <li className="flex items-center gap-3 text-sm group justify-center md:justify-start">
-                  <div className="p-2 bg-[#5B8C51]/10 rounded-lg group-hover:bg-[#5B8C51] transition-colors">
-                    <Phone className="h-4 w-4 text-[#5B8C51] group-hover:text-white" />
-                  </div>
+                <li className="flex items-center gap-3 text-sm">
+                  <Phone className="h-4 w-4 shrink-0 text-forest-soft" />
                   <a
                     href="tel:+918605911293"
-                    className="text-gray-400 hover:text-[#5B8C51] transition-colors"
+                    className="text-white/55 transition-colors hover:text-forest-soft"
                   >
                     +91 8605911293
                   </a>
                 </li>
-                <li className="flex items-center gap-3 text-sm group justify-center md:justify-start">
-                  <div className="p-2 bg-[#5B8C51]/10 rounded-lg group-hover:bg-[#5B8C51] transition-colors">
-                    <Mail className="h-4 w-4 text-[#5B8C51] group-hover:text-white" />
-                  </div>
+                <li className="flex items-center gap-3 text-sm">
+                  <Mail className="h-4 w-4 shrink-0 text-forest-soft" />
                   <a
                     href="mailto:riyanshamrit106@gmail.com"
-                    className="text-gray-400 hover:text-[#5B8C51] transition-colors break-all"
+                    className="break-all text-white/55 transition-colors hover:text-forest-soft"
                   >
                     riyanshamrit106@gmail.com
                   </a>
                 </li>
-                <li className="flex items-center gap-3 text-sm justify-center md:justify-start">
-                  <div className="p-2 bg-[#5B8C51]/10 rounded-lg">
-                    <Clock className="h-4 w-4 text-[#5B8C51]" />
-                  </div>
-                  <span className="text-gray-400">Mon - Sat: 9:00 AM - 8:00 PM</span>
+                <li className="flex items-center gap-3 text-sm">
+                  <Clock className="h-4 w-4 shrink-0 text-forest-soft" />
+                  <span className="text-white/55">Mon - Sat: 9:00 AM - 8:00 PM</span>
                 </li>
               </ul>
             </div>
 
-            {/* Newsletter */}
             <div>
-              <h4 className="font-bold text-sm mb-3 text-gray-300">Subscribe Newsletter</h4>
+              <h4 className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-white/40">
+                Subscribe Newsletter
+              </h4>
               <div className="relative">
                 <input
                   type="email"
                   placeholder="Your email"
-                  className="w-full px-4 py-3 pr-12 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#5B8C51] transition-colors"
+                  autoComplete="email"
+                  suppressHydrationWarning
+                  className="w-full rounded-full border border-white/10 bg-white/5 px-4 py-3 pr-12 text-sm text-white placeholder:text-white/35 focus:border-forest-soft focus:outline-none"
                 />
-                <button className="absolute right-1 top-1 bottom-1 px-3 bg-gradient-to-r from-[#5B8C51] to-[#4E7A45] rounded-lg hover:opacity-90 transition-opacity">
+                <button
+                  type="button"
+                  className="absolute right-1 top-1 bottom-1 flex items-center justify-center rounded-full bg-forest px-3 transition-opacity hover:opacity-90"
+                  aria-label="Subscribe"
+                  suppressHydrationWarning
+                >
                   <Send className="h-4 w-4 text-white" />
                 </button>
               </div>
@@ -187,48 +185,41 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Bottom Bar */}
-        <div className="border-t border-white/10 pt-8">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-sm text-gray-500 text-center md:text-left">
-              © {currentYear} <span className="text-[#5B8C51] font-semibold">Riyansh</span> Made with{' '}
-              <Heart className="inline h-3 w-3 text-red-500 animate-pulse" /> for your wellness
-              {' · '}
-              <a
-                href="https://mahendranagpure.com/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-[#5B8C51] transition-colors"
-              >
-                mahendranagpure.com
-              </a>
-              {' · '}
-              <a
-                href="https://jayeshbpatil.com/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-[#5B8C51] transition-colors"
-              >
-                jayeshbpatil.com
-              </a>
-            </p>
-            <div className="flex items-center gap-6 text-xs text-gray-500 flex-wrap justify-center">
-              <Link href="/privacy" className="hover:text-[#5B8C51] transition-colors">
-                Privacy Policy
-              </Link>
-              <span>•</span>
-              <Link href="/terms" className="hover:text-[#5B8C51] transition-colors">
-                Terms & Conditions
-              </Link>
-              <span>•</span>
-              <Link href="/shipping" className="hover:text-[#5B8C51] transition-colors">
-                Shipping Policy
-              </Link>
-              <span>•</span>
-              <Link href="/cancellation-refund" className="hover:text-[#5B8C51] transition-colors">
-                Returns & Refunds
-              </Link>
-            </div>
+        <div className="flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-8 md:flex-row">
+          <p className="text-center text-sm text-white/40 md:text-left">
+            © {currentYear} <span className="font-medium text-forest-soft">Riyansh</span>
+            {' · '}
+            <a
+              href="https://mahendranagpure.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-forest-soft"
+            >
+              mahendranagpure.com
+            </a>
+            {' · '}
+            <a
+              href="https://jayeshbpatil.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-forest-soft"
+            >
+              jayeshbpatil.com
+            </a>
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-4 text-xs text-white/40">
+            <Link href="/privacy" className="hover:text-forest-soft">
+              Privacy
+            </Link>
+            <Link href="/terms" className="hover:text-forest-soft">
+              Terms
+            </Link>
+            <Link href="/shipping" className="hover:text-forest-soft">
+              Shipping
+            </Link>
+            <Link href="/cancellation-refund" className="hover:text-forest-soft">
+              Returns
+            </Link>
           </div>
         </div>
       </div>

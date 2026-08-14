@@ -127,7 +127,7 @@ export default function Logs() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#8BC34A]"></div>
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#5B8C51]"></div>
       </div>
     )
   }
@@ -169,13 +169,13 @@ export default function Logs() {
             <ShoppingCart className="h-12 w-12 text-purple-500 opacity-20" />
           </div>
         </div>
-        <div className="bg-white rounded-lg shadow p-6 border-l-4 border-[#8BC34A]">
+        <div className="bg-white rounded-lg shadow p-6 border-l-4 border-[#5B8C51]">
           <div className="flex items-center justify-between">
             <div>
               <div className="text-sm text-gray-600 mb-1">Payments</div>
-              <div className="text-3xl font-bold text-[#8BC34A]">{stats.payments}</div>
+              <div className="text-3xl font-bold text-[#5B8C51]">{stats.payments}</div>
             </div>
-            <CreditCard className="h-12 w-12 text-[#8BC34A] opacity-20" />
+            <CreditCard className="h-12 w-12 text-[#5B8C51] opacity-20" />
           </div>
         </div>
       </div>
@@ -198,7 +198,7 @@ export default function Logs() {
             <select
               value={actionFilter}
               onChange={(e) => setActionFilter(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#8BC34A] focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#5B8C51] focus:border-transparent"
             >
               <option value="all">All Actions</option>
               {uniqueActions.map((action) => (
