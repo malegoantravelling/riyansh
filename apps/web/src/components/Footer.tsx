@@ -31,13 +31,13 @@ export default function Footer() {
           {/* About Section */}
           <div className="space-y-6 text-center md:text-left">
             <div>
-              <h3 className="text-3xl font-extrabold mb-2">
+              <p className="text-3xl font-extrabold mb-2">
                 <span className="text-white">RIY</span>
                 <span className="text-[#5B8C51]">ANSH</span>
-              </h3>
+              </p>
               <p className="text-gray-400 text-sm leading-relaxed">
-                Your trusted partner for premium quality healthcare products. We deliver wellness to
-                your doorstep.
+                Authentic Ayurvedic juices and herbal supplements from Maharashtra — immunity,
+                joints, digestion, and women’s wellness, delivered across India.
               </p>
             </div>
 
@@ -83,6 +83,9 @@ export default function Footer() {
               {[
                 { href: '/', label: 'Home' },
                 { href: '/store', label: 'Shop' },
+                { href: '/wellness', label: 'Wellness guides' },
+                { href: '/wellness/immunity', label: 'Immunity' },
+                { href: '/wellness/joint-pain', label: 'Joint care' },
                 { href: '/about', label: 'About Us' },
                 { href: '/contact', label: 'Contact' },
               ].map((link) => (

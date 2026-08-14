@@ -388,34 +388,34 @@ export default function ProductDetailsPage() {
           {activeTab === 'description' && (
             <div className="bg-white space-y-6 text-sm text-gray-700 leading-relaxed max-w-5xl">
               <div>
-                <h3 className="font-bold text-base text-[#1A1A1A] uppercase tracking-wide mb-2">
-                  RIYANSH {product.name.toUpperCase()}
-                </h3>
+                <h2 className="font-bold text-base text-[#1A1A1A] mb-2">
+                  About this formula
+                </h2>
                 <p>{product.description || 'Natural Ayurvedic wellness formulation crafted with time-tested organic herbs to promote holistic health, vitality, and natural healing.'}</p>
               </div>
 
               <div>
-                <h4 className="font-bold text-sm text-[#1A1A1A] uppercase tracking-wide mb-1">
-                  USAGE OF RIYANSH {product.name.toUpperCase()}:
-                </h4>
+                <h3 className="font-bold text-sm text-[#1A1A1A] mb-1">
+                  How to use
+                </h3>
                 <p>
                   Take 1-2 capsules (or 15-30ml juice) twice daily after meals with lukewarm water or milk, or as directed by an Ayurvedic Physician. Consume regularly for 60 to 90 days for optimal results.
                 </p>
               </div>
 
               <div>
-                <h4 className="font-bold text-sm text-[#1A1A1A] uppercase tracking-wide mb-1">
-                  INDICATIONS & HEALTH BENEFITS:
-                </h4>
+                <h3 className="font-bold text-sm text-[#1A1A1A] mb-1">
+                  Who it is for
+                </h3>
                 <p>
                   Helps support natural body healing, strengthens immune function, improves vitality, reduces body inflammation, and promotes daily metabolic wellness. Free from artificial chemicals, sugars, and preservatives.
                 </p>
               </div>
 
               <div>
-                <h4 className="font-bold text-sm text-[#1A1A1A] uppercase tracking-wide mb-1">
-                  HERBAL FORMULATION STORY:
-                </h4>
+                <h3 className="font-bold text-sm text-[#1A1A1A] mb-1">
+                  How it is made
+                </h3>
                 <p>
                   Formulated under strict GMP certified lab standards by Riyansh Multitrade Pvt. Ltd., combining pure botanical extractions of Ashwagandha, Tulsi, Giloy, Amla, and traditional Rasayana herbs for long-term health and vitality.
                 </p>
@@ -475,8 +475,8 @@ export default function ProductDetailsPage() {
         {/* Bottom Section: RELATED PRODUCTS */}
         <div className="pt-8 border-t border-gray-200">
           <div className="text-center mb-10">
-            <h2 className="text-2xl sm:text-3xl font-bold text-[#1A1A1A] tracking-tight uppercase">
-              RELATED PRODUCTS
+            <h2 className="text-2xl sm:text-3xl font-bold text-[#1A1A1A] tracking-tight">
+              You may also like
             </h2>
             <p className="text-xs sm:text-sm text-gray-500 mt-1">
               The herbal choice is a healthy choice.

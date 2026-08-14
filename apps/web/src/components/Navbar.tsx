@@ -11,6 +11,7 @@ import { useAuth } from '@/contexts/AuthContext'
 const categoryLinks = [
   { href: '/', label: 'Home', match: (path: string) => path === '/' },
   { href: '/store', label: 'Store', match: (path: string) => path.startsWith('/store') },
+  { href: '/wellness', label: 'Wellness', match: (path: string) => path.startsWith('/wellness') },
   { href: '/about', label: 'About us', match: (path: string) => path.startsWith('/about') },
   {
     href: '/contact',

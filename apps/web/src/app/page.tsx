@@ -8,6 +8,9 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useState, useEffect, useRef } from 'react'
 import { getCachedProducts } from '@/lib/productCache'
+import HomeSeoContent, { homeFaqs } from '@/components/HomeSeoContent'
+import { JsonLd } from '@/components/JsonLd'
+import { faqJsonLd } from '@/lib/seo'
 
 const testimonials = [
   {
@@ -29,6 +32,7 @@ const testimonials = [
 export default function Home() {
   const [featuredProducts, setFeaturedProducts] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [showHeroVideo, setShowHeroVideo] = useState(false)
   const heroVideoRef = useRef<HTMLVideoElement>(null)
 
   useEffect(() => {
@@ -49,8 +53,17 @@ export default function Home() {
     fetchProducts()
   }, [])
 
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 1024px)')
+    const update = () => setShowHeroVideo(mq.matches)
+    update()
+    mq.addEventListener('change', update)
+    return () => mq.removeEventListener('change', update)
+  }, [])
+
   // Hero video: play forward, then reverse with rAF, then loop
   useEffect(() => {
+    if (!showHeroVideo) return
     const video = heroVideoRef.current
     if (!video) return
 
@@ -93,7 +106,7 @@ export default function Home() {
       video.removeEventListener('ended', onEnded)
       cancelReverse()
     }
-  }, [])
+  }, [showHeroVideo])
 
   return (
     <div>
@@ -111,18 +124,20 @@ export default function Home() {
           aria-label="Riyansh Amrit Juice 42 Herbs"
         />
 
-        {/* Laptop/desktop: hero video — forward then reverse ping-pong */}
-        <video
-          ref={heroVideoRef}
-          className="absolute inset-0 hidden lg:block w-full h-full object-cover object-right"
-          autoPlay
-          muted
-          playsInline
-          preload="metadata"
-          aria-hidden="true"
-        >
-          <source src="/video/riyansh_amrit_hero.mp4" type="video/mp4" />
-        </video>
+        {showHeroVideo ? (
+          <video
+            ref={heroVideoRef}
+            className="absolute inset-0 hidden lg:block w-full h-full object-cover object-right"
+            autoPlay
+            muted
+            playsInline
+            preload="none"
+            poster="/image/riyansh_amrit_hero_bg.png"
+            aria-hidden="true"
+          >
+            <source src="/video/riyansh_amrit_hero.mp4" type="video/mp4" />
+          </video>
+        ) : null}
 
         {/* Text backdrop overlay restricted to left side only so the right side media stays clear */}
         <div className="absolute inset-y-0 left-0 w-full md:w-3/5 lg:w-[55%] bg-gradient-to-r from-white via-white/90 to-transparent pointer-events-none" />
@@ -144,9 +159,9 @@ export default function Home() {
 
             {/* Heading */}
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-[#333333] leading-[1.1]">
-              Your Health,{' '}
+              Ayurvedic wellness for{' '}
               <span className="text-[#5B8C51] relative inline-block">
-                Our Priority
+                everyday immunity
                 <svg
                   className="absolute -bottom-1 left-0 w-full"
                   height="10"
@@ -165,8 +180,9 @@ export default function Home() {
 
             {/* Description */}
             <p className="text-base lg:text-lg text-[#666666] leading-relaxed max-w-xl">
-              Discover premium quality medicines and healthcare products. Fast delivery, genuine
-              products, and expert guidance at your fingertips.
+              Shop authentic Ayurvedic supplements from Maharashtra — herbal immunity syrup,
+              joint-care formulas, and women’s health tonics. Genuine products, pan-India
+              delivery, and guidance when you need it.
             </p>
 
             {/* CTA Buttons */}
@@ -388,8 +404,8 @@ export default function Home() {
               </span>
             </h2>
             <p className="text-lg text-[#666666] max-w-2xl mx-auto">
-              Discover our carefully curated selection of premium pharmacy products for your health
-              and wellness
+              Ayurvedic juices, capsules, and targeted care formulas for immunity, joints,
+              digestion, and women’s wellness.
             </p>
           </div>
 
@@ -665,6 +681,11 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      <HomeSeoContent />
+      <JsonLd
+        data={faqJsonLd(homeFaqs.map((item) => ({ question: item.q, answer: item.a })))}
+      />
     </div>
   )
 }

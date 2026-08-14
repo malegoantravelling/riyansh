@@ -6,6 +6,7 @@ import ProductCardSkeleton from '@/components/ProductCardSkeleton'
 import { Button } from '@/components/ui/button'
 import { getCachedProducts, prioritizeAmritJuice } from '@/lib/productCache'
 import { Search, ArrowUpDown, SlidersHorizontal, X } from 'lucide-react'
+import Link from 'next/link'
 
 export default function StorePage() {
   const [products, setProducts] = useState<any[]>([])
@@ -37,6 +38,12 @@ export default function StorePage() {
   useEffect(() => {
     fetchProducts()
   }, [fetchProducts])
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const query = params.get('q')
+    if (query) setSearchQuery(query)
+  }, [])
 
   // Filter & Search Logic
   useEffect(() => {
@@ -79,7 +86,21 @@ export default function StorePage() {
   return (
     <div className="min-h-screen bg-white text-[#1A1A1A]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
-        
+        <header className="mb-8 max-w-3xl">
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-[#1A1A1A] tracking-tight">
+            Shop Ayurvedic supplements
+          </h1>
+          <p className="mt-3 text-[#555555] leading-relaxed text-sm sm:text-base">
+            Juices, capsules, and herbal formulas for immunity, joint comfort, digestion, stamina,
+            and women’s wellness — made by Riyansh Multitrade in Maharashtra. Use search and
+            filters, or read our{' '}
+            <Link href="/wellness" className="text-[#4E7A45] font-semibold hover:underline">
+              wellness guides
+            </Link>{' '}
+            before you buy.
+          </p>
+        </header>
+
         {/* Top Controls Bar: Search & Sort Dropdown */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 mb-8">
           {/* Mobile Filter Toggle */}
@@ -194,7 +215,7 @@ export default function StorePage() {
           </aside>
 
           {/* Right Product Grid Column */}
-          <main className="lg:col-span-9">
+          <div className="lg:col-span-9">
             {loading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {[...Array(6)].map((_, i) => (
@@ -240,7 +261,7 @@ export default function StorePage() {
                 )}
               </>
             )}
-          </main>
+          </div>
         </div>
       </div>
     </div>
