@@ -56,7 +56,5 @@ logs/
 *.pid
 *.lock
 
-.env.example
-.env
 .env
 apps/api/.env

@@ -319,7 +319,7 @@ export default function Dashboard() {
   ]
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       {loadError && (
         <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
           <p className="font-semibold">Dashboard data could not load</p>
@@ -330,27 +330,27 @@ export default function Dashboard() {
         </div>
       )}
 
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#80866e]">Overview</p>
-          <h1 className="mt-1 text-3xl font-bold tracking-tight text-[#013220]">Dashboard</h1>
-          <p className="mt-1 text-sm text-[#80866e]">
+          <h1 className="mt-1 text-2xl sm:text-3xl font-bold tracking-tight text-[#013220]">Dashboard</h1>
+          <p className="mt-1 text-xs sm:text-sm text-[#80866e]">
             Revenue counts only paid orders — pending and failed are excluded.
           </p>
         </div>
 
-        <div className="relative">
+        <div className="relative self-start sm:self-auto">
           <button
             type="button"
             onClick={() => setDateFilterOpen((v) => !v)}
-            className="inline-flex items-center gap-2 rounded-full border border-[#013220]/12 bg-white px-4 py-2.5 text-sm font-medium text-[#013220] shadow-sm transition hover:bg-[#f7f8f5]"
+            className="inline-flex items-center gap-2 rounded-full border border-[#013220]/12 bg-white px-3 sm:px-4 py-2 sm:py-2.5 text-sm font-medium text-[#013220] shadow-sm transition hover:bg-[#f7f8f5] min-h-[40px]"
           >
-            <Calendar className="h-4 w-4 text-[#80866e]" />
-            {metrics.rangeLabel}
-            <ChevronDown className={cn('h-4 w-4 text-[#80866e] transition', dateFilterOpen && 'rotate-180')} />
+            <Calendar className="h-4 w-4 text-[#80866e] shrink-0" />
+            <span className="truncate max-w-[120px] sm:max-w-none">{metrics.rangeLabel}</span>
+            <ChevronDown className={cn('h-4 w-4 text-[#80866e] transition shrink-0', dateFilterOpen && 'rotate-180')} />
           </button>
           {dateFilterOpen && (
-            <div className="absolute right-0 z-50 mt-2 w-48 overflow-hidden rounded-2xl border border-[#013220]/10 bg-white py-1 shadow-lg">
+            <div className="absolute left-0 sm:left-auto sm:right-0 z-50 mt-2 w-48 overflow-hidden rounded-2xl border border-[#013220]/10 bg-white py-1 shadow-lg">
               {RANGE_OPTIONS.map((range) => (
                 <button
                   key={range.key}
@@ -372,7 +372,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {cards.map((card) => {
           const Icon = card.icon
           return (
@@ -404,7 +404,7 @@ export default function Dashboard() {
         })}
       </div>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-2">
         <div className="rounded-2xl border border-[#013220]/8 bg-white p-6 shadow-sm">
           <div className="mb-5 flex items-center justify-between">
             <div>
@@ -471,15 +471,15 @@ export default function Dashboard() {
       </div>
 
       <div className="overflow-hidden rounded-2xl border border-[#013220]/8 bg-white shadow-sm">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#013220]/8 px-6 py-5">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#013220]/8 px-4 sm:px-6 py-4 sm:py-5">
           <div>
-            <h2 className="text-lg font-semibold text-[#013220]">Recent orders</h2>
+            <h2 className="text-base sm:text-lg font-semibold text-[#013220]">Recent orders</h2>
             <p className="mt-0.5 text-xs text-[#80866e]">Latest across all statuses</p>
           </div>
           <button
             type="button"
             onClick={() => navigate('/orders')}
-            className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium text-[#013220] transition hover:bg-[#f7f8f5]"
+            className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium text-[#013220] transition hover:bg-[#f7f8f5] min-h-[36px]"
           >
             View all
             <ArrowUpRight className="h-4 w-4" />
@@ -487,67 +487,96 @@ export default function Dashboard() {
         </div>
 
         {metrics.recent.length > 0 ? (
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[640px]">
-              <thead className="bg-[#f7f8f5] text-left text-[11px] font-semibold uppercase tracking-[0.12em] text-[#80866e]">
-                <tr>
-                  <th className="px-6 py-3">Order</th>
-                  <th className="px-6 py-3">Customer</th>
-                  <th className="px-6 py-3">Amount</th>
-                  <th className="px-6 py-3">Status</th>
-                  <th className="px-6 py-3">Date</th>
-                  <th className="px-6 py-3"> </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#013220]/6">
-                {metrics.recent.map((order) => (
-                  <tr key={order.id} className="transition hover:bg-[#fafaf8]">
-                    <td className="px-6 py-4 font-mono text-sm text-[#013220]">#{order.id.slice(0, 8)}</td>
-                    <td className="px-6 py-4">
-                      <p className="text-sm font-medium text-[#013220]">
-                        {order.user?.full_name || 'Guest / unknown'}
-                      </p>
-                      <p className="text-xs text-[#80866e]">{order.user?.email || '—'}</p>
-                    </td>
-                    <td className="px-6 py-4 text-sm font-semibold tabular-nums text-[#013220]">
-                      {formatCurrency(orderAmount(order))}
-                    </td>
-                    <td className="px-6 py-4">
-                      <span
-                        className={cn(
-                          'inline-flex rounded-full border px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide',
-                          statusTone(order.status)
-                        )}
-                      >
+          <>
+            {/* Desktop table */}
+            <div className="hidden sm:block overflow-x-auto">
+              <table className="w-full min-w-[600px]">
+                <thead className="bg-[#f7f8f5] text-left text-[11px] font-semibold uppercase tracking-[0.12em] text-[#80866e]">
+                  <tr>
+                    <th className="px-4 sm:px-6 py-3">Order</th>
+                    <th className="px-4 sm:px-6 py-3">Customer</th>
+                    <th className="px-4 sm:px-6 py-3">Amount</th>
+                    <th className="px-4 sm:px-6 py-3">Status</th>
+                    <th className="px-4 sm:px-6 py-3">Date</th>
+                    <th className="px-4 sm:px-6 py-3"> </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#013220]/6">
+                  {metrics.recent.map((order) => (
+                    <tr key={order.id} className="transition hover:bg-[#fafaf8]">
+                      <td className="px-4 sm:px-6 py-4 font-mono text-sm text-[#013220]">#{order.id.slice(0, 8)}</td>
+                      <td className="px-4 sm:px-6 py-4">
+                        <p className="text-sm font-medium text-[#013220]">
+                          {order.user?.full_name || 'Guest / unknown'}
+                        </p>
+                        <p className="text-xs text-[#80866e]">{order.user?.email || '—'}</p>
+                      </td>
+                      <td className="px-4 sm:px-6 py-4 text-sm font-semibold tabular-nums text-[#013220]">
+                        {formatCurrency(orderAmount(order))}
+                      </td>
+                      <td className="px-4 sm:px-6 py-4">
+                        <span className={cn('inline-flex rounded-full border px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide', statusTone(order.status))}>
+                          {order.status}
+                        </span>
+                      </td>
+                      <td className="px-4 sm:px-6 py-4 text-sm text-[#80866e]">
+                        {new Date(order.created_at).toLocaleString('en-IN', {
+                          day: 'numeric', month: 'short', year: 'numeric',
+                          hour: '2-digit', minute: '2-digit',
+                        })}
+                      </td>
+                      <td className="px-4 sm:px-6 py-4">
+                        <button
+                          type="button"
+                          onClick={() => navigate('/orders')}
+                          className="inline-flex items-center gap-1 text-sm font-medium text-[#013220] hover:underline min-h-[36px]"
+                        >
+                          <Eye className="h-4 w-4" />
+                          View
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile card list */}
+            <div className="sm:hidden divide-y divide-[#013220]/6">
+              {metrics.recent.map((order) => (
+                <div key={order.id} className="px-4 py-3.5 flex items-start justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-mono text-xs text-[#013220] font-semibold">#{order.id.slice(0, 8)}</span>
+                      <span className={cn('inline-flex rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide', statusTone(order.status))}>
                         {order.status}
                       </span>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-[#80866e]">
-                      {new Date(order.created_at).toLocaleString('en-IN', {
-                        day: 'numeric',
-                        month: 'short',
-                        year: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })}
-                    </td>
-                    <td className="px-6 py-4">
-                      <button
-                        type="button"
-                        onClick={() => navigate('/orders')}
-                        className="inline-flex items-center gap-1 text-sm font-medium text-[#013220] hover:underline"
-                      >
-                        <Eye className="h-4 w-4" />
-                        View
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                    </div>
+                    <p className="mt-1 text-sm font-medium text-[#013220] truncate">
+                      {order.user?.full_name || 'Guest'}
+                    </p>
+                    <p className="text-xs text-[#80866e] truncate">{order.user?.email || '—'}</p>
+                    <p className="mt-1 text-[11px] text-[#80866e]">
+                      {new Date(order.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                    </p>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className="text-sm font-bold tabular-nums text-[#013220]">{formatCurrency(orderAmount(order))}</p>
+                    <button
+                      type="button"
+                      onClick={() => navigate('/orders')}
+                      className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-[#013220] hover:underline min-h-[32px]"
+                    >
+                      <Eye className="h-3.5 w-3.5" />
+                      View
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
         ) : (
-          <div className="px-6 py-14 text-center">
+          <div className="px-6 py-12 sm:py-14 text-center">
             <ShoppingCart className="mx-auto mb-3 h-8 w-8 text-[#c1c3ac]" />
             <p className="font-medium text-[#013220]">No orders yet</p>
             <p className="mt-1 text-sm text-[#80866e]">Paid and pending checkouts will show up here.</p>

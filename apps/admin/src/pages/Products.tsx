@@ -283,36 +283,36 @@ export default function Products() {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-800">Products</h1>
-        <Button onClick={() => setShowForm(true)}>
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Products</h1>
+        <Button onClick={() => setShowForm(true)} className="min-h-[40px]">
           <Plus className="h-4 w-4 mr-2" />
           Add Product
         </Button>
       </div>
 
       {/* Search and Filters */}
-      <div className="bg-white rounded-lg shadow p-6 mb-6 border border-gray-200">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="bg-white rounded-lg shadow p-4 sm:p-6 mb-4 sm:mb-6 border border-gray-200">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
           {/* Search */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+          <div className="relative sm:col-span-2 xl:col-span-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
             <Input
               type="text"
-              placeholder="Search products..."
+              placeholder="Search products…"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
+              className="pl-9 h-10"
             />
           </div>
 
           {/* Category Filter */}
           <div className="relative">
-            <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <Filter className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
             <select
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#5B8C51] focus:border-transparent"
+              className="w-full pl-9 pr-4 h-10 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-[#5B8C51] focus:border-transparent"
             >
               <option value="all">All Categories</option>
               {categories.map((category) => (
@@ -325,11 +325,11 @@ export default function Products() {
 
           {/* Status Filter */}
           <div className="relative">
-            <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <Filter className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#5B8C51] focus:border-transparent"
+              className="w-full pl-9 pr-4 h-10 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-[#5B8C51] focus:border-transparent"
             >
               <option value="all">All Status</option>
               <option value="active">Active</option>
@@ -339,33 +339,33 @@ export default function Products() {
 
           {/* Price Range Filter */}
           <div className="relative">
-            <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <Filter className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
             <select
               value={priceRangeFilter}
               onChange={(e) => setPriceRangeFilter(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#5B8C51] focus:border-transparent"
+              className="w-full pl-9 pr-4 h-10 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-[#5B8C51] focus:border-transparent"
             >
               <option value="all">All Prices</option>
               <option value="under-100">Under ₹100</option>
-              <option value="100-500">₹100 - ₹500</option>
-              <option value="500-1000">₹500 - ₹1000</option>
+              <option value="100-500">₹100 – ₹500</option>
+              <option value="500-1000">₹500 – ₹1000</option>
               <option value="over-1000">Over ₹1000</option>
             </select>
           </div>
         </div>
 
         {/* Results count */}
-        <div className="mt-4 text-sm text-gray-600">
+        <div className="mt-3 text-xs sm:text-sm text-gray-600">
           Showing {filteredProducts.length} of {products.length} products
         </div>
       </div>
 
       {showForm && (
-        <div className="bg-white rounded-lg shadow p-6 border border-gray-200 mb-6">
-          <h2 className="text-xl font-bold mb-4">
+        <div className="bg-white rounded-lg shadow p-4 sm:p-6 border border-gray-200 mb-4 sm:mb-6">
+          <h2 className="text-lg sm:text-xl font-bold mb-4">
             {editingProduct ? 'Edit Product' : 'Add New Product'}
           </h2>
-          <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
+          <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="name">Product Name</Label>
               <Input
@@ -515,93 +515,110 @@ export default function Products() {
 
       <div className="bg-white rounded-lg shadow border border-gray-200 overflow-hidden">
         {filteredProducts.length === 0 ? (
-          <div className="p-12 text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
-              <Plus className="h-8 w-8 text-gray-400" />
+          <div className="p-8 sm:p-12 text-center">
+            <div className="inline-flex items-center justify-center w-14 h-14 bg-gray-100 rounded-full mb-4">
+              <Plus className="h-7 w-7 text-gray-400" />
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">No products found</h3>
-            <p className="text-gray-500 mb-6">
-              {searchTerm ||
-              categoryFilter !== 'all' ||
-              statusFilter !== 'all' ||
-              priceRangeFilter !== 'all'
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">No products found</h3>
+            <p className="text-sm text-gray-500 mb-6">
+              {searchTerm || categoryFilter !== 'all' || statusFilter !== 'all' || priceRangeFilter !== 'all'
                 ? 'No products match your current filters. Try adjusting your search criteria.'
                 : 'No products available. Add your first product to get started.'}
             </p>
-            {!searchTerm &&
-              categoryFilter === 'all' &&
-              statusFilter === 'all' &&
-              priceRangeFilter === 'all' && (
-                <Button onClick={() => setShowForm(true)}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add First Product
-                </Button>
-              )}
+            {!searchTerm && categoryFilter === 'all' && statusFilter === 'all' && priceRangeFilter === 'all' && (
+              <Button onClick={() => setShowForm(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add First Product
+              </Button>
+            )}
           </div>
         ) : (
-          <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Name
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Category
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Price
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Stock
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
+          <>
+            {/* Desktop table */}
+            <div className="hidden sm:block overflow-x-auto">
+              <table className="w-full min-w-[560px]">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">Name</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">Category</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">Price</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">Stock</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">Status</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {filteredProducts.map((product) => (
+                    <tr key={product.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-4 py-3.5 text-sm font-medium text-gray-900">{product.name}</td>
+                      <td className="px-4 py-3.5 text-sm text-gray-500">{product.category?.name || '-'}</td>
+                      <td className="px-4 py-3.5 text-sm text-gray-500">{formatCurrency(product.price)}</td>
+                      <td className="px-4 py-3.5 text-sm text-gray-500">{product.stock_quantity}</td>
+                      <td className="px-4 py-3.5">
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${product.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+                          {product.is_active ? 'Active' : 'Inactive'}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3.5">
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => handleEdit(product)}
+                            className="p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-md transition-colors min-h-[32px] min-w-[32px] flex items-center justify-center"
+                            aria-label="Edit product"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(product.id)}
+                            className="p-1.5 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors min-h-[32px] min-w-[32px] flex items-center justify-center"
+                            aria-label="Delete product"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile card list */}
+            <div className="sm:hidden divide-y divide-gray-200">
               {filteredProducts.map((product) => (
-                <tr key={product.id}>
-                  <td className="px-6 py-4 text-sm font-medium text-gray-900">{product.name}</td>
-                  <td className="px-6 py-4 text-sm text-gray-500">
-                    {product.category?.name || '-'}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-500">
-                    {formatCurrency(product.price)}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-500">{product.stock_quantity}</td>
-                  <td className="px-6 py-4 text-sm">
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs ${
-                        product.is_active
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-gray-100 text-gray-800'
-                      }`}
-                    >
-                      {product.is_active ? 'Active' : 'Inactive'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-sm space-x-2">
+                <div key={product.id} className="p-4 flex items-start justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-gray-900 truncate">{product.name}</p>
+                    <p className="text-xs text-gray-500 mt-0.5">{product.category?.name || 'No category'}</p>
+                    <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                      <span className="text-sm font-semibold text-gray-900">{formatCurrency(product.price)}</span>
+                      <span className="text-xs text-gray-400">·</span>
+                      <span className="text-xs text-gray-500">Stock: {product.stock_quantity}</span>
+                      <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${product.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+                        {product.is_active ? 'Active' : 'Inactive'}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1 shrink-0">
                     <button
                       onClick={() => handleEdit(product)}
-                      className="text-blue-600 hover:text-blue-800"
+                      className="p-2 text-blue-600 hover:bg-blue-50 rounded-md transition-colors min-h-[40px] min-w-[40px] flex items-center justify-center"
+                      aria-label="Edit product"
                     >
                       <Pencil className="h-4 w-4" />
                     </button>
                     <button
                       onClick={() => handleDelete(product.id)}
-                      className="text-red-600 hover:text-red-800"
+                      className="p-2 text-red-600 hover:bg-red-50 rounded-md transition-colors min-h-[40px] min-w-[40px] flex items-center justify-center"
+                      aria-label="Delete product"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
-                  </td>
-                </tr>
+                  </div>
+                </div>
               ))}
-            </tbody>
-          </table>
+            </div>
+          </>
         )}
       </div>
 
