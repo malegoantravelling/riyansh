@@ -25,6 +25,7 @@ import { Preloader } from '@/components/motion/Preloader'
 import { PageTransition } from '@/components/motion/PageTransition'
 import { PageAtmosphere } from '@/components/layout/PageAtmosphere'
 import { Analytics } from '@vercel/analytics/next'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 
 const dmSans = DM_Sans({
   subsets: ['latin'],
@@ -138,6 +139,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </AuthProvider>
         </ToastProvider>
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   )
