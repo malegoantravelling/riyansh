@@ -24,6 +24,7 @@ import { CustomCursor } from '@/components/motion/CustomCursor'
 import { Preloader } from '@/components/motion/Preloader'
 import { PageTransition } from '@/components/motion/PageTransition'
 import { PageAtmosphere } from '@/components/layout/PageAtmosphere'
+import { Analytics } from '@vercel/analytics/next'
 
 const dmSans = DM_Sans({
   subsets: ['latin'],
@@ -136,6 +137,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </WishlistProvider>
           </AuthProvider>
         </ToastProvider>
+        <Analytics />
       </body>
     </html>
   )
