@@ -110,7 +110,7 @@ export default function Transactions() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#8BC34A]"></div>
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#5B8C51]"></div>
       </div>
     )
   }
@@ -141,9 +141,9 @@ export default function Transactions() {
           <div className="text-sm text-gray-600 mb-1">Failed</div>
           <div className="text-3xl font-bold text-red-600">{stats.failed}</div>
         </div>
-        <div className="bg-white rounded-lg shadow p-6 border-l-4 border-[#8BC34A]">
+        <div className="bg-white rounded-lg shadow p-6 border-l-4 border-[#5B8C51]">
           <div className="text-sm text-gray-600 mb-1">Total Revenue</div>
-          <div className="text-2xl font-bold text-[#8BC34A]">₹{stats.totalAmount.toFixed(2)}</div>
+          <div className="text-2xl font-bold text-[#5B8C51]">₹{stats.totalAmount.toFixed(2)}</div>
         </div>
       </div>
 
@@ -165,7 +165,7 @@ export default function Transactions() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#8BC34A] focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#5B8C51] focus:border-transparent"
             >
               <option value="all">All Status</option>
               <option value="success">Success</option>
@@ -226,7 +226,7 @@ export default function Transactions() {
                   <tr key={transaction.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center space-x-3">
-                        <div className="bg-gradient-to-br from-[#8BC34A] to-[#7CB342] p-2 rounded">
+                        <div className="bg-gradient-to-br from-[#5B8C51] to-[#4E7A46] p-2 rounded">
                           <CreditCard className="h-4 w-4 text-white" />
                         </div>
                         <div>
@@ -253,7 +253,7 @@ export default function Transactions() {
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="text-lg font-bold text-[#8BC34A]">
+                      <div className="text-lg font-bold text-[#5B8C51]">
                         ₹{transaction.amount.toFixed(2)}
                       </div>
                       <div className="text-xs text-gray-500">{transaction.currency}</div>

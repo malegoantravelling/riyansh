@@ -112,24 +112,24 @@ function PendingContent() {
   }, [authLoading, getAccessToken, orderId, router, txnid])
 
   return (
-    <div className="min-h-[60vh] flex items-center justify-center px-4 bg-[linear-gradient(160deg,#FAF8F2,#fff)]">
-      <div className="max-w-md w-full text-center bg-white border border-[#EEEEEE] p-8 shadow-sm">
-        {!stopped && <Loader2 className="h-12 w-12 text-[#5B8C51] mx-auto mb-4 animate-spin" />}
-        <h1 className="text-2xl font-bold text-[#1A1A1A]">Confirming payment</h1>
-        <p className="mt-2 text-sm text-[#787878]">{message}</p>
+    <div className="page-shell surface-band flex min-h-[60vh] items-center justify-center px-4">
+      <div className="surface-glass w-full max-w-md rounded-2xl p-8 text-center">
+        {!stopped && <Loader2 className="h-12 w-12 text-[#013220] mx-auto mb-4 animate-spin" />}
+        <h1 className="text-2xl font-bold text-[#013220]">Confirming payment</h1>
+        <p className="mt-2 text-sm text-[#80866e]">{message}</p>
         {payuStatus && (
-          <p className="mt-3 text-xs text-[#555555]">
+          <p className="mt-3 text-xs text-[#80866e]">
             PayU: <span className="font-mono">{payuStatus}</span>
           </p>
         )}
         {orderId && (
-          <p className="mt-2 text-xs text-[#555555]">
+          <p className="mt-2 text-xs text-[#80866e]">
             Order: <span className="font-mono">{orderId}</span>
           </p>
         )}
         <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
           <Link href="/account/orders">
-            <Button className="bg-[#5B8C51] hover:bg-[#4E7A45] w-full">My Orders</Button>
+            <Button className="bg-[#013220] hover:bg-[#012418] w-full">My Orders</Button>
           </Link>
           <Link href="/cart">
             <Button variant="outline" className="w-full">
@@ -144,7 +144,9 @@ function PendingContent() {
 
 export default function OrderPendingPage() {
   return (
-    <Suspense fallback={<div className="min-h-[40vh] flex items-center justify-center">Loading…</div>}>
+    <Suspense
+      fallback={<div className="min-h-[40vh] flex items-center justify-center">Loading…</div>}
+    >
       <PendingContent />
     </Suspense>
   )

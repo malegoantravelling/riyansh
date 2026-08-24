@@ -1,6 +1,6 @@
 import React from 'react'
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { DM_Sans, Fraunces } from 'next/font/google'
 import './globals.css'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
@@ -19,8 +19,25 @@ import {
   organizationJsonLd,
   websiteJsonLd,
 } from '@/lib/seo'
+import { SmoothScrollProvider } from '@/components/motion/SmoothScrollProvider'
+import { CustomCursor } from '@/components/motion/CustomCursor'
+import { Preloader } from '@/components/motion/Preloader'
+import { PageTransition } from '@/components/motion/PageTransition'
+import { PageAtmosphere } from '@/components/layout/PageAtmosphere'
+import { Analytics } from '@vercel/analytics/next'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 
-const inter = Inter({ subsets: ['latin'] })
+const dmSans = DM_Sans({
+  subsets: ['latin'],
+  variable: '--font-dm-sans',
+  display: 'swap',
+})
+
+const fraunces = Fraunces({
+  subsets: ['latin'],
+  variable: '--font-fraunces',
+  display: 'swap',
+})
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -91,8 +108,13 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en-IN" data-scroll-behavior="smooth" suppressHydrationWarning>
-      <body className={inter.className} suppressHydrationWarning>
+    <html
+      lang="en-IN"
+      data-scroll-behavior="smooth"
+      className={`${dmSans.variable} ${fraunces.variable}`}
+      suppressHydrationWarning
+    >
+      <body className={`${dmSans.className} min-h-screen`} suppressHydrationWarning>
         <JsonLd data={organizationJsonLd} />
         <JsonLd data={websiteJsonLd} />
         <ToastProvider>
@@ -100,15 +122,24 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <OAuthLandingHandler />
             <WishlistProvider>
               <CartProvider>
-                <div className="flex flex-col min-h-screen">
-                  <Navbar />
-                  <main className="flex-1">{children}</main>
-                  <Footer />
-                </div>
+                <SmoothScrollProvider>
+                  <Preloader />
+                  <CustomCursor />
+                  <PageAtmosphere />
+                  <div className="relative z-10 flex min-h-screen flex-col">
+                    <Navbar />
+                    <main className="flex-1">
+                      <PageTransition>{children}</PageTransition>
+                    </main>
+                    <Footer />
+                  </div>
+                </SmoothScrollProvider>
               </CartProvider>
             </WishlistProvider>
           </AuthProvider>
         </ToastProvider>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   )

@@ -93,9 +93,9 @@ export default function CancellationRefundPage() {
   ]
 
   return (
-    <div className="bg-gradient-to-b from-white via-gray-50 to-white">
+    <div className="page-canvas surface-mist">
       {/* Hero Section */}
-      <div className="relative bg-gradient-to-r from-[#5B8C51] via-[#4E7A45] to-[#5B8C51] py-20 overflow-hidden">
+      <div className="relative bg-gradient-to-r from-[#013220] via-[#012418] to-[#013220] py-20 overflow-hidden">
         <div
           className="absolute inset-0"
           style={{
@@ -135,26 +135,26 @@ export default function CancellationRefundPage() {
       </div>
 
       {/* Main Content */}
-      <section className="py-20 bg-white relative overflow-hidden">
-        <div className="absolute top-20 right-0 w-96 h-96 bg-[#5B8C51]/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 left-0 w-96 h-96 bg-[#4E7A45]/5 rounded-full blur-3xl" />
+      <section className="surface-band relative overflow-hidden py-20">
+        <div className="absolute top-20 right-0 w-96 h-96 bg-[#013220]/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-20 left-0 w-96 h-96 bg-[#012418]/5 rounded-full blur-3xl" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="space-y-16">
             {/* Overview */}
-            <div className="bg-gradient-to-br from-[#5B8C51]/10 to-[#4E7A45]/5 rounded-2xl p-8 border border-[#5B8C51]/20">
+            <div className="bg-gradient-to-br from-[#013220]/10 to-[#012418]/5 rounded-2xl p-8 border border-[#013220]/20">
               <h2 className="text-3xl font-bold text-gray-900 mb-4">Policy Overview</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="text-center">
-                  <div className="text-4xl font-bold text-[#5B8C51] mb-2">7 Days</div>
+                  <div className="text-4xl font-bold text-[#013220] mb-2">7 Days</div>
                   <div className="text-gray-700">Return Window</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-4xl font-bold text-[#5B8C51] mb-2">5-10 Days</div>
+                  <div className="text-4xl font-bold text-[#013220] mb-2">5-10 Days</div>
                   <div className="text-gray-700">Refund Processing</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-4xl font-bold text-[#5B8C51] mb-2">100%</div>
+                  <div className="text-4xl font-bold text-[#013220] mb-2">100%</div>
                   <div className="text-gray-700">Satisfaction Guarantee</div>
                 </div>
               </div>
@@ -179,7 +179,7 @@ export default function CancellationRefundPage() {
                     <ul className="space-y-3">
                       {policy.details.map((detail, idx) => (
                         <li key={idx} className="flex items-start gap-2">
-                          <CheckCircle2 className="h-5 w-5 text-[#5B8C51] flex-shrink-0 mt-0.5" />
+                          <CheckCircle2 className="h-5 w-5 text-[#013220] flex-shrink-0 mt-0.5" />
                           <span className="text-gray-700 leading-relaxed">{detail}</span>
                         </li>
                       ))}
@@ -198,9 +198,9 @@ export default function CancellationRefundPage() {
                 {refundPolicy.map((policy, index) => (
                   <div
                     key={index}
-                    className="flex items-start gap-6 p-8 bg-white rounded-2xl border border-gray-200 hover:border-[#5B8C51] transition-all duration-300 shadow-sm"
+                    className="surface-glass flex items-start gap-6 rounded-2xl border-evergreen/10 p-8 transition-all duration-300 hover:border-evergreen/30 hover:shadow-lift"
                   >
-                    <div className="flex-shrink-0 w-14 h-14 bg-gradient-to-br from-[#5B8C51] to-[#4E7A45] rounded-xl flex items-center justify-center">
+                    <div className="flex-shrink-0 w-14 h-14 bg-gradient-to-br from-[#013220] to-[#012418] rounded-xl flex items-center justify-center">
                       <policy.icon className="h-7 w-7 text-white" />
                     </div>
                     <div className="flex-1 space-y-3">
@@ -209,7 +209,7 @@ export default function CancellationRefundPage() {
                         {policy.details &&
                           policy.details.map((detail, idx) => (
                             <li key={idx} className="flex items-start gap-2">
-                              <span className="text-[#5B8C51] mt-1">•</span>
+                              <span className="text-[#013220] mt-1">•</span>
                               <span className="text-gray-700 leading-relaxed">{detail}</span>
                             </li>
                           ))}
@@ -218,7 +218,7 @@ export default function CancellationRefundPage() {
                             <li key={idx} className="flex items-start gap-2">
                               <CheckCircle2
                                 className={`h-5 w-5 flex-shrink-0 mt-0.5 ${
-                                  policy.icon === XCircle ? 'text-red-500' : 'text-[#5B8C51]'
+                                  policy.icon === XCircle ? 'text-red-500' : 'text-[#013220]'
                                 }`}
                               />
                               <span className="text-gray-700 leading-relaxed">{condition}</span>
@@ -240,14 +240,14 @@ export default function CancellationRefundPage() {
                 {returnSteps.map((step, index) => (
                   <div key={index} className="relative">
                     <div className="flex flex-col items-center text-center">
-                      <div className="w-16 h-16 bg-gradient-to-br from-[#5B8C51] to-[#4E7A45] rounded-full flex items-center justify-center mb-4 shadow-lg relative z-10 hover:scale-110 transition-transform">
+                      <div className="w-16 h-16 bg-gradient-to-br from-[#013220] to-[#012418] rounded-full flex items-center justify-center mb-4 shadow-lg relative z-10 hover:scale-110 transition-transform">
                         <span className="text-2xl font-bold text-white">{step.step}</span>
                       </div>
                       <h3 className="font-bold text-gray-900 mb-2">{step.title}</h3>
                       <p className="text-sm text-gray-600 leading-relaxed">{step.description}</p>
                     </div>
                     {index < returnSteps.length - 1 && (
-                      <div className="hidden md:block absolute top-8 left-[60%] w-full h-0.5 bg-gradient-to-r from-[#5B8C51] to-[#4E7A45] z-0" />
+                      <div className="hidden md:block absolute top-8 left-[60%] w-full h-0.5 bg-gradient-to-r from-[#013220] to-[#012418] z-0" />
                     )}
                   </div>
                 ))}
@@ -284,7 +284,7 @@ export default function CancellationRefundPage() {
             </div>
 
             {/* Contact Section */}
-            <div className="bg-gradient-to-br from-[#5B8C51]/10 to-[#4E7A45]/5 rounded-2xl p-8 border border-[#5B8C51]/20">
+            <div className="bg-gradient-to-br from-[#013220]/10 to-[#012418]/5 rounded-2xl p-8 border border-[#013220]/20">
               <h3 className="text-2xl font-bold text-gray-900 mb-4 text-center">
                 Need Help With Returns or Refunds?
               </h3>
@@ -295,13 +295,13 @@ export default function CancellationRefundPage() {
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <a
                   href="mailto:riyanshamrit106@gmail.com"
-                  className="px-8 py-3 bg-gradient-to-r from-[#5B8C51] to-[#4E7A45] text-white rounded-lg hover:opacity-90 transition-opacity font-semibold text-center"
+                  className="px-8 py-3 bg-gradient-to-r from-[#013220] to-[#012418] text-white rounded-lg hover:opacity-90 transition-opacity font-semibold text-center"
                 >
                   Request Return via Email
                 </a>
                 <a
                   href="tel:+918605911293"
-                  className="px-8 py-3 bg-white text-[#5B8C51] border-2 border-[#5B8C51] rounded-lg hover:bg-[#5B8C51] hover:text-white transition-all font-semibold text-center"
+                  className="px-8 py-3 bg-white text-[#013220] border-2 border-[#013220] rounded-lg hover:bg-[#013220] hover:text-white transition-all font-semibold text-center"
                 >
                   Call Us: +91 8605911293
                 </a>
@@ -309,7 +309,7 @@ export default function CancellationRefundPage() {
               <div className="mt-6 text-center">
                 <p className="text-gray-600">
                   <strong>Email:</strong>{' '}
-                  <a href="mailto:riyanshamrit106@gmail.com" className="text-[#5B8C51] hover:underline">
+                  <a href="mailto:riyanshamrit106@gmail.com" className="text-[#013220] hover:underline">
                     riyanshamrit106@gmail.com
                   </a>
                 </p>

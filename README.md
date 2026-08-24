@@ -120,11 +120,15 @@ riyansh-ecommerce/
 ## 🎨 Color Palette
 
 - Background: `#FFFFFF`
-- Text: `#333333`
-- Primary/CTA: `#8BC34A`
-- Section Background: `#A5D6A7`
-- Borders: `#CCCCCC` - `#EEEEEE`
-- Accent: `#FF69B4`
+- Text: `#1A1A1A`
+- Muted text: `#737373`
+- Primary/CTA: `#5B8C51`
+- Primary hover: `#4E7A46`
+- Primary dark: `#3D5D36`
+- Accent (light green): `#7BA672`
+- Cream / secondary surface: `#F6F0E2`
+- Light cream: `#FAFAF2`
+- Borders: `#E0E0E0` – `#EEEEEE`
 
 ## 📱 Apps
 

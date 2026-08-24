@@ -76,31 +76,32 @@ export default function WishlistPage() {
   const subtotal = wishlistItems.reduce((acc, item) => acc + item.price, 0)
 
   return (
-    <div className="min-h-screen bg-white text-[#1A1A1A]">
-      <div className="bg-[#FAF9F5] border-b border-gray-200 py-3 text-center">
+    <div className="page-canvas surface-mist text-evergreen">
+      <div className="border-b border-evergreen/10 bg-white/60 py-3 text-center backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 text-xs sm:text-sm text-gray-600 font-medium">
-          <Link href="/" className="hover:text-[#5B8C51] transition-colors">
+          <Link href="/" className="hover:text-[#013220] transition-colors">
             Home
           </Link>
           <span className="mx-2">&gt;</span>
-          <span className="text-[#1A1A1A] font-bold">Wishlist</span>
+          <span className="text-[#013220] font-bold">Wishlist</span>
         </div>
       </div>
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-        <h1 className="text-3xl sm:text-4xl font-bold text-center text-[#1A1A1A] mb-8 sm:mb-12">
+        <h1 className="text-3xl sm:text-4xl font-bold text-center text-[#013220] mb-8 sm:mb-12">
           Wishlist
         </h1>
 
         {wishlistItems.length === 0 ? (
-          <div className="bg-[#FAF9F5] rounded-2xl p-12 text-center border border-gray-200 max-w-md mx-auto my-8">
+          <div className="surface-glass mx-auto my-8 max-w-md rounded-2xl p-12 text-center">
             <Heart className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-            <h2 className="text-xl font-bold text-[#1A1A1A] mb-2">Your Wishlist is Empty</h2>
+            <h2 className="text-xl font-bold text-[#013220] mb-2">Your Wishlist is Empty</h2>
             <p className="text-gray-500 text-xs sm:text-sm mb-6">
-              Browse our authentic Ayurvedic products and click the heart icon to save your favorites.
+              Browse our authentic Ayurvedic products and click the heart icon to save your
+              favorites.
             </p>
             <Link href="/store">
-              <Button className="bg-[#5B8C51] hover:bg-[#4E7A45] text-white px-6 py-2 text-xs sm:text-sm font-semibold rounded">
+              <Button className="bg-[#013220] hover:bg-[#012418] text-white px-6 py-2 text-xs sm:text-sm font-semibold rounded">
                 Browse Store
               </Button>
             </Link>
@@ -110,7 +111,7 @@ export default function WishlistPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="bg-[#FAF9F5] border-b border-gray-200 text-xs sm:text-sm font-bold text-[#1A1A1A]">
+                  <tr className="surface-glass border-b border-evergreen/10 border-gray-200 text-xs sm:text-sm font-bold text-[#013220]">
                     <th className="py-4 px-6 w-5/12">Product</th>
                     <th className="py-4 px-6 w-2/12">Price</th>
                     <th className="py-4 px-6 w-2/12">Availability</th>
@@ -140,31 +141,31 @@ export default function WishlistPage() {
                           <div className="space-y-1">
                             <Link
                               href={`/products/${item.slug}`}
-                              className="font-bold text-[#1A1A1A] hover:text-[#5B8C51] transition-colors leading-snug line-clamp-2 text-sm sm:text-base"
+                              className="font-bold text-[#013220] hover:text-[#013220] transition-colors leading-snug line-clamp-2 text-sm sm:text-base"
                             >
                               {item.name}
                             </Link>
                           </div>
                         </div>
                       </td>
-                      <td className="py-6 px-6 font-bold text-[#1A1A1A] text-sm sm:text-base whitespace-nowrap">
+                      <td className="py-6 px-6 font-bold text-[#013220] text-sm sm:text-base whitespace-nowrap">
                         ₹ {item.price.toLocaleString()}.00
                       </td>
-                      <td className="py-6 px-6 font-semibold text-[#1A1A1A] text-xs sm:text-sm whitespace-nowrap">
+                      <td className="py-6 px-6 font-semibold text-[#013220] text-xs sm:text-sm whitespace-nowrap">
                         Available
                       </td>
                       <td className="py-6 px-6 text-right whitespace-nowrap">
                         <div className="flex items-center justify-end gap-2.5">
                           <Button
                             onClick={() => handleAddToCart(item)}
-                            className="bg-white border border-[#5B8C51] text-[#5B8C51] hover:bg-[#edf5eb] font-semibold text-xs px-3 py-2 rounded"
+                            className="bg-white border border-[#013220] text-[#013220] hover:bg-[#f6f0e2] font-semibold text-xs px-3 py-2 rounded"
                           >
                             Add to cart
                           </Button>
                           <Button
                             onClick={() => handleCheckoutSingle(item)}
                             disabled={processingId === item.id}
-                            className="bg-[#5B8C51] hover:bg-[#4E7A45] text-white font-semibold text-xs px-4 py-2 rounded transition-all shadow-sm flex items-center gap-1.5"
+                            className="bg-[#013220] hover:bg-[#012418] text-white font-semibold text-xs px-4 py-2 rounded transition-all shadow-sm flex items-center gap-1.5"
                           >
                             {processingId === item.id ? (
                               <span>Processing...</span>
@@ -191,19 +192,19 @@ export default function WishlistPage() {
               </table>
             </div>
 
-            <div className="bg-[#FAF9F5] rounded-xl border border-gray-200 p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="surface-glass rounded-xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
               <div>
                 <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
                   Wishlist Total ({wishlistItems.length} items)
                 </p>
-                <p className="text-2xl font-bold text-[#1A1A1A]">
+                <p className="text-2xl font-bold text-[#013220]">
                   ₹ {subtotal.toLocaleString()}.00
                 </p>
               </div>
               <Button
                 onClick={handleCheckoutAll}
                 disabled={processingCheckout}
-                className="w-full sm:w-auto bg-[#5B8C51] hover:bg-[#4E7A45] text-white font-bold text-sm px-8 py-3 rounded-md shadow-md flex items-center justify-center gap-2 transition-all"
+                className="w-full sm:w-auto bg-[#013220] hover:bg-[#012418] text-white font-bold text-sm px-8 py-3 rounded-md shadow-md flex items-center justify-center gap-2 transition-all"
               >
                 {processingCheckout ? (
                   <span>Preparing Checkout...</span>

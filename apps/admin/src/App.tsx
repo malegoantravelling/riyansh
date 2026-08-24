@@ -8,13 +8,40 @@ import Orders from './pages/Orders'
 import Users from './pages/Users'
 import Logs from './pages/Logs'
 import Layout from './components/Layout'
+import { ADMIN_AUTH_EXPIRED_EVENT, api } from './lib/api'
 
 function App() {
+  const [authReady, setAuthReady] = useState(false)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
 
   useEffect(() => {
-    const token = localStorage.getItem('admin_token')
-    setIsAuthenticated(!!token)
+    let cancelled = false
+
+    const syncAuth = async () => {
+      const token = localStorage.getItem('admin_token')
+      if (!token) {
+        if (!cancelled) {
+          setIsAuthenticated(false)
+          setAuthReady(true)
+        }
+        return
+      }
+
+      const valid = await api.validateAdminSession()
+      if (!cancelled) {
+        setIsAuthenticated(valid)
+        setAuthReady(true)
+      }
+    }
+
+    void syncAuth()
+
+    const onExpired = () => setIsAuthenticated(false)
+    window.addEventListener(ADMIN_AUTH_EXPIRED_EVENT, onExpired)
+    return () => {
+      cancelled = true
+      window.removeEventListener(ADMIN_AUTH_EXPIRED_EVENT, onExpired)
+    }
   }, [])
 
   const handleLogin = () => {
@@ -24,6 +51,14 @@ function App() {
   const handleLogout = () => {
     localStorage.removeItem('admin_token')
     setIsAuthenticated(false)
+  }
+
+  if (!authReady) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#f4f5f2] text-sm text-[#80866e]">
+        Checking admin session…
+      </div>
+    )
   }
 
   if (!isAuthenticated) {

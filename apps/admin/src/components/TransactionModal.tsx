@@ -153,72 +153,76 @@ export default function TransactionModal({ transaction, isOpen, onClose }: Trans
         onClick={onClose}
       />
 
-      {/* Modal */}
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
+      {/* Modal — full screen on mobile, centered on desktop */}
+      <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 pointer-events-none">
         <div
-          className="bg-white rounded-3xl shadow-2xl max-w-4xl w-full max-h-[95vh] overflow-hidden animate-scale-in pointer-events-auto"
+          className="bg-white w-full sm:rounded-3xl sm:max-w-4xl shadow-2xl max-h-[95dvh] sm:max-h-[95vh] overflow-hidden animate-scale-in pointer-events-auto flex flex-col rounded-t-2xl sm:rounded-3xl"
           onClick={(e) => e.stopPropagation()}
         >
+          {/* Drag handle (mobile) */}
+          <div className="flex justify-center pt-3 sm:hidden shrink-0">
+            <div className="w-10 h-1 bg-white/40 rounded-full" />
+          </div>
+
           {/* Header */}
-          <div className="bg-gradient-to-r from-[#27AE60] via-[#229954] to-[#1E8449] px-8 py-6 flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="bg-white/20 backdrop-blur-sm p-3 rounded-xl shadow-lg">
-                <CreditCard className="h-7 w-7 text-white" />
+          <div className="bg-gradient-to-r from-[#5B8C51] via-[#4E7A46] to-[#3D5D36] px-4 sm:px-8 py-4 sm:py-6 flex items-center justify-between shrink-0">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="bg-white/20 backdrop-blur-sm p-2 sm:p-3 rounded-xl shadow-lg">
+                <CreditCard className="h-5 w-5 sm:h-7 sm:w-7 text-white" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-white tracking-tight">
+                <h2 className="text-base sm:text-2xl font-bold text-white tracking-tight">
                   Transaction Details
                 </h2>
-                <p className="text-sm text-white/90 mt-1 font-medium">
+                <p className="text-xs sm:text-sm text-white/90 mt-0.5 font-medium hidden sm:block">
                   Complete payment information and order details
                 </p>
               </div>
             </div>
             <button
               onClick={onClose}
-              className="text-white/90 hover:text-white hover:bg-white/20 p-2 rounded-xl transition-all duration-200 hover:rotate-90"
+              className="text-white/90 hover:text-white hover:bg-white/20 p-2 rounded-xl transition-all duration-200 min-h-[40px] min-w-[40px] flex items-center justify-center"
+              aria-label="Close"
             >
-              <X className="h-6 w-6" />
+              <X className="h-5 w-5 sm:h-6 sm:w-6" />
             </button>
           </div>
 
           {/* Content */}
-          <div className="p-8 overflow-y-auto max-h-[calc(95vh-180px)] custom-scrollbar">
+          <div className="p-4 sm:p-8 overflow-y-auto flex-1 custom-scrollbar">
             {/* Status & Amount Card */}
             <div
-              className={`flex items-center justify-between mb-8 p-6 ${statusConfig.bgColor} border-2 ${statusConfig.borderColor} rounded-2xl shadow-sm`}
+              className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8 p-4 sm:p-6 ${statusConfig.bgColor} border-2 ${statusConfig.borderColor} rounded-2xl shadow-sm`}
             >
-              <div className="flex items-center space-x-4">
-                <div className={`${statusConfig.iconBg} p-3 rounded-xl shadow-md`}>
-                  <StatusIcon className="h-6 w-6 text-white" />
+              <div className="flex items-center gap-3 sm:gap-4">
+                <div className={`${statusConfig.iconBg} p-2.5 sm:p-3 rounded-xl shadow-md shrink-0`}>
+                  <StatusIcon className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-600 mb-1">Payment Status</p>
-                  <p
-                    className={`text-xl font-bold ${statusConfig.textColor} uppercase tracking-wide`}
-                  >
+                  <p className="text-xs sm:text-sm font-medium text-gray-600 mb-0.5">Payment Status</p>
+                  <p className={`text-lg sm:text-xl font-bold ${statusConfig.textColor} uppercase tracking-wide`}>
                     {transaction.status}
                   </p>
                 </div>
               </div>
-              <div className="text-right">
-                <p className="text-sm font-medium text-gray-600 mb-2">Total Amount</p>
-                <p className="text-3xl font-extrabold text-[#27AE60]">
+              <div className="sm:text-right">
+                <p className="text-xs sm:text-sm font-medium text-gray-600 mb-1">Total Amount</p>
+                <p className="text-2xl sm:text-3xl font-extrabold text-[#5B8C51]">
                   ₹{transaction.amount.toFixed(2)}
                 </p>
-                <p className="text-xs text-gray-500 mt-1 uppercase">{transaction.currency}</p>
+                <p className="text-xs text-gray-500 mt-0.5 uppercase">{transaction.currency}</p>
               </div>
             </div>
 
             {/* Main Content Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
               {/* Left Column */}
               <div className="space-y-6">
                 {/* Customer Information */}
                 {transaction.user && (
                   <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
                     <div className="flex items-center space-x-3 mb-5">
-                      <div className="bg-gradient-to-br from-[#27AE60] to-[#229954] p-2.5 rounded-xl">
+                      <div className="bg-gradient-to-br from-[#5B8C51] to-[#4E7A46] p-2.5 rounded-xl">
                         <User className="h-5 w-5 text-white" />
                       </div>
                       <h3 className="text-lg font-bold text-gray-800">Customer Information</h3>
@@ -501,10 +505,10 @@ export default function TransactionModal({ transaction, isOpen, onClose }: Trans
           </div>
 
           {/* Footer */}
-          <div className="px-8 py-5 bg-gradient-to-r from-gray-50 to-white border-t border-gray-200 flex justify-end">
+          <div className="px-4 sm:px-8 py-4 sm:py-5 bg-gradient-to-r from-gray-50 to-white border-t border-gray-200 flex justify-end shrink-0">
             <button
               onClick={onClose}
-              className="px-8 py-3 bg-gradient-to-r from-[#27AE60] to-[#229954] text-white font-semibold rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-200 flex items-center space-x-2"
+              className="min-h-[44px] px-6 sm:px-8 py-2.5 sm:py-3 bg-gradient-to-r from-[#5B8C51] to-[#4E7A46] text-white text-sm font-semibold rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-200 flex items-center gap-2"
             >
               <span>Close</span>
               <X className="h-4 w-4" />

@@ -13,9 +13,9 @@ export const Button: React.FC<ButtonProps> = ({
 }) => {
   const baseClasses = 'px-6 py-3 rounded font-medium transition-all duration-200'
   const variantClasses = {
-    primary: 'bg-[#8BC34A] text-white hover:bg-[#7CB342]',
-    secondary: 'bg-[#A5D6A7] text-[#333333] hover:bg-[#8BC34A]',
-    outline: 'border-2 border-[#8BC34A] text-[#8BC34A] hover:bg-[#8BC34A] hover:text-white',
+    primary: 'bg-[#5B8C51] text-white hover:bg-[#4E7A46]',
+    secondary: 'bg-[#F6F0E2] text-[#1A1A1A] hover:bg-[#7BA672] hover:text-white',
+    outline: 'border-2 border-[#5B8C51] text-[#5B8C51] hover:bg-[#5B8C51] hover:text-white',
   }
 
   return (

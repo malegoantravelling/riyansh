@@ -39,78 +39,94 @@ const Toast = ({ toast, onClose }: ToastProps) => {
   const getIcon = () => {
     switch (toast.type) {
       case 'success':
-        return <CheckCircle2 className="h-5 w-5 text-[#5B8C51]" />
+        return <CheckCircle2 className="h-5 w-5 text-evergreen" />
       case 'error':
-        return <AlertCircle className="h-5 w-5 text-red-500" />
+        return <AlertCircle className="h-5 w-5 text-[var(--error)]" />
       case 'warning':
-        return <AlertTriangle className="h-5 w-5 text-yellow-500" />
+        return <AlertTriangle className="h-5 w-5 text-[var(--warning)]" />
       case 'info':
-        return <Info className="h-5 w-5 text-blue-500" />
+        return <Info className="h-5 w-5 text-[var(--info)]" />
+      default: {
+        const _exhaustive: never = toast.type
+        return _exhaustive
+      }
     }
   }
 
   const getBorderColor = () => {
     switch (toast.type) {
       case 'success':
-        return 'border-l-[#5B8C51]'
+        return 'border-l-evergreen'
       case 'error':
-        return 'border-l-red-500'
+        return 'border-l-[var(--error)]'
       case 'warning':
-        return 'border-l-yellow-500'
+        return 'border-l-[var(--warning)]'
       case 'info':
-        return 'border-l-blue-500'
+        return 'border-l-[var(--info)]'
+      default: {
+        const _exhaustive: never = toast.type
+        return _exhaustive
+      }
+    }
+  }
+
+  const progressColor = () => {
+    switch (toast.type) {
+      case 'success':
+        return 'bg-evergreen'
+      case 'error':
+        return 'bg-[var(--error)]'
+      case 'warning':
+        return 'bg-[var(--warning)]'
+      case 'info':
+        return 'bg-[var(--info)]'
+      default: {
+        const _exhaustive: never = toast.type
+        return _exhaustive
+      }
     }
   }
 
   return (
     <div
       className={`
-        group relative w-full max-w-md bg-white rounded-xl shadow-2xl border-l-4 ${getBorderColor()}
-        overflow-hidden backdrop-blur-sm transition-all duration-300
-        ${isExiting ? 'opacity-0 translate-x-full scale-95' : 'opacity-100 translate-x-0 scale-100'}
+        group relative w-full max-w-md overflow-hidden rounded-2xl border border-evergreen/8 border-l-4 bg-white/95 shadow-lift backdrop-blur-md transition-all duration-300
+        ${getBorderColor()}
+        ${isExiting ? 'translate-x-full scale-95 opacity-0' : 'translate-x-0 scale-100 opacity-100'}
       `}
     >
-      {/* Progress Bar */}
-      <div className="absolute top-0 left-0 h-1 bg-gray-100 w-full overflow-hidden">
+      <div className="absolute left-0 top-0 h-1 w-full overflow-hidden bg-jade/30">
         <div
-          className={`h-full ${
-            toast.type === 'success'
-              ? 'bg-[#5B8C51]'
-              : toast.type === 'error'
-              ? 'bg-red-500'
-              : toast.type === 'warning'
-              ? 'bg-yellow-500'
-              : 'bg-blue-500'
-          }`}
+          className={`h-full ${progressColor()}`}
           style={{
-            animation: `progress ${toast.duration || 5000}ms linear forwards`,
+            animation: `toast-progress ${toast.duration || 5000}ms linear forwards`,
           }}
         />
       </div>
 
       <div className="p-4 pr-12">
         <div className="flex items-start gap-3">
-          <div className="flex-shrink-0 mt-0.5">{getIcon()}</div>
-          <div className="flex-1 min-w-0">
-            <h3 className="text-sm font-bold text-[#2d2d2d] mb-1">{toast.title}</h3>
+          <div className="mt-0.5 flex-shrink-0">{getIcon()}</div>
+          <div className="min-w-0 flex-1">
+            <h3 className="mb-1 text-sm font-bold text-evergreen">{toast.title}</h3>
             {toast.description && (
-              <p className="text-sm text-[#666666] leading-relaxed">{toast.description}</p>
+              <p className="text-sm leading-relaxed text-dusty-olive">{toast.description}</p>
             )}
           </div>
         </div>
       </div>
 
-      {/* Close Button */}
       <button
         onClick={handleClose}
-        className="absolute top-3 right-3 p-1.5 rounded-lg text-gray-400 hover:text-[#2d2d2d] hover:bg-gray-100 transition-all duration-200"
+        className="absolute right-3 top-3 rounded-lg p-1.5 text-dusty-olive transition-all duration-200 hover:bg-jade/40 hover:text-evergreen"
         aria-label="Close notification"
+        type="button"
       >
         <X className="h-4 w-4" />
       </button>
 
       <style jsx>{`
-        @keyframes progress {
+        @keyframes toast-progress {
           from {
             width: 100%;
           }

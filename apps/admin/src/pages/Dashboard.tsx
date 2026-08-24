@@ -1,36 +1,21 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Package,
   ShoppingCart,
   Users,
-  TrendingUp,
-  TrendingDown,
   ArrowUpRight,
   ArrowDownRight,
   Eye,
   Calendar,
   Loader2,
   ChevronDown,
+  IndianRupee,
 } from 'lucide-react'
 import { api } from '@/lib/api'
-import { formatCurrency } from '@/lib/utils'
+import { cn, formatCurrency } from '@/lib/utils'
 
-// Indian Rupee Icon Component - Simplified ₹ symbol
-const IndianRupee = ({ className }: { className?: string }) => {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="16"
-      height="16"
-      fill="currentColor"
-      className={className}
-      viewBox="0 0 16 16"
-    >
-      <path d="M4 3.06h2.726c1.22 0 2.12.575 2.325 1.724H4v1.051h5.051C8.855 7.001 8 7.558 6.788 7.558H4v1.317L8.437 14h2.11L6.095 8.884h.855c2.316-.018 3.465-1.476 3.688-3.049H12V4.784h-1.345c-.08-.778-.357-1.335-.793-1.732H12V2H4z" />
-    </svg>
-  )
-}
+type DateRangeKey = '7d' | '30d' | '90d' | '180d' | 'year'
 
 interface Order {
   id: string
@@ -38,28 +23,138 @@ interface Order {
   total_amount: number
   status: string
   created_at: string
+  paid_at?: string | null
   user?: {
-    full_name: string
-    email: string
+    full_name?: string
+    email?: string
+  }
+}
+
+const RANGE_OPTIONS: { key: DateRangeKey; label: string }[] = [
+  { key: '7d', label: 'Last 7 days' },
+  { key: '30d', label: 'Last 30 days' },
+  { key: '90d', label: 'Last 3 months' },
+  { key: '180d', label: 'Last 6 months' },
+  { key: 'year', label: 'This year' },
+]
+
+/** Payment collected — counts toward revenue. */
+const REVENUE_STATUSES = new Set(['paid', 'completed', 'processing', 'shipped', 'delivered'])
+
+function startOfDay(d: Date) {
+  const x = new Date(d)
+  x.setHours(0, 0, 0, 0)
+  return x
+}
+
+function startOfMonth(d: Date) {
+  return new Date(d.getFullYear(), d.getMonth(), 1)
+}
+
+function addMonths(d: Date, n: number) {
+  return new Date(d.getFullYear(), d.getMonth() + n, 1)
+}
+
+function rangeStart(key: DateRangeKey, now = new Date()): Date {
+  const today = startOfDay(now)
+  switch (key) {
+    case '7d': {
+      const d = new Date(today)
+      d.setDate(d.getDate() - 6)
+      return d
+    }
+    case '30d': {
+      const d = new Date(today)
+      d.setDate(d.getDate() - 29)
+      return d
+    }
+    case '90d': {
+      const d = new Date(today)
+      d.setDate(d.getDate() - 89)
+      return d
+    }
+    case '180d': {
+      const d = new Date(today)
+      d.setDate(d.getDate() - 179)
+      return d
+    }
+    case 'year':
+      return new Date(today.getFullYear(), 0, 1)
+    default: {
+      const _exhaustive: never = key
+      return _exhaustive
+    }
+  }
+}
+
+function previousPeriodBounds(key: DateRangeKey, now = new Date()): { start: Date; end: Date } {
+  const currentStart = rangeStart(key, now)
+  const end = new Date(currentStart.getTime() - 1)
+  const ms = now.getTime() - currentStart.getTime()
+  const start = new Date(end.getTime() - ms)
+  return { start, end }
+}
+
+function inRange(dateIso: string, start: Date, end: Date) {
+  const t = new Date(dateIso).getTime()
+  return t >= start.getTime() && t <= end.getTime()
+}
+
+function isRevenueOrder(order: Order) {
+  return REVENUE_STATUSES.has(String(order.status || '').toLowerCase())
+}
+
+function orderAmount(order: Order) {
+  return Number(order.total_amount) || 0
+}
+
+function percentChange(current: number, previous: number): number | null {
+  if (previous === 0) return current === 0 ? 0 : null
+  return ((current - previous) / previous) * 100
+}
+
+function formatTrend(change: number | null): { label: string; up: boolean } {
+  if (change === null) return { label: 'New', up: true }
+  const up = change >= 0
+  const abs = Math.abs(change)
+  return {
+    label: `${up ? '+' : '−'}${abs.toFixed(1)}%`,
+    up,
+  }
+}
+
+function statusTone(status: string) {
+  const key = status.toLowerCase()
+  switch (key) {
+    case 'paid':
+    case 'completed':
+    case 'delivered':
+      return 'bg-emerald-50 text-emerald-800 border-emerald-100'
+    case 'processing':
+    case 'shipped':
+      return 'bg-sky-50 text-sky-800 border-sky-100'
+    case 'pending':
+      return 'bg-amber-50 text-amber-900 border-amber-100'
+    case 'failed':
+    case 'cancelled':
+      return 'bg-red-50 text-red-800 border-red-100'
+    default:
+      return 'bg-gray-50 text-gray-700 border-gray-100'
   }
 }
 
 export default function Dashboard() {
   const navigate = useNavigate()
-  const [stats, setStats] = useState({
-    totalProducts: 0,
-    totalOrders: 0,
-    totalUsers: 0,
-    totalRevenue: 0,
-  })
-  const [recentOrders, setRecentOrders] = useState<Order[]>([])
+  const [orders, setOrders] = useState<Order[]>([])
+  const [productCount, setProductCount] = useState(0)
+  const [userCount, setUserCount] = useState(0)
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
   const [dateFilterOpen, setDateFilterOpen] = useState(false)
-  const [selectedDateRange, setSelectedDateRange] = useState('Last 30 days')
+  const [rangeKey, setRangeKey] = useState<DateRangeKey>('30d')
 
   useEffect(() => {
-    fetchData()
+    void fetchData()
   }, [])
 
   const fetchData = async () => {
@@ -76,9 +171,9 @@ export default function Dashboard() {
         productsResult.status === 'fulfilled' && Array.isArray(productsResult.value)
           ? productsResult.value
           : []
-      const orders =
+      const nextOrders =
         ordersResult.status === 'fulfilled' && Array.isArray(ordersResult.value)
-          ? ordersResult.value
+          ? (ordersResult.value as Order[])
           : []
       const users =
         usersResult.status === 'fulfilled' && Array.isArray(usersResult.value)
@@ -87,412 +182,406 @@ export default function Dashboard() {
 
       const failures: string[] = []
       if (productsResult.status === 'rejected') {
-        console.error('Error fetching products:', productsResult.reason)
         failures.push(`Products: ${productsResult.reason?.message || productsResult.reason}`)
       }
       if (ordersResult.status === 'rejected') {
-        console.error('Error fetching orders:', ordersResult.reason)
         failures.push(`Orders: ${ordersResult.reason?.message || ordersResult.reason}`)
       }
       if (usersResult.status === 'rejected') {
-        console.error('Error fetching users:', usersResult.reason)
         failures.push(`Users: ${usersResult.reason?.message || usersResult.reason}`)
       }
 
       if (failures.length === 3) {
         setLoadError(
-          'Cannot reach the API or admin auth failed. Set VITE_API_URL=https://riyansh-api.vercel.app and ensure ADMIN_API_TOKEN is configured on the API.'
+          'Cannot reach the API or admin auth failed. Log out and sign in again (admin / admin123).'
         )
       } else if (failures.length) {
         setLoadError(failures.join(' · '))
       }
 
-      const revenue = orders.reduce(
-        (sum: number, order: any) => sum + (Number(order.total_amount) || 0),
-        0
-      )
-
-      setStats({
-        totalProducts: products.length,
-        totalOrders: orders.length,
-        totalUsers: users.length,
-        totalRevenue: revenue,
-      })
-
-      setRecentOrders(orders.slice(0, 5))
+      setOrders(nextOrders)
+      setProductCount(products.length)
+      setUserCount(users.length)
     } catch (error) {
-      console.error('Error fetching stats:', error)
       setLoadError(error instanceof Error ? error.message : 'Failed to load dashboard')
     } finally {
       setLoading(false)
     }
   }
 
-  const statCards = [
-    {
-      label: 'Total Revenue',
-      value: formatCurrency(stats.totalRevenue),
-      icon: IndianRupee,
-      bgColor: 'bg-gradient-to-br from-emerald-500 to-emerald-600',
-      change: '+12.5%',
-      changeType: 'increase',
-      lightBg: 'bg-emerald-50',
-      lightColor: 'text-emerald-600',
-    },
-    {
-      label: 'Total Orders',
-      value: stats.totalOrders,
-      icon: ShoppingCart,
-      bgColor: 'bg-gradient-to-br from-blue-500 to-blue-600',
-      change: '+8.2%',
-      changeType: 'increase',
-      lightBg: 'bg-blue-50',
-      lightColor: 'text-blue-600',
-    },
-    {
-      label: 'Total Products',
-      value: stats.totalProducts,
-      icon: Package,
-      bgColor: 'bg-gradient-to-br from-purple-500 to-purple-600',
-      change: '+3.1%',
-      changeType: 'increase',
-      lightBg: 'bg-purple-50',
-      lightColor: 'text-purple-600',
-    },
-    {
-      label: 'Total Users',
-      value: stats.totalUsers,
-      icon: Users,
-      bgColor: 'bg-gradient-to-br from-orange-500 to-orange-600',
-      change: '-2.4%',
-      changeType: 'decrease',
-      lightBg: 'bg-orange-50',
-      lightColor: 'text-orange-600',
-    },
-  ]
+  const metrics = useMemo(() => {
+    const now = new Date()
+    const currentStart = rangeStart(rangeKey, now)
+    const prev = previousPeriodBounds(rangeKey, now)
+    const thisMonthStart = startOfMonth(now)
+    const lastMonthStart = addMonths(thisMonthStart, -1)
+    const lastMonthEnd = new Date(thisMonthStart.getTime() - 1)
 
-  const getStatusBadge = (status: string) => {
-    const statusConfig: Record<string, { bg: string; text: string; label: string }> = {
-      pending: { bg: 'bg-yellow-100', text: 'text-yellow-800', label: 'Pending' },
-      processing: { bg: 'bg-blue-100', text: 'text-blue-800', label: 'Processing' },
-      completed: { bg: 'bg-green-100', text: 'text-green-800', label: 'Completed' },
-      cancelled: { bg: 'bg-red-100', text: 'text-red-800', label: 'Cancelled' },
+    const inCurrent = orders.filter((o) => inRange(o.created_at, currentStart, now))
+    const inPrevious = orders.filter((o) => inRange(o.created_at, prev.start, prev.end))
+
+    const revenueOrdersCurrent = inCurrent.filter(isRevenueOrder)
+    const revenueOrdersPrevious = inPrevious.filter(isRevenueOrder)
+
+    const revenue = revenueOrdersCurrent.reduce((s, o) => s + orderAmount(o), 0)
+    const revenuePrev = revenueOrdersPrevious.reduce((s, o) => s + orderAmount(o), 0)
+
+    const orderCount = inCurrent.length
+    const orderCountPrev = inPrevious.length
+
+    const thisMonthRevenue = orders
+      .filter((o) => isRevenueOrder(o) && inRange(o.created_at, thisMonthStart, now))
+      .reduce((s, o) => s + orderAmount(o), 0)
+
+    const lastMonthRevenue = orders
+      .filter((o) => isRevenueOrder(o) && inRange(o.created_at, lastMonthStart, lastMonthEnd))
+      .reduce((s, o) => s + orderAmount(o), 0)
+
+    const statusCounts: Record<string, number> = {}
+    for (const o of inCurrent) {
+      const key = String(o.status || 'unknown').toLowerCase()
+      statusCounts[key] = (statusCounts[key] || 0) + 1
     }
 
-    const config = statusConfig[status] || statusConfig.pending
+    const paidCount = (statusCounts.paid || 0) + (statusCounts.completed || 0) + (statusCounts.delivered || 0)
+    const processingCount = (statusCounts.processing || 0) + (statusCounts.shipped || 0)
+    const pendingCount = statusCounts.pending || 0
+    const failedCount = (statusCounts.failed || 0) + (statusCounts.cancelled || 0)
 
-    return (
-      <span
-        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${config.bg} ${config.text}`}
-      >
-        {config.label}
-      </span>
-    )
-  }
+    const maxMonth = Math.max(thisMonthRevenue, lastMonthRevenue, 1)
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    })
-  }
+    const recent = [...orders]
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      .slice(0, 6)
+
+    return {
+      revenue,
+      revenueTrend: formatTrend(percentChange(revenue, revenuePrev)),
+      orderCount,
+      orderTrend: formatTrend(percentChange(orderCount, orderCountPrev)),
+      thisMonthRevenue,
+      lastMonthRevenue,
+      thisMonthPct: Math.round((thisMonthRevenue / maxMonth) * 100),
+      lastMonthPct: Math.round((lastMonthRevenue / maxMonth) * 100),
+      paidCount,
+      processingCount,
+      pendingCount,
+      failedCount,
+      recent,
+      rangeLabel: RANGE_OPTIONS.find((r) => r.key === rangeKey)?.label || 'Last 30 days',
+    }
+  }, [orders, rangeKey])
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-full">
+      <div className="flex h-full items-center justify-center">
         <div className="text-center">
-          <Loader2 className="h-12 w-12 animate-spin text-[#27AE60] mx-auto mb-4" />
-          <p className="text-gray-600">Loading dashboard...</p>
+          <Loader2 className="mx-auto mb-4 h-10 w-10 animate-spin text-[#013220]" />
+          <p className="text-sm text-[#80866e]">Loading dashboard…</p>
         </div>
       </div>
     )
   }
 
+  const cards = [
+    {
+      label: 'Paid revenue',
+      hint: 'Sum of paid / completed orders in range',
+      value: formatCurrency(metrics.revenue),
+      trend: metrics.revenueTrend,
+      icon: IndianRupee,
+      tone: 'bg-[#013220]/8 text-[#013220]',
+    },
+    {
+      label: 'Orders',
+      hint: 'All orders created in range',
+      value: String(metrics.orderCount),
+      trend: metrics.orderTrend,
+      icon: ShoppingCart,
+      tone: 'bg-[#c1c3ac]/50 text-[#013220]',
+    },
+    {
+      label: 'Products',
+      hint: 'Catalog size (not date-filtered)',
+      value: String(productCount),
+      trend: null,
+      icon: Package,
+      tone: 'bg-[#f6f0e2] text-[#3d5d36]',
+    },
+    {
+      label: 'Customers',
+      hint: 'Registered users (not date-filtered)',
+      value: String(userCount),
+      trend: null,
+      icon: Users,
+      tone: 'bg-[#7ba672]/20 text-[#013220]',
+    },
+  ]
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       {loadError && (
-        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+        <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
           <p className="font-semibold">Dashboard data could not load</p>
           <p className="mt-1">{loadError}</p>
-          <button
-            type="button"
-            onClick={() => void fetchData()}
-            className="mt-2 text-xs font-semibold underline"
-          >
+          <button type="button" onClick={() => void fetchData()} className="mt-2 text-xs font-semibold underline">
             Retry
           </button>
         </div>
       )}
 
-      {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-500 mt-1">
-            Welcome back! Here's what's happening with your store.
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#80866e]">Overview</p>
+          <h1 className="mt-1 text-2xl sm:text-3xl font-bold tracking-tight text-[#013220]">Dashboard</h1>
+          <p className="mt-1 text-xs sm:text-sm text-[#80866e]">
+            Revenue counts only paid orders — pending and failed are excluded.
           </p>
         </div>
-        <div className="relative">
-          <button
-            onClick={() => setDateFilterOpen(!dateFilterOpen)}
-            className="flex items-center space-x-2 px-4 py-2 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
-          >
-            <Calendar className="h-5 w-5 text-gray-600" />
-            <span className="text-gray-700 font-medium">{selectedDateRange}</span>
-            <ChevronDown
-              className={`h-4 w-4 text-gray-400 transition-transform ${
-                dateFilterOpen ? 'rotate-180' : ''
-              }`}
-            />
-          </button>
 
+        <div className="relative self-start sm:self-auto">
+          <button
+            type="button"
+            onClick={() => setDateFilterOpen((v) => !v)}
+            className="inline-flex items-center gap-2 rounded-full border border-[#013220]/12 bg-white px-3 sm:px-4 py-2 sm:py-2.5 text-sm font-medium text-[#013220] shadow-sm transition hover:bg-[#f7f8f5] min-h-[40px]"
+          >
+            <Calendar className="h-4 w-4 text-[#80866e] shrink-0" />
+            <span className="truncate max-w-[120px] sm:max-w-none">{metrics.rangeLabel}</span>
+            <ChevronDown className={cn('h-4 w-4 text-[#80866e] transition shrink-0', dateFilterOpen && 'rotate-180')} />
+          </button>
           {dateFilterOpen && (
-            <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50">
-              {['Last 7 days', 'Last 30 days', 'Last 3 months', 'Last 6 months', 'This year'].map(
-                (range) => (
-                  <button
-                    key={range}
-                    onClick={() => {
-                      setSelectedDateRange(range)
-                      setDateFilterOpen(false)
-                      // Trigger data refetch with new date range
-                      console.log('Filtering by:', range)
-                      fetchData()
-                    }}
-                    className={`w-full px-4 py-2 text-left text-sm hover:bg-gray-50 transition-colors ${
-                      selectedDateRange === range ? 'text-[#27AE60] font-semibold' : 'text-gray-700'
-                    }`}
-                  >
-                    {range}
-                  </button>
-                )
-              )}
+            <div className="absolute left-0 sm:left-auto sm:right-0 z-50 mt-2 w-48 overflow-hidden rounded-2xl border border-[#013220]/10 bg-white py-1 shadow-lg">
+              {RANGE_OPTIONS.map((range) => (
+                <button
+                  key={range.key}
+                  type="button"
+                  onClick={() => {
+                    setRangeKey(range.key)
+                    setDateFilterOpen(false)
+                  }}
+                  className={cn(
+                    'w-full px-4 py-2.5 text-left text-sm transition hover:bg-[#f7f8f5]',
+                    rangeKey === range.key ? 'font-semibold text-[#013220]' : 'text-[#3d5d36]'
+                  )}
+                >
+                  {range.label}
+                </button>
+              ))}
             </div>
           )}
         </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {statCards.map((stat) => {
-          const Icon = stat.icon
-          const isIncrease = stat.changeType === 'increase'
-
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        {cards.map((card) => {
+          const Icon = card.icon
           return (
             <div
-              key={stat.label}
-              className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-lg transition-all duration-300 cursor-pointer group"
+              key={card.label}
+              className="rounded-2xl border border-[#013220]/8 bg-white p-5 shadow-sm transition hover:shadow-md"
             >
-              <div className="flex items-center justify-between mb-4">
-                <div
-                  className={`${stat.lightBg} p-3 rounded-xl group-hover:scale-110 transition-transform`}
-                >
-                  <Icon className={`h-6 w-6 ${stat.lightColor}`} />
+              <div className="mb-4 flex items-start justify-between gap-3">
+                <div className={cn('rounded-xl p-2.5', card.tone)}>
+                  <Icon className="h-5 w-5" />
                 </div>
-                <div
-                  className={`flex items-center space-x-1 text-sm font-semibold ${
-                    isIncrease ? 'text-green-600' : 'text-red-600'
-                  }`}
-                >
-                  {isIncrease ? (
-                    <ArrowUpRight className="h-4 w-4" />
-                  ) : (
-                    <ArrowDownRight className="h-4 w-4" />
-                  )}
-                  <span>{stat.change}</span>
-                </div>
+                {card.trend && (
+                  <span
+                    className={cn(
+                      'inline-flex items-center gap-0.5 text-xs font-semibold',
+                      card.trend.up ? 'text-emerald-700' : 'text-red-600'
+                    )}
+                  >
+                    {card.trend.up ? <ArrowUpRight className="h-3.5 w-3.5" /> : <ArrowDownRight className="h-3.5 w-3.5" />}
+                    {card.trend.label}
+                  </span>
+                )}
               </div>
-
-              <div>
-                <p className="text-gray-500 text-sm font-medium mb-1">{stat.label}</p>
-                <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
-              </div>
+              <p className="text-xs font-medium uppercase tracking-[0.12em] text-[#80866e]">{card.label}</p>
+              <p className="mt-1 text-2xl font-bold tabular-nums text-[#013220]">{card.value}</p>
+              <p className="mt-2 text-[11px] leading-snug text-[#80866e]">{card.hint}</p>
             </div>
           )
         })}
       </div>
 
-      {/* Quick Stats Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Sales Overview */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">Sales Overview</h3>
-            <TrendingUp className="h-5 w-5 text-green-500" />
-          </div>
-          <div className="space-y-4">
+      <div className="grid grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-2">
+        <div className="rounded-2xl border border-[#013220]/8 bg-white p-6 shadow-sm">
+          <div className="mb-5 flex items-center justify-between">
             <div>
-              <div className="flex items-center justify-between text-sm mb-2">
-                <span className="text-gray-600">This Month</span>
-                <span className="font-semibold text-gray-900">
-                  {formatCurrency(stats.totalRevenue * 0.6)}
+              <h3 className="text-base font-semibold text-[#013220]">Sales overview</h3>
+              <p className="mt-0.5 text-xs text-[#80866e]">Paid revenue by calendar month</p>
+            </div>
+          </div>
+          <div className="space-y-5">
+            <div>
+              <div className="mb-2 flex items-center justify-between text-sm">
+                <span className="text-[#80866e]">This month</span>
+                <span className="font-semibold tabular-nums text-[#013220]">
+                  {formatCurrency(metrics.thisMonthRevenue)}
                 </span>
               </div>
-              <div className="w-full bg-gray-100 rounded-full h-2">
+              <div className="h-2 overflow-hidden rounded-full bg-[#f0f1ec]">
                 <div
-                  className="bg-gradient-to-r from-emerald-500 to-emerald-600 h-2 rounded-full"
-                  style={{ width: '60%' }}
-                ></div>
+                  className="h-full rounded-full bg-[#013220] transition-all"
+                  style={{ width: `${metrics.thisMonthPct}%` }}
+                />
               </div>
             </div>
             <div>
-              <div className="flex items-center justify-between text-sm mb-2">
-                <span className="text-gray-600">Last Month</span>
-                <span className="font-semibold text-gray-900">
-                  {formatCurrency(stats.totalRevenue * 0.4)}
+              <div className="mb-2 flex items-center justify-between text-sm">
+                <span className="text-[#80866e]">Last month</span>
+                <span className="font-semibold tabular-nums text-[#013220]">
+                  {formatCurrency(metrics.lastMonthRevenue)}
                 </span>
               </div>
-              <div className="w-full bg-gray-100 rounded-full h-2">
+              <div className="h-2 overflow-hidden rounded-full bg-[#f0f1ec]">
                 <div
-                  className="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full"
-                  style={{ width: '40%' }}
-                ></div>
+                  className="h-full rounded-full bg-[#7ba672] transition-all"
+                  style={{ width: `${metrics.lastMonthPct}%` }}
+                />
               </div>
             </div>
           </div>
         </div>
 
-        {/* Order Status */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">Order Status</h3>
-            <ShoppingCart className="h-5 w-5 text-blue-500" />
+        <div className="rounded-2xl border border-[#013220]/8 bg-white p-6 shadow-sm">
+          <div className="mb-5">
+            <h3 className="text-base font-semibold text-[#013220]">Order status</h3>
+            <p className="mt-0.5 text-xs text-[#80866e]">Counts inside the selected date range</p>
           </div>
-          <div className="space-y-3">
-            <button
-              onClick={() => navigate('/orders?status=completed')}
-              className="w-full flex items-center justify-between hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors"
-            >
-              <span className="text-sm text-gray-600">Completed</span>
-              <span className="text-sm font-semibold text-green-600">
-                {Math.floor(stats.totalOrders * 0.7)}
-              </span>
-            </button>
-            <button
-              onClick={() => navigate('/orders?status=processing')}
-              className="w-full flex items-center justify-between hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors"
-            >
-              <span className="text-sm text-gray-600">Processing</span>
-              <span className="text-sm font-semibold text-blue-600">
-                {Math.floor(stats.totalOrders * 0.2)}
-              </span>
-            </button>
-            <button
-              onClick={() => navigate('/orders?status=pending')}
-              className="w-full flex items-center justify-between hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors"
-            >
-              <span className="text-sm text-gray-600">Pending</span>
-              <span className="text-sm font-semibold text-yellow-600">
-                {Math.floor(stats.totalOrders * 0.1)}
-              </span>
-            </button>
+          <div className="space-y-2">
+            {[
+              { label: 'Paid / completed', count: metrics.paidCount, path: '/orders?status=paid' },
+              { label: 'Processing', count: metrics.processingCount, path: '/orders?status=processing' },
+              { label: 'Pending payment', count: metrics.pendingCount, path: '/orders?status=pending' },
+              { label: 'Failed / cancelled', count: metrics.failedCount, path: '/orders?status=failed' },
+            ].map((row) => (
+              <button
+                key={row.label}
+                type="button"
+                onClick={() => navigate(row.path)}
+                className="flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left transition hover:bg-[#f7f8f5]"
+              >
+                <span className="text-sm text-[#3d5d36]">{row.label}</span>
+                <span className="text-sm font-semibold tabular-nums text-[#013220]">{row.count}</span>
+              </button>
+            ))}
           </div>
         </div>
       </div>
 
-      {/* Recent Orders */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
-        <div className="p-6 border-b border-gray-100">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-xl font-bold text-gray-900">Recent Orders</h2>
-              <p className="text-sm text-gray-500 mt-1">Latest orders from your customers</p>
-            </div>
-            <button
-              onClick={() => navigate('/orders')}
-              className="flex items-center space-x-2 px-4 py-2 text-[#27AE60] hover:bg-green-50 rounded-xl transition-colors"
-            >
-              <span className="font-medium">View All</span>
-              <ArrowUpRight className="h-4 w-4" />
-            </button>
+      <div className="overflow-hidden rounded-2xl border border-[#013220]/8 bg-white shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#013220]/8 px-4 sm:px-6 py-4 sm:py-5">
+          <div>
+            <h2 className="text-base sm:text-lg font-semibold text-[#013220]">Recent orders</h2>
+            <p className="mt-0.5 text-xs text-[#80866e]">Latest across all statuses</p>
           </div>
+          <button
+            type="button"
+            onClick={() => navigate('/orders')}
+            className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium text-[#013220] transition hover:bg-[#f7f8f5] min-h-[36px]"
+          >
+            View all
+            <ArrowUpRight className="h-4 w-4" />
+          </button>
         </div>
 
-        <div className="overflow-x-auto">
-          {recentOrders.length > 0 ? (
-            <table className="w-full">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Order ID
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Customer
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Amount
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Date
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Action
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {recentOrders.map((order) => (
-                  <tr key={order.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm font-medium text-gray-900">
-                        #{order.id.slice(0, 8)}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div>
-                        <p className="text-sm font-medium text-gray-900">
-                          {order.user?.full_name || 'Unknown'}
-                        </p>
-                        <p className="text-xs text-gray-500">{order.user?.email || 'N/A'}</p>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm font-semibold text-gray-900">
-                        {formatCurrency(order.total_amount)}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">{getStatusBadge(order.status)}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm text-gray-600">{formatDate(order.created_at)}</span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <button
-                        onClick={() => navigate(`/orders/${order.id}`)}
-                        className="flex items-center space-x-1 text-[#27AE60] hover:text-[#229954] transition-colors"
-                      >
-                        <Eye className="h-4 w-4" />
-                        <span className="text-sm font-medium">View</span>
-                      </button>
-                    </td>
+        {metrics.recent.length > 0 ? (
+          <>
+            {/* Desktop table */}
+            <div className="hidden sm:block overflow-x-auto">
+              <table className="w-full min-w-[600px]">
+                <thead className="bg-[#f7f8f5] text-left text-[11px] font-semibold uppercase tracking-[0.12em] text-[#80866e]">
+                  <tr>
+                    <th className="px-4 sm:px-6 py-3">Order</th>
+                    <th className="px-4 sm:px-6 py-3">Customer</th>
+                    <th className="px-4 sm:px-6 py-3">Amount</th>
+                    <th className="px-4 sm:px-6 py-3">Status</th>
+                    <th className="px-4 sm:px-6 py-3">Date</th>
+                    <th className="px-4 sm:px-6 py-3"> </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          ) : (
-            <div className="p-12 text-center">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
-                <ShoppingCart className="h-8 w-8 text-gray-400" />
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">No orders yet</h3>
-              <p className="text-gray-500 mb-6">
-                When customers place orders, they'll appear here.
-              </p>
-              <button
-                onClick={() => navigate('/products')}
-                className="px-6 py-2 bg-[#27AE60] text-white rounded-xl hover:bg-[#229954] transition-colors font-medium"
-              >
-                Add First Product
-              </button>
+                </thead>
+                <tbody className="divide-y divide-[#013220]/6">
+                  {metrics.recent.map((order) => (
+                    <tr key={order.id} className="transition hover:bg-[#fafaf8]">
+                      <td className="px-4 sm:px-6 py-4 font-mono text-sm text-[#013220]">#{order.id.slice(0, 8)}</td>
+                      <td className="px-4 sm:px-6 py-4">
+                        <p className="text-sm font-medium text-[#013220]">
+                          {order.user?.full_name || 'Guest / unknown'}
+                        </p>
+                        <p className="text-xs text-[#80866e]">{order.user?.email || '—'}</p>
+                      </td>
+                      <td className="px-4 sm:px-6 py-4 text-sm font-semibold tabular-nums text-[#013220]">
+                        {formatCurrency(orderAmount(order))}
+                      </td>
+                      <td className="px-4 sm:px-6 py-4">
+                        <span className={cn('inline-flex rounded-full border px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide', statusTone(order.status))}>
+                          {order.status}
+                        </span>
+                      </td>
+                      <td className="px-4 sm:px-6 py-4 text-sm text-[#80866e]">
+                        {new Date(order.created_at).toLocaleString('en-IN', {
+                          day: 'numeric', month: 'short', year: 'numeric',
+                          hour: '2-digit', minute: '2-digit',
+                        })}
+                      </td>
+                      <td className="px-4 sm:px-6 py-4">
+                        <button
+                          type="button"
+                          onClick={() => navigate('/orders')}
+                          className="inline-flex items-center gap-1 text-sm font-medium text-[#013220] hover:underline min-h-[36px]"
+                        >
+                          <Eye className="h-4 w-4" />
+                          View
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-          )}
-        </div>
+
+            {/* Mobile card list */}
+            <div className="sm:hidden divide-y divide-[#013220]/6">
+              {metrics.recent.map((order) => (
+                <div key={order.id} className="px-4 py-3.5 flex items-start justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-mono text-xs text-[#013220] font-semibold">#{order.id.slice(0, 8)}</span>
+                      <span className={cn('inline-flex rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide', statusTone(order.status))}>
+                        {order.status}
+                      </span>
+                    </div>
+                    <p className="mt-1 text-sm font-medium text-[#013220] truncate">
+                      {order.user?.full_name || 'Guest'}
+                    </p>
+                    <p className="text-xs text-[#80866e] truncate">{order.user?.email || '—'}</p>
+                    <p className="mt-1 text-[11px] text-[#80866e]">
+                      {new Date(order.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                    </p>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className="text-sm font-bold tabular-nums text-[#013220]">{formatCurrency(orderAmount(order))}</p>
+                    <button
+                      type="button"
+                      onClick={() => navigate('/orders')}
+                      className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-[#013220] hover:underline min-h-[32px]"
+                    >
+                      <Eye className="h-3.5 w-3.5" />
+                      View
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        ) : (
+          <div className="px-6 py-12 sm:py-14 text-center">
+            <ShoppingCart className="mx-auto mb-3 h-8 w-8 text-[#c1c3ac]" />
+            <p className="font-medium text-[#013220]">No orders yet</p>
+            <p className="mt-1 text-sm text-[#80866e]">Paid and pending checkouts will show up here.</p>
+          </div>
+        )}
       </div>
     </div>
   )

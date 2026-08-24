@@ -11,6 +11,9 @@ import { useWishlist } from '@/contexts/WishlistContext'
 import ProductShare from '@/components/ProductShare'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
+import { cn } from '@/lib/utils'
+import { HoverTiltCard } from '@/components/aceternity/hover-tilt-card'
+import { SpotlightCard } from '@/components/aceternity/spotlight'
 
 interface ProductCardProps {
   product: {
@@ -42,6 +45,10 @@ export default function ProductCard({ product }: ProductCardProps) {
   const rating = product.rating || 5
   const hasSale = product.compare_at_price && product.price < product.compare_at_price
   const isOutOfStock = product.stock_quantity === 0
+  const discount =
+    hasSale && product.compare_at_price
+      ? Math.round(((product.compare_at_price - product.price) / product.compare_at_price) * 100)
+      : 0
 
   const cartProduct = {
     id: product.id,
@@ -107,23 +114,25 @@ export default function ProductCard({ product }: ProductCardProps) {
   }
 
   return (
-    <div className="group relative bg-white rounded-xl border border-gray-200 hover:border-[#5B8C51] hover:shadow-xl transition-all duration-300 flex flex-col p-4">
-      {/* Top Header Icons (Wishlist, Share & Sale Badge) */}
-      <div className="flex items-center justify-between z-20 mb-2 relative">
+    <HoverTiltCard>
+    <SpotlightCard
+      data-cursor="product"
+      className="group relative flex flex-col overflow-hidden rounded-2xl border border-evergreen/8 bg-white p-4 shadow-soft transition-all duration-500 ease-premium hover:-translate-y-1 hover:border-evergreen/20"
+    >
+      <div className="relative z-20 mb-2 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <button
             onClick={handleToggleWishlist}
             type="button"
-            className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center hover:border-[#5B8C51] transition-colors bg-white shadow-sm"
-            aria-label="Add to Wishlist"
+            className={cn(
+              'flex h-9 w-9 items-center justify-center rounded-full border bg-white/90 shadow-sm transition-colors',
+              isWishlisted
+                ? 'border-evergreen bg-evergreen/10 text-evergreen'
+                : 'border-evergreen/15 text-evergreen hover:border-evergreen'
+            )}
+            aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
           >
-            <Heart
-              className={`h-4 w-4 transition-colors ${
-                isWishlisted
-                  ? 'fill-[#5B8C51] text-[#5B8C51]'
-                  : 'text-[#5B8C51] hover:fill-[#5B8C51]/20'
-              }`}
-            />
+            <Heart className={cn('h-4 w-4 transition-transform', isWishlisted && 'fill-current scale-110')} />
           </button>
           <ProductShare
             variant="icon"
@@ -134,117 +143,87 @@ export default function ProductCard({ product }: ProductCardProps) {
         </div>
 
         {hasSale ? (
-          <span className="bg-[#5B8C51] text-white text-[11px] font-semibold px-2 py-0.5 rounded-[3px] uppercase tracking-wide shadow-sm">
-            Sale!
+          <span className="rounded-full bg-evergreen px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-white">
+            {discount > 0 ? `−${discount}%` : 'Sale'}
           </span>
         ) : null}
       </div>
 
-      <Link href={`/products/${product.slug}`} className="flex-1 flex flex-col items-center">
-        {/* Product Image Area */}
-        <div className="relative w-full aspect-square bg-white flex items-center justify-center p-3 mb-3">
+      <Link href={`/products/${product.slug}`} className="flex flex-1 flex-col items-center">
+        <div
+          data-cursor="image"
+          className="relative mb-4 aspect-square w-full overflow-hidden rounded-xl bg-cotton-deep"
+        >
           {product.image_url ? (
             <Image
               src={product.image_url}
               alt={product.name}
               fill
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-              className="object-contain p-2 group-hover:scale-105 transition-transform duration-300"
+              className="object-contain p-4 transition-transform duration-700 ease-premium group-hover:scale-105"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center bg-gray-50 rounded-lg">
-              <ShoppingCart className="h-12 w-12 text-gray-300" />
+            <div className="flex h-full w-full items-center justify-center">
+              <ShoppingCart className="h-12 w-12 text-dusty-olive/40" />
             </div>
           )}
         </div>
 
-        {/* Product Name (Centered) */}
-        <h3 className="font-bold text-sm sm:text-base text-[#1A1A1A] text-center line-clamp-2 min-h-[2.5rem] leading-snug mb-2 group-hover:text-[#5B8C51] transition-colors px-1">
+        <h3 className="mb-2 min-h-[2.5rem] px-1 text-center font-display text-base font-medium leading-snug text-evergreen transition-colors group-hover:text-evergreen-mid line-clamp-2 sm:text-lg">
           {product.name}
         </h3>
 
-        {/* Price Section (Centered) */}
-        <div className="flex items-center justify-center gap-2 mb-2">
-          <span className="text-base sm:text-lg font-bold text-[#1A1A1A]">
+        <div className="mb-2 flex items-center justify-center gap-2">
+          <span className="text-lg font-semibold text-evergreen">
             ₹{product.price.toLocaleString()}
           </span>
           {product.compare_at_price && (
-            <span className="text-xs sm:text-sm text-gray-400 line-through">
+            <span className="text-sm text-dusty-olive line-through">
               ₹{product.compare_at_price.toLocaleString()}
             </span>
           )}
         </div>
 
-        {/* Rating Stars (Centered) */}
-        <div className="flex items-center justify-center gap-1 mb-4">
+        <div className="mb-4 flex items-center justify-center gap-0.5">
           {[...Array(5)].map((_, index) => (
             <Star
               key={index}
-              className={`h-3.5 w-3.5 ${
+              className={cn(
+                'h-3.5 w-3.5',
                 index < Math.floor(rating)
-                  ? 'fill-amber-400 text-amber-400'
-                  : 'fill-gray-200 text-gray-200'
-              }`}
+                  ? 'fill-dusty-olive text-dusty-olive'
+                  : 'fill-dusty-olive/20 text-dusty-olive/20'
+              )}
             />
           ))}
         </div>
       </Link>
 
-      {/* Action Buttons: Add to Cart + Buy Now */}
-      <div className="mt-auto pt-1 flex gap-2">
+      <div className="mt-auto flex gap-2 pt-1">
         <Button
           onClick={handleAddToCart}
           disabled={addingToCart || isOutOfStock}
           variant="outline"
-          className={`
-            flex-1 h-10 text-xs sm:text-sm font-semibold rounded-md
-            border border-[#5B8C51] text-[#5B8C51] bg-white
-            hover:bg-[#5B8C51] hover:text-white
-            transition-all duration-300 flex items-center justify-center gap-1 shadow-sm px-2
-            ${
-              isOutOfStock
-                ? 'border-gray-200 text-gray-400 bg-gray-100 hover:bg-gray-100 hover:text-gray-400 cursor-not-allowed'
-                : ''
-            }
-          `}
-        >
-          {addingToCart ? (
-            <div className="flex items-center gap-1">
-              <div className="h-3.5 w-3.5 border-2 border-[#5B8C51] border-t-transparent rounded-full animate-spin" />
-              <span>Adding...</span>
-            </div>
-          ) : isOutOfStock ? (
-            'Out of Stock'
-          ) : (
-            <>
-              <span>Add to Cart</span>
-              <span className="text-base leading-none">→</span>
-            </>
+          className={cn(
+            'h-10 flex-1 rounded-full text-xs sm:text-sm',
+            isOutOfStock &&
+              'cursor-not-allowed border-dusty-olive/20 text-dusty-olive hover:bg-transparent hover:text-dusty-olive'
           )}
+        >
+          {addingToCart ? 'Adding...' : isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
         </Button>
 
         {!isOutOfStock && (
           <Button
             onClick={handleBuyNow}
             disabled={buyingNow}
-            className="flex-1 h-10 text-xs sm:text-sm font-semibold rounded-md
-              bg-[#5B8C51] text-white hover:bg-[#4E7A45]
-              transition-all duration-300 flex items-center justify-center gap-1 shadow-sm px-2"
+            className="h-10 flex-1 rounded-full text-xs sm:text-sm"
           >
-            {buyingNow ? (
-              <div className="flex items-center gap-1">
-                <div className="h-3.5 w-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                <span>Buying...</span>
-              </div>
-            ) : (
-              <>
-                <span>Buy Now</span>
-                <span className="text-base leading-none">→</span>
-              </>
-            )}
+            {buyingNow ? 'Buying...' : 'Buy Now'}
           </Button>
         )}
       </div>
-    </div>
+    </SpotlightCard>
+    </HoverTiltCard>
   )
 }

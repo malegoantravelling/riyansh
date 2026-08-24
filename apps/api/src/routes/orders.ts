@@ -53,7 +53,7 @@ router.get('/', authenticateToken, async (req: AuthRequest, res) => {
 
     const { data, error } = await supabase
       .from('orders')
-      .select('*, items:order_items(*, product:products(id, slug, image_url))')
+      .select('*, items:order_items(*, product:products(id, name, slug, image_url))')
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
 
@@ -61,7 +61,21 @@ router.get('/', authenticateToken, async (req: AuthRequest, res) => {
       return res.status(400).json({ error: error.message })
     }
 
-    res.json(data)
+    const enriched = (data || []).map((order: any) => ({
+      ...order,
+      items: (order.items || []).map((item: any) => {
+        const product = item.product
+        return {
+          ...item,
+          product_name: product?.name || item.product_name,
+          product_image: product?.image_url || item.product_image,
+          product_slug: product?.slug || null,
+          product: undefined,
+        }
+      }),
+    }))
+
+    res.json(enriched)
   } catch (error: any) {
     res.status(500).json({ error: error.message })
   }

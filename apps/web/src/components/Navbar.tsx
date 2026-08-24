@@ -2,11 +2,12 @@
 
 import Link from 'next/link'
 import { ShoppingCart, Heart, Phone, Menu, X, User, LogOut, Package } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { useCart } from '@/contexts/CartContext'
 import { useWishlist } from '@/contexts/WishlistContext'
 import { useAuth } from '@/contexts/AuthContext'
+import { cn } from '@/lib/utils'
 
 const categoryLinks = [
   { href: '/', label: 'Home', match: (path: string) => path === '/' },
@@ -28,6 +29,26 @@ export default function Navbar() {
   const { user, loading, signOut } = useAuth()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [accountOpen, setAccountOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24)
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
+  useEffect(() => {
+    setMobileMenuOpen(false)
+    setAccountOpen(false)
+  }, [pathname])
+
+  useEffect(() => {
+    document.body.style.overflow = mobileMenuOpen ? 'hidden' : ''
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [mobileMenuOpen])
 
   const handleSignOut = async () => {
     setAccountOpen(false)
@@ -37,18 +58,67 @@ export default function Navbar() {
   }
 
   return (
-    <header className="w-full relative bg-white shadow-[0_1px_0_rgba(0,0,0,0.04)]">
-      <div className="bg-[#F6F0E2]">
-        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 h-9 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-4 sm:gap-5 min-w-0">
+    <>
+      <header className="pointer-events-none sticky top-0 z-[40] w-full px-3 pt-3 sm:px-5 sm:pt-4">
+        <div
+          className={cn(
+            'pointer-events-auto mx-auto flex max-w-[1280px] items-center justify-between gap-3 rounded-full border transition-all duration-500 ease-premium',
+            scrolled
+              ? 'h-14 border-evergreen/15 bg-white/55 px-3 shadow-glass backdrop-blur-2xl supports-[backdrop-filter]:bg-white/40 sm:px-5'
+              : 'h-16 border-transparent bg-transparent px-2 sm:px-4'
+          )}
+        >
+          <Link href="/" className="flex shrink-0 flex-col pl-1">
+            <span className="font-display text-xl font-semibold tracking-tight sm:text-2xl">
+              <span className="text-charcoal">RIY</span>
+              <span className="text-forest">ANSH</span>
+            </span>
+            {!scrolled && (
+              <span className="hidden text-[9px] uppercase tracking-[0.2em] text-stone sm:block">
+                Health Care At A Click
+              </span>
+            )}
+          </Link>
+
+          <nav className="hidden items-center gap-1 lg:flex">
+            {categoryLinks.map((link) => {
+              const active = link.match(pathname)
+              return (
+                <Link
+                  key={link.label}
+                  href={link.href}
+                  className={cn(
+                    'relative rounded-full px-3.5 py-2 text-[13px] font-medium transition-colors',
+                    active ? 'text-forest' : 'text-charcoal/70 hover:text-forest'
+                  )}
+                >
+                  {link.label}
+                  {active && (
+                    <span className="absolute inset-x-3 -bottom-0.5 h-0.5 rounded-full bg-forest" />
+                  )}
+                </Link>
+              )
+            })}
+          </nav>
+
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <a
+              href="tel:+918605911293"
+              className="magnetic-cta hidden items-center gap-2 rounded-full border border-forest/15 bg-white/50 px-3 py-1.5 text-xs font-medium text-charcoal transition-colors hover:border-forest/30 xl:inline-flex"
+              aria-label="Call us"
+            >
+              <Phone className="h-3.5 w-3.5 text-forest" strokeWidth={1.5} />
+              <span>+91 8605911293</span>
+            </a>
+
             <Link
               href="/wishlist"
-              className="inline-flex items-center gap-1.5 text-[12px] font-medium tracking-[0.08em] uppercase text-[#555555] hover:text-ayurveda-green transition-colors relative"
+              className="relative inline-flex h-10 w-10 items-center justify-center rounded-full text-charcoal/80 transition-colors hover:bg-forest/8 hover:text-forest"
+              aria-label="Wishlist"
             >
-              <Heart className="h-3.5 w-3.5" strokeWidth={1.5} />
-              <span className="hidden sm:inline">Wishlist</span>
+              <Heart className="h-4.5 w-4.5" strokeWidth={1.5} />
               {wishlistCount > 0 && (
-                <span className="ml-1 bg-ayurveda-green text-white text-[10px] font-bold rounded-full w-4 h-4 inline-flex items-center justify-center">
+                <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-forest px-1 text-[10px] font-bold text-white">
                   {wishlistCount}
                 </span>
               )}
@@ -61,19 +131,21 @@ export default function Navbar() {
                     <button
                       type="button"
                       onClick={() => setAccountOpen((v) => !v)}
-                      className="inline-flex items-center gap-1.5 text-[12px] font-medium tracking-[0.08em] uppercase text-[#555555] hover:text-ayurveda-green transition-colors"
+                      className="inline-flex h-10 items-center gap-1.5 rounded-full px-2 text-charcoal/80 transition-colors hover:bg-forest/8 hover:text-forest sm:px-3"
+                      aria-expanded={accountOpen}
+                      aria-haspopup="menu"
                     >
-                      <User className="h-3.5 w-3.5" strokeWidth={1.5} />
-                      <span className="hidden sm:inline max-w-[120px] truncate">
+                      <User className="h-4.5 w-4.5" strokeWidth={1.5} />
+                      <span className="hidden max-w-[100px] truncate text-xs font-medium sm:inline">
                         {user.user_metadata?.full_name || user.email?.split('@')[0] || 'Account'}
                       </span>
                     </button>
                     {accountOpen && (
-                      <div className="absolute left-0 top-full mt-2 z-50 w-48 bg-white border border-[#EEEEEE] shadow-lg py-1">
+                      <div className="glass-panel-strong absolute right-0 top-full mt-2 w-48 overflow-hidden rounded-2xl py-1 shadow-lift">
                         <Link
                           href="/account/orders"
                           onClick={() => setAccountOpen(false)}
-                          className="flex items-center gap-2 px-3 py-2 text-sm text-[#333] hover:bg-[#F6F0E2]"
+                          className="flex items-center gap-2 px-4 py-2.5 text-sm text-charcoal hover:bg-forest/8"
                         >
                           <Package className="h-4 w-4" />
                           My Orders
@@ -81,7 +153,7 @@ export default function Navbar() {
                         <button
                           type="button"
                           onClick={handleSignOut}
-                          className="w-full flex items-center gap-2 px-3 py-2 text-sm text-[#333] hover:bg-[#F6F0E2]"
+                          className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-charcoal hover:bg-forest/8"
                         >
                           <LogOut className="h-4 w-4" />
                           Sign out
@@ -92,157 +164,125 @@ export default function Navbar() {
                 ) : (
                   <Link
                     href="/login"
-                    className="inline-flex items-center gap-1.5 text-[12px] font-medium tracking-[0.08em] uppercase text-[#555555] hover:text-ayurveda-green transition-colors"
+                    className="inline-flex h-10 items-center gap-1.5 rounded-full px-2 text-charcoal/80 transition-colors hover:bg-forest/8 hover:text-forest sm:px-3"
                   >
-                    <User className="h-3.5 w-3.5" strokeWidth={1.5} />
-                    <span className="hidden sm:inline">Login</span>
+                    <User className="h-4.5 w-4.5" strokeWidth={1.5} />
+                    <span className="hidden text-xs font-medium sm:inline">Login</span>
                   </Link>
                 )}
               </div>
             )}
-          </div>
 
-          <Link
-            href="/cart"
-            className="shrink-0 h-9 inline-flex items-center gap-1.5 bg-ayurveda-green text-white px-4 text-[12px] font-semibold tracking-[0.1em] uppercase hover:bg-ayurveda-green-dark transition-colors"
-          >
-            <ShoppingCart className="h-4 w-4" strokeWidth={1.75} />
-            <span>
-              Cart
-              {cartCount > 0 ? (
-                <span className="ml-1 normal-case tracking-normal">({cartCount})</span>
-              ) : null}
-            </span>
-          </Link>
-        </div>
-      </div>
-
-      <div className="bg-white border-b border-[#EEEEEE]">
-        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 py-3.5 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-          <Link href="/" className="flex flex-col shrink-0">
-            <span className="text-[26px] lg:text-[28px] leading-none font-extrabold tracking-tight">
-              <span className="text-[#222222]">RIY</span>
-              <span className="text-ayurveda-green">ANSH</span>
-            </span>
-            <span className="mt-1 text-[11px] tracking-[0.18em] uppercase text-[#999999]">
-              Health Care At A Click
-            </span>
-          </Link>
-
-          <div className="hidden lg:flex items-center gap-6 xl:gap-8 flex-1 justify-center">
-            <a
-              href="tel:+918605911293"
-              className="flex items-center gap-2.5 hover:opacity-90 transition-opacity"
+            <Link
+              href="/cart"
+              className="magnetic-cta relative inline-flex h-10 items-center gap-2 rounded-full bg-forest px-3.5 text-xs font-semibold tracking-wide text-white transition-colors hover:bg-forest-deep"
             >
-              <Phone className="h-7 w-7 text-ayurveda-green shrink-0" strokeWidth={1.25} />
-              <span className="block">
-                <span className="block text-[13px] leading-tight text-[#888888]">
-                  Order Online or Call Us
+              <ShoppingCart className="h-4 w-4" strokeWidth={1.75} />
+              <span className="hidden sm:inline">Cart</span>
+              {cartCount > 0 && (
+                <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-white/20 px-1.5 text-[10px]">
+                  {cartCount}
                 </span>
-                <span className="block text-[15px] font-semibold text-[#222222] tracking-wide">
-                  +91 8605911293
-                </span>
-              </span>
-            </a>
-          </div>
+              )}
+            </Link>
 
-          <div className="relative flex items-center gap-2 shrink-0 ml-auto sm:ml-0">
             <button
               type="button"
-              onClick={() => setMobileMenuOpen((v) => !v)}
-              className="lg:hidden flex items-center justify-center w-9 h-9 text-[#222222]"
-              aria-label="Toggle menu"
+              onClick={() => setMobileMenuOpen(true)}
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full text-charcoal lg:hidden"
+              aria-label="Open menu"
             >
-              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              <Menu className="h-5 w-5" />
             </button>
           </div>
         </div>
-      </div>
+      </header>
 
-      <nav className="bg-ayurveda-green">
-        <div className="max-w-[1200px] mx-auto px-2 sm:px-4">
-          <ul className="hidden lg:flex items-stretch justify-center h-10">
-            {categoryLinks.map((link) => {
-              const active = link.match(pathname)
-              return (
-                <li key={link.label} className="flex">
-                  <Link
-                    href={link.href}
-                    className={`flex items-center px-2.5 xl:px-3.5 text-[14px] font-medium text-white whitespace-nowrap transition-colors ${
-                      active ? 'bg-black/15' : 'hover:bg-black/10'
-                    }`}
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              )
-            })}
-          </ul>
-        </div>
-      </nav>
+      {/* Mobile full-screen menu */}
+      <div
+        className={cn(
+          'fixed inset-0 z-[50] bg-ivory/95 backdrop-blur-xl transition-all duration-500 ease-premium lg:hidden',
+          mobileMenuOpen ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'
+        )}
+        aria-hidden={!mobileMenuOpen}
+      >
+        <div className="flex h-full flex-col px-6 pb-10 pt-6">
+          <div className="mb-10 flex items-center justify-between">
+            <span className="font-display text-2xl font-semibold">
+              <span className="text-charcoal">RIY</span>
+              <span className="text-forest">ANSH</span>
+            </span>
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-forest/15"
+              aria-label="Close menu"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
 
-      {mobileMenuOpen && (
-        <div className="lg:hidden bg-white border-b border-gray-100 shadow-lg">
-          <div className="px-4 py-4 space-y-1">
-            {categoryLinks.map((link) => {
+          <nav className="flex flex-1 flex-col gap-2">
+            {categoryLinks.map((link, i) => {
               const active = link.match(pathname)
               return (
                 <Link
                   key={link.label}
                   href={link.href}
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`block px-3 py-2.5 text-[15px] font-medium rounded ${
-                    active
-                      ? 'bg-ayurveda-green text-white'
-                      : 'text-[#333333] hover:bg-[#F6F0E2] hover:text-ayurveda-green'
-                  }`}
+                  className={cn(
+                    'font-display text-3xl font-medium transition-all',
+                    active ? 'text-forest' : 'text-charcoal/80',
+                    mobileMenuOpen ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
+                  )}
+                  style={{ transitionDelay: mobileMenuOpen ? `${80 + i * 60}ms` : '0ms' }}
                 >
                   {link.label}
                 </Link>
               )
             })}
+          </nav>
 
-            <div className="pt-3 mt-2 border-t border-gray-100 space-y-1">
-              {user ? (
-                <>
-                  <Link
-                    href="/account/orders"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="block px-3 py-2 text-sm text-[#666666]"
-                  >
-                    My Orders
-                  </Link>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMobileMenuOpen(false)
-                      void handleSignOut()
-                    }}
-                    className="block w-full text-left px-3 py-2 text-sm text-[#666666]"
-                  >
-                    Sign out
-                  </button>
-                </>
-              ) : (
+          <div className="space-y-3 border-t border-forest/10 pt-6">
+            {user ? (
+              <>
                 <Link
-                  href="/login"
+                  href="/account/orders"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="block px-3 py-2 text-sm text-[#666666]"
+                  className="block text-sm text-stone"
                 >
-                  Login / Sign up
+                  My Orders
                 </Link>
-              )}
-              <a
-                href="tel:+918605911293"
-                className="flex items-center gap-2 px-3 py-2 text-sm text-[#666666]"
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileMenuOpen(false)
+                    void handleSignOut()
+                  }}
+                  className="block text-sm text-stone"
+                >
+                  Sign out
+                </button>
+              </>
+            ) : (
+              <Link
+                href="/login"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block text-sm text-stone"
               >
-                <Phone className="h-4 w-4 text-ayurveda-green" />
-                +91 8605911293
-              </a>
-            </div>
+                Login / Sign up
+              </Link>
+            )}
+            <a
+              href="tel:+918605911293"
+              className="inline-flex items-center gap-2 text-sm font-medium text-forest"
+            >
+              <Phone className="h-4 w-4" />
+              +91 8605911293
+            </a>
           </div>
         </div>
-      )}
-    </header>
+      </div>
+    </>
   )
 }

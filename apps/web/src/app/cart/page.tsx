@@ -1,13 +1,21 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Button } from '@/components/ui/button'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { ShoppingBag, Package } from 'lucide-react'
+import { ChevronRight, Minus, Package, Plus, ShoppingBag, Trash2 } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { ShimmerButton } from '@/components/magicui/shimmer-button'
+import { BlurFade } from '@/components/magicui/blur-fade'
+import { Reveal } from '@/components/motion/Reveal'
 import { useCart } from '@/contexts/CartContext'
 import { useAuth } from '@/contexts/AuthContext'
+import { cn } from '@/lib/utils'
+
+function formatInr(amount: number) {
+  return `₹ ${amount.toLocaleString('en-IN')}`
+}
 
 export default function CartPage() {
   const router = useRouter()
@@ -15,9 +23,8 @@ export default function CartPage() {
   const { user } = useAuth()
   const [orderNote, setOrderNote] = useState('')
 
-  const calculateSubtotal = () => {
-    return items.reduce((acc, item) => acc + item.price * item.quantity, 0)
-  }
+  const itemCount = items.reduce((sum, item) => sum + item.quantity, 0)
+  const subtotal = items.reduce((acc, item) => acc + item.price * item.quantity, 0)
 
   const handleCheckout = () => {
     if (items.length === 0) return
@@ -36,183 +43,218 @@ export default function CartPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white text-[#1A1A1A]">
-      {/* Top Breadcrumb Header Bar */}
-      <div className="bg-[#FAF9F5] border-b border-gray-200 py-3 text-center">
-        <div className="max-w-7xl mx-auto px-4 text-xs sm:text-sm text-gray-600 font-medium">
-          <Link href="/" className="hover:text-[#5B8C51] transition-colors">
-            Home
-          </Link>
-          <span className="mx-2">&gt;</span>
-          <span className="text-[#1A1A1A] font-bold">Your Shopping Cart</span>
-        </div>
-      </div>
+    <div className="page-shell text-evergreen pb-28 lg:pb-16">
+      <div className="container-editorial py-10 sm:py-14">
+        <BlurFade>
+          <nav className="mb-6 flex items-center gap-1.5 text-xs text-dusty-olive" aria-label="Breadcrumb">
+            <Link href="/" className="transition-colors hover:text-evergreen">
+              Home
+            </Link>
+            <ChevronRight className="h-3.5 w-3.5 opacity-60" />
+            <span className="font-medium text-evergreen">Cart</span>
+          </nav>
 
-      {/* Main Page Container */}
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-        {/* Title */}
-        <h1 className="text-3xl sm:text-4xl font-bold text-center text-[#1A1A1A] mb-8 sm:mb-12">
-          Your Cart
-        </h1>
+          <div className="mb-10 max-w-2xl">
+            <p className="eyebrow mb-3">Cart</p>
+            <h1 className="font-display text-3xl font-medium tracking-tight text-evergreen sm:text-4xl lg:text-5xl">
+              Your cart
+            </h1>
+            <p className="mt-3 text-sm text-dusty-olive sm:text-base">
+              {items.length === 0
+                ? 'No items yet — explore the store when you are ready.'
+                : `${itemCount} ${itemCount === 1 ? 'item' : 'items'} ready for checkout.`}
+            </p>
+          </div>
+        </BlurFade>
 
         {items.length === 0 ? (
-          <div className="bg-[#FAF9F5] rounded-2xl p-12 text-center border border-gray-200 max-w-md mx-auto my-8">
-            <ShoppingBag className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-            <h2 className="text-xl font-bold text-[#1A1A1A] mb-2">Your Cart is Empty</h2>
-            <p className="text-gray-500 text-xs sm:text-sm mb-6">
-              Looks like you haven&apos;t added any items to your cart yet.
-            </p>
-            <Link href="/store">
-              <Button className="bg-[#5B8C51] hover:bg-[#4E7A45] text-white px-6 py-2 text-xs sm:text-sm font-semibold rounded">
-                Continue Shopping
-              </Button>
-            </Link>
-          </div>
+          <BlurFade delay={0.08}>
+            <div className="surface-glass mx-auto max-w-md rounded-3xl px-8 py-14 text-center">
+              <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-jade/40">
+                <ShoppingBag className="h-7 w-7 text-evergreen/50" />
+              </div>
+              <h2 className="font-display text-2xl font-medium text-evergreen">Your cart is empty</h2>
+              <p className="mx-auto mt-3 max-w-sm text-sm text-dusty-olive">
+                Looks like you have not added any wellness essentials yet.
+              </p>
+              <Link href="/store" className="mt-8 inline-block">
+                <Button size="lg" className="rounded-full px-8">
+                  Continue Shopping
+                </Button>
+              </Link>
+            </div>
+          </BlurFade>
         ) : (
-          <div className="space-y-12">
-            {/* Cart Table */}
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                {/* Table Header */}
-                <thead>
-                  <tr className="bg-[#FAF9F5] border-b border-gray-200 text-xs sm:text-sm font-bold text-[#1A1A1A]">
-                    <th className="py-4 px-6 w-5/12">Product</th>
-                    <th className="py-4 px-6 w-2/12">Price</th>
-                    <th className="py-4 px-6 w-3/12 text-center">Quantity</th>
-                    <th className="py-4 px-6 w-2/12 text-right">Total</th>
-                  </tr>
-                </thead>
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-10">
+            <div className="space-y-4 lg:col-span-7">
+              {items.map((item, index) => {
+                const href = `/products/${item.slug || item.id}`
+                const sizeLabel = item.name.toLowerCase().includes('juice') ? '500ML' : '60 Capsules'
+                const lineTotal = item.price * item.quantity
 
-                {/* Table Body */}
-                <tbody className="divide-y divide-gray-100 text-xs sm:text-sm">
-                  {items.map((item) => (
-                    <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
-                      {/* Product Column */}
-                      <td className="py-6 px-6">
-                        <div className="flex items-center gap-4">
-                          <Link
-                            href={`/products/${item.slug || item.id}`}
-                            className="shrink-0 relative w-16 h-16 sm:w-20 sm:h-20 bg-[#F8F8F6] rounded-md overflow-hidden p-2 flex items-center justify-center border border-gray-100 group"
-                          >
-                            {item.image_url ? (
-                              <Image
-                                src={item.image_url}
-                                alt={item.name}
-                                fill
-                                sizes="80px"
-                                className="object-contain p-1 group-hover:scale-105 transition-transform duration-300"
-                              />
-                            ) : (
-                              <Package className="h-8 w-8 text-gray-300" />
-                            )}
-                          </Link>
+                return (
+                  <Reveal key={item.id} delay={index * 0.06}>
+                    <article className="surface-glass group rounded-2xl p-4 transition-shadow duration-300 hover:shadow-lift sm:p-5">
+                      <div className="flex gap-4 sm:gap-5">
+                        <Link
+                          href={href}
+                          className="relative h-24 w-24 shrink-0 overflow-hidden rounded-xl border border-evergreen/8 bg-[#f7f8f5] sm:h-28 sm:w-28"
+                        >
+                          {item.image_url ? (
+                            <Image
+                              src={item.image_url}
+                              alt={item.name}
+                              fill
+                              sizes="112px"
+                              className="object-contain p-2 transition-transform duration-500 ease-premium group-hover:scale-105"
+                            />
+                          ) : (
+                            <div className="flex h-full w-full items-center justify-center">
+                              <Package className="h-8 w-8 text-dusty-olive/40" />
+                            </div>
+                          )}
+                        </Link>
 
-                          <div className="space-y-1">
-                            <Link
-                              href={`/products/${item.slug || item.id}`}
-                              className="font-bold text-[#1A1A1A] hover:text-[#5B8C51] transition-colors leading-snug line-clamp-2 text-sm sm:text-base"
-                            >
-                              {item.name}
-                            </Link>
-                            <p className="text-[11px] sm:text-xs text-gray-400 font-medium">
-                              Size: {item.name.toLowerCase().includes('juice') ? '500ML' : '60 Capsules'}
+                        <div className="flex min-w-0 flex-1 flex-col">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                              <Link
+                                href={href}
+                                className="font-display text-base font-medium leading-snug text-evergreen transition-colors hover:text-evergreen-mid sm:text-lg"
+                              >
+                                {item.name}
+                              </Link>
+                              <p className="mt-1 text-xs text-dusty-olive">Size: {sizeLabel}</p>
+                              <p className="mt-2 text-sm font-semibold text-evergreen">
+                                {formatInr(item.price)}
+                              </p>
+                            </div>
+                            <p className="shrink-0 font-display text-base font-medium text-evergreen sm:text-lg">
+                              {formatInr(lineTotal)}
                             </p>
                           </div>
-                        </div>
-                      </td>
 
-                      {/* Price Column */}
-                      <td className="py-6 px-6 font-bold text-[#1A1A1A] text-sm sm:text-base whitespace-nowrap">
-                        ₹ {item.price.toLocaleString()}.00
-                      </td>
+                          <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+                            <div className="inline-flex items-center rounded-full border border-evergreen/15 bg-white/80">
+                              <button
+                                type="button"
+                                onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                                className="flex h-10 w-10 items-center justify-center rounded-full text-evergreen transition-colors hover:bg-jade/50"
+                                aria-label={`Decrease quantity of ${item.name}`}
+                              >
+                                <Minus className="h-3.5 w-3.5" />
+                              </button>
+                              <span className="min-w-[2rem] text-center text-sm font-semibold tabular-nums text-evergreen">
+                                {item.quantity}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                className="flex h-10 w-10 items-center justify-center rounded-full text-evergreen transition-colors hover:bg-jade/50"
+                                aria-label={`Increase quantity of ${item.name}`}
+                              >
+                                <Plus className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
 
-                      {/* Quantity Column */}
-                      <td className="py-6 px-6 text-center whitespace-nowrap">
-                        <div className="flex flex-col items-center gap-2">
-                          <div className="inline-flex items-center bg-[#F4F4F0] border border-gray-200 rounded-md">
                             <button
-                              onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                              className="w-8 h-8 flex items-center justify-center text-gray-700 hover:bg-gray-200 font-bold transition-colors text-sm"
+                              type="button"
+                              onClick={() => removeItem(item.id)}
+                              className="inline-flex items-center gap-1.5 text-xs font-medium text-dusty-olive transition-colors hover:text-evergreen"
                             >
-                              -
-                            </button>
-                            <span className="w-9 text-center font-bold text-sm text-[#1A1A1A]">
-                              {item.quantity}
-                            </span>
-                            <button
-                              onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                              className="w-8 h-8 flex items-center justify-center text-gray-700 hover:bg-gray-200 font-bold transition-colors text-sm"
-                            >
-                              +
+                              <Trash2 className="h-3.5 w-3.5" />
+                              Remove
                             </button>
                           </div>
-
-                          <button
-                            onClick={() => removeItem(item.id)}
-                            className="bg-[#5B8C51] hover:bg-[#4E7A45] text-white text-xs font-semibold px-4 py-1 rounded transition-colors shadow-sm"
-                          >
-                            Remove
-                          </button>
                         </div>
-                      </td>
+                      </div>
+                    </article>
+                  </Reveal>
+                )
+              })}
 
-                      {/* Total Column */}
-                      <td className="py-6 px-6 text-right font-bold text-[#1A1A1A] text-sm sm:text-base whitespace-nowrap">
-                        ₹ {(item.price * item.quantity).toLocaleString()}.00
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Bottom 2-Column Section */}
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start pt-4">
-              {/* Left Column: Order Notes & Continue Shopping */}
-              <div className="md:col-span-7 space-y-4">
-                <h3 className="font-bold text-sm sm:text-base text-[#1A1A1A]">
-                  Add a note to your order
-                </h3>
-                <textarea
-                  value={orderNote}
-                  onChange={(e) => setOrderNote(e.target.value)}
-                  placeholder="Write note"
-                  rows={5}
-                  className="w-full bg-[#F9F9F7] border border-gray-200 rounded-md p-4 text-xs sm:text-sm text-[#1A1A1A] placeholder-gray-400 focus:bg-white focus:border-gray-300 focus:outline-none transition-all resize-y"
-                />
-                <div className="pt-2">
-                  <Link href="/store">
-                    <Button className="bg-[#5B8C51] hover:bg-[#4E7A45] text-white font-semibold text-xs sm:text-sm px-6 py-2.5 rounded shadow-sm transition-all">
-                      Continue Shopping
-                    </Button>
-                  </Link>
+              <Reveal delay={0.08}>
+                <div className="surface-glass rounded-2xl p-5 sm:p-6">
+                  <label htmlFor="order-note" className="font-display text-base font-medium text-evergreen">
+                    Add a note to your order
+                  </label>
+                  <p className="mt-1 text-xs text-dusty-olive">Optional — shared with your order at checkout.</p>
+                  <textarea
+                    id="order-note"
+                    value={orderNote}
+                    onChange={(e) => setOrderNote(e.target.value)}
+                    placeholder="Delivery preference, gift message, or special request…"
+                    rows={4}
+                    className="mt-4 w-full resize-y rounded-xl border border-evergreen/15 bg-white/90 px-4 py-3 text-sm text-evergreen placeholder:text-dusty-olive/70 focus:border-evergreen/30 focus:outline-none focus:ring-2 focus:ring-evergreen/10"
+                  />
                 </div>
-              </div>
+              </Reveal>
 
-              {/* Right Column: Sub Total & Check Out */}
-              <div className="md:col-span-5 space-y-4 md:text-right">
-                <div className="flex items-center justify-between md:justify-end gap-6 text-base sm:text-lg">
-                  <span className="font-bold text-[#1A1A1A]">Sub Total</span>
-                  <span className="font-bold text-[#1A1A1A] text-xl sm:text-2xl">
-                    ₹ {calculateSubtotal().toLocaleString()}.00
-                  </span>
-                </div>
-                <p className="text-xs text-gray-500">
-                  Shipping &amp; taxes calculated at checkout
-                </p>
-                <div className="pt-2">
-                  <Button
-                    onClick={handleCheckout}
-                    className="w-full bg-[#5B8C51] hover:bg-[#4E7A45] text-white font-bold text-sm sm:text-base py-3 rounded shadow-sm transition-all"
-                  >
-                    Check Out
+              <div className="lg:hidden">
+                <Link href="/store">
+                  <Button variant="outline" size="lg" className="w-full rounded-full">
+                    Continue Shopping
                   </Button>
-                </div>
+                </Link>
               </div>
             </div>
+
+            <aside className="hidden lg:col-span-5 lg:block">
+              <Reveal delay={0.1}>
+                <div className="surface-glass sticky top-28 rounded-3xl p-6 shadow-soft lg:p-7">
+                  <h2 className="font-display text-xl font-medium text-evergreen">Order summary</h2>
+                  <div className="mt-6 space-y-3 border-b border-evergreen/10 pb-5 text-sm">
+                    <div className="flex items-center justify-between text-dusty-olive">
+                      <span>
+                        Subtotal ({itemCount} {itemCount === 1 ? 'item' : 'items'})
+                      </span>
+                      <span className="font-semibold text-evergreen">{formatInr(subtotal)}</span>
+                    </div>
+                  </div>
+                  <div className="mt-5 flex items-center justify-between">
+                    <span className="text-sm font-semibold text-evergreen">Total</span>
+                    <span className="font-display text-2xl font-medium text-evergreen">
+                      {formatInr(subtotal)}
+                    </span>
+                  </div>
+                  <p className="mt-2 text-xs text-dusty-olive">Shipping & taxes calculated at checkout.</p>
+
+                  <div className="mt-7 space-y-3">
+                    <ShimmerButton onClick={handleCheckout} size="lg" className="w-full rounded-full">
+                      Checkout
+                    </ShimmerButton>
+                    <Link href="/store" className="block">
+                      <Button variant="outline" size="lg" className="w-full rounded-full">
+                        Continue Shopping
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              </Reveal>
+            </aside>
           </div>
         )}
       </div>
+
+      {/* Mobile sticky checkout bar */}
+      {items.length > 0 && (
+        <div
+          className={cn(
+            'fixed inset-x-0 bottom-0 z-30 border-t border-evergreen/10 bg-white/90 px-4 py-3 backdrop-blur-xl lg:hidden',
+            'pb-[max(0.75rem,env(safe-area-inset-bottom))]'
+          )}
+        >
+          <div className="mx-auto flex max-w-lg items-center gap-3">
+            <div className="min-w-0 flex-1">
+              <p className="text-[11px] uppercase tracking-[0.14em] text-dusty-olive">Subtotal</p>
+              <p className="font-display text-lg font-medium text-evergreen">{formatInr(subtotal)}</p>
+            </div>
+            <ShimmerButton onClick={handleCheckout} className="shrink-0 rounded-full px-6">
+              Checkout
+            </ShimmerButton>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

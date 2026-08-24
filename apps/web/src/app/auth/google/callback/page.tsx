@@ -62,7 +62,7 @@ function GoogleCallbackInner() {
   }, [router])
 
   return (
-    <div className="min-h-[50vh] flex items-center justify-center px-4 text-sm text-[#787878]">
+    <div className="min-h-[50vh] flex items-center justify-center px-4 text-sm text-[#80866e]">
       {message}
     </div>
   )
@@ -72,7 +72,7 @@ export default function GoogleAuthCallbackPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-[50vh] flex items-center justify-center text-sm text-[#787878]">
+        <div className="min-h-[50vh] flex items-center justify-center text-sm text-[#80866e]">
           Completing Google sign-in…
         </div>
       }

@@ -127,7 +127,7 @@ export default function Logs() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#8BC34A]"></div>
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#5B8C51]"></div>
       </div>
     )
   }
@@ -135,70 +135,70 @@ export default function Logs() {
   return (
     <div>
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">Activity Logs</h1>
-        <p className="text-gray-600">Monitor all system activities and user actions</p>
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-1">Activity Logs</h1>
+        <p className="text-sm text-gray-600">Monitor all system activities and user actions</p>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white rounded-lg shadow p-6 border-l-4 border-blue-500">
-          <div className="flex items-center justify-between">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
+        <div className="bg-white rounded-lg shadow p-4 sm:p-6 border-l-4 border-blue-500">
+          <div className="flex items-center justify-between gap-2">
             <div>
-              <div className="text-sm text-gray-600 mb-1">Total Activities</div>
-              <div className="text-3xl font-bold text-gray-900">{stats.total}</div>
+              <div className="text-xs sm:text-sm text-gray-600 mb-1">Total Activities</div>
+              <div className="text-2xl sm:text-3xl font-bold text-gray-900">{stats.total}</div>
             </div>
-            <Activity className="h-12 w-12 text-blue-500 opacity-20" />
+            <Activity className="h-8 w-8 sm:h-12 sm:w-12 text-blue-500 opacity-20 shrink-0" />
           </div>
         </div>
-        <div className="bg-white rounded-lg shadow p-6 border-l-4 border-green-500">
-          <div className="flex items-center justify-between">
+        <div className="bg-white rounded-lg shadow p-4 sm:p-6 border-l-4 border-green-500">
+          <div className="flex items-center justify-between gap-2">
             <div>
-              <div className="text-sm text-gray-600 mb-1">Today's Activities</div>
-              <div className="text-3xl font-bold text-green-600">{stats.today}</div>
+              <div className="text-xs sm:text-sm text-gray-600 mb-1">Today's Activities</div>
+              <div className="text-2xl sm:text-3xl font-bold text-green-600">{stats.today}</div>
             </div>
-            <Calendar className="h-12 w-12 text-green-500 opacity-20" />
+            <Calendar className="h-8 w-8 sm:h-12 sm:w-12 text-green-500 opacity-20 shrink-0" />
           </div>
         </div>
-        <div className="bg-white rounded-lg shadow p-6 border-l-4 border-purple-500">
-          <div className="flex items-center justify-between">
+        <div className="bg-white rounded-lg shadow p-4 sm:p-6 border-l-4 border-purple-500">
+          <div className="flex items-center justify-between gap-2">
             <div>
-              <div className="text-sm text-gray-600 mb-1">Orders Placed</div>
-              <div className="text-3xl font-bold text-purple-600">{stats.orders}</div>
+              <div className="text-xs sm:text-sm text-gray-600 mb-1">Orders Placed</div>
+              <div className="text-2xl sm:text-3xl font-bold text-purple-600">{stats.orders}</div>
             </div>
-            <ShoppingCart className="h-12 w-12 text-purple-500 opacity-20" />
+            <ShoppingCart className="h-8 w-8 sm:h-12 sm:w-12 text-purple-500 opacity-20 shrink-0" />
           </div>
         </div>
-        <div className="bg-white rounded-lg shadow p-6 border-l-4 border-[#8BC34A]">
-          <div className="flex items-center justify-between">
+        <div className="bg-white rounded-lg shadow p-4 sm:p-6 border-l-4 border-[#5B8C51]">
+          <div className="flex items-center justify-between gap-2">
             <div>
-              <div className="text-sm text-gray-600 mb-1">Payments</div>
-              <div className="text-3xl font-bold text-[#8BC34A]">{stats.payments}</div>
+              <div className="text-xs sm:text-sm text-gray-600 mb-1">Payments</div>
+              <div className="text-2xl sm:text-3xl font-bold text-[#5B8C51]">{stats.payments}</div>
             </div>
-            <CreditCard className="h-12 w-12 text-[#8BC34A] opacity-20" />
+            <CreditCard className="h-8 w-8 sm:h-12 sm:w-12 text-[#5B8C51] opacity-20 shrink-0" />
           </div>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-lg shadow p-6 mb-6 border border-gray-200">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="bg-white rounded-lg shadow p-4 sm:p-6 mb-4 sm:mb-6 border border-gray-200">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
             <Input
               type="text"
-              placeholder="Search activities..."
+              placeholder="Search activities…"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
+              className="pl-9 h-10"
             />
           </div>
           <div className="relative">
-            <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <Filter className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
             <select
               value={actionFilter}
               onChange={(e) => setActionFilter(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#8BC34A] focus:border-transparent"
+              className="w-full pl-9 pr-4 h-10 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-[#5B8C51] focus:border-transparent"
             >
               <option value="all">All Actions</option>
               {uniqueActions.map((action) => (
@@ -233,59 +233,47 @@ export default function Logs() {
               {filteredLogs.map((log, index) => (
                 <div
                   key={log.id}
-                  className="flex items-start space-x-4 p-4 rounded-lg hover:bg-gray-50 transition-colors border border-gray-100"
+                  className="flex items-start gap-3 p-3 sm:p-4 rounded-lg hover:bg-gray-50 transition-colors border border-gray-100"
                 >
-                  {/* Timeline Line */}
-                  <div className="relative flex flex-col items-center">
-                    <div
-                      className={`p-2 rounded-full border-2 ${getActionColor(log.action)} bg-white`}
-                    >
+                  {/* Timeline icon */}
+                  <div className="relative flex flex-col items-center shrink-0">
+                    <div className={`p-1.5 sm:p-2 rounded-full border-2 ${getActionColor(log.action)} bg-white`}>
                       {getActionIcon(log.action)}
                     </div>
                     {index < filteredLogs.length - 1 && (
-                      <div className="w-0.5 h-full bg-gray-200 absolute top-10"></div>
+                      <div className="w-0.5 h-full bg-gray-200 absolute top-10" />
                     )}
                   </div>
 
                   {/* Content */}
-                  <div className="flex-1">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-2 mb-1">
-                          <span
-                            className={`px-2 py-1 rounded text-xs font-semibold border ${getActionColor(
-                              log.action
-                            )}`}
-                          >
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center flex-wrap gap-1.5 mb-1">
+                          <span className={`px-1.5 py-0.5 rounded text-[10px] sm:text-xs font-semibold border ${getActionColor(log.action)}`}>
                             {log.action.replace(/_/g, ' ').toUpperCase()}
                           </span>
                           {log.entity_type && (
-                            <span className="text-xs text-gray-500">
-                              {log.entity_type.toUpperCase()}
-                            </span>
+                            <span className="text-[10px] sm:text-xs text-gray-500">{log.entity_type.toUpperCase()}</span>
                           )}
                         </div>
-                        <p className="text-gray-900 font-medium mb-1">{log.description}</p>
-                        <div className="flex items-center space-x-4 text-sm text-gray-600">
-                          <div className="flex items-center space-x-1">
-                            <User className="h-4 w-4" />
+                        <p className="text-sm sm:text-base text-gray-900 font-medium mb-1">{log.description}</p>
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs sm:text-sm text-gray-600">
+                          <div className="flex items-center gap-1">
+                            <User className="h-3.5 w-3.5" />
                             <span>{log.user?.full_name || 'System'}</span>
                           </div>
-                          {log.user?.email && <span className="text-gray-400">•</span>}
                           {log.user?.email && (
-                            <span className="text-gray-500">{log.user.email}</span>
+                            <span className="text-gray-500 hidden sm:inline truncate max-w-[200px]">{log.user.email}</span>
                           )}
                         </div>
                       </div>
-                      <div className="text-right ml-4">
-                        <div className="text-sm text-gray-900">
+                      <div className="text-right shrink-0 ml-1">
+                        <div className="text-xs sm:text-sm text-gray-900 whitespace-nowrap">
                           {new Date(log.created_at).toLocaleDateString('en-IN')}
                         </div>
-                        <div className="text-xs text-gray-500">
-                          {new Date(log.created_at).toLocaleTimeString('en-IN', {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })}
+                        <div className="text-[10px] sm:text-xs text-gray-500 whitespace-nowrap">
+                          {new Date(log.created_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
                         </div>
                       </div>
                     </div>

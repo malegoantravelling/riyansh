@@ -2,36 +2,65 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Safe-area support for modern mobile devices */
+:root {
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+}
+
+/*
+  Brand palette (aligned with web)
+  Primary green:  #5b8c51
+  Dark green:     #4e7a46
+  Darker green:   #3d5d36
+  Light green:    #7ba672
+  Cream:          #f6f0e2
+  Light cream:    #fafaf2
+  Text black:     #1a1a1a
+  Muted gray:     #737373
+*/
+
 :root {
   --background: 0 0% 100%;
-  --foreground: 0 0% 20%;
+  --foreground: 0 0% 10%;
 
   --card: 0 0% 100%;
-  --card-foreground: 0 0% 20%;
+  --card-foreground: 0 0% 10%;
 
   --popover: 0 0% 100%;
-  --popover-foreground: 0 0% 20%;
+  --popover-foreground: 0 0% 10%;
 
-  --primary: 88 50% 53%;
+  --primary: 109 27% 43%;
   --primary-foreground: 0 0% 100%;
 
-  --secondary: 122 38% 75%;
-  --secondary-foreground: 0 0% 20%;
+  --secondary: 42 50% 92%;
+  --secondary-foreground: 0 0% 10%;
 
-  --muted: 0 0% 96%;
+  --muted: 60 20% 97%;
   --muted-foreground: 0 0% 45%;
 
-  --accent: 330 100% 71%;
+  --accent: 109 23% 55%;
   --accent-foreground: 0 0% 100%;
 
   --destructive: 0 84% 60%;
   --destructive-foreground: 0 0% 100%;
 
-  --border: 0 0% 80%;
+  --border: 0 0% 88%;
   --input: 0 0% 89%;
-  --ring: 88 50% 53%;
+  --ring: 109 27% 43%;
 
   --radius: 0.5rem;
+
+  --brand-green: #5b8c51;
+  --brand-green-dark: #4e7a46;
+  --brand-green-darker: #3d5d36;
+  --brand-green-light: #7ba672;
+  --brand-cream: #f6f0e2;
+  --brand-light-cream: #fafaf2;
+  --brand-black: #1a1a1a;
+  --brand-gray: #737373;
 }
 
 * {
@@ -39,31 +68,51 @@
 }
 
 body {
-  @apply bg-background text-foreground;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu',
-    'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  @apply bg-background text-foreground font-sans;
+  font-family: 'DM Sans', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+/* Custom Scrollbar — desktop only (mobile keeps native scrolling) */
+@media (pointer: fine) {
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #fafaf2;
+    border-radius: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #5b8c51, #4e7a46);
+    border-radius: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #4e7a46, #3d5d36);
+  }
 }
 
-::-webkit-scrollbar-track {
-  background: #f1f5f9;
-  border-radius: 10px;
+/* Reduced motion — respect user preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
-::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+/* Prevent horizontal overflow at the root */
+html,
+body {
+  overflow-x: hidden;
+  max-width: 100vw;
 }
 
 /* Custom Animations */
@@ -110,9 +159,27 @@ body {
   animation: scaleIn 0.2s ease-out;
 }
 
+*:focus-visible {
+  outline: 2px solid #5b8c51;
+  outline-offset: 2px;
+}
+
+::selection {
+  background-color: #5b8c51;
+  color: white;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: #5b8c51;
+  box-shadow: 0 0 0 3px rgba(91, 140, 81, 0.15);
+}
+
 /* Gradient Text */
 .gradient-text {
-  @apply bg-gradient-to-r from-[#27AE60] to-[#229954] bg-clip-text text-transparent;
+  @apply bg-gradient-to-r from-[#5B8C51] to-[#4E7A46] bg-clip-text text-transparent;
 }
 
 /* Card Hover Effects */
@@ -166,10 +233,10 @@ body {
 .shimmer {
   background: linear-gradient(
     to right,
-    #f6f7f8 0%,
-    #edeef1 20%,
-    #f6f7f8 40%,
-    #f6f7f8 100%
+    #fafaf2 0%,
+    #f6f0e2 20%,
+    #fafaf2 40%,
+    #fafaf2 100%
   );
   background-size: 1000px 100%;
   animation: shimmer 2s linear infinite;
