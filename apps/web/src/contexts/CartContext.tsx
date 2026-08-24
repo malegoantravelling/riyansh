@@ -82,50 +82,58 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [items, isLoaded])
 
   const syncCart = useCallback(async () => {
-    const token = (await getAccessToken()) || accessToken
-    if (!token) return
+    try {
+      const token = (await getAccessToken()) || accessToken
+      if (!token) return
 
-    const localItems = (() => {
-      try {
-        return JSON.parse(localStorage.getItem(CART_STORAGE_KEY) || '[]') as CartItem[]
-      } catch {
-        return items
+      const localItems = (() => {
+        try {
+          return JSON.parse(localStorage.getItem(CART_STORAGE_KEY) || '[]') as CartItem[]
+        } catch {
+          return items
+        }
+      })()
+
+      const payload = {
+        items: localItems
+          .filter((item) => item?.id && item.quantity > 0)
+          .map((item) => ({
+            product_id: item.id,
+            quantity: item.quantity,
+          })),
       }
-    })()
 
-    const payload = {
-      items: localItems.map((item) => ({
-        product_id: item.id,
-        quantity: item.quantity,
-      })),
-    }
+      const postSync = (authToken: string) =>
+        fetch(`${resolveApiBase()}/api/cart/sync`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        })
 
-    const postSync = (authToken: string) =>
-      fetch(`${resolveApiBase()}/api/cart/sync`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      })
-
-    let res = await postSync(token)
-    if (res.status === 401 || res.status === 403) {
-      const refreshed = await getAccessToken()
-      if (refreshed && refreshed !== token) {
-        res = await postSync(refreshed)
+      let res = await postSync(token)
+      if (res.status === 401 || res.status === 403) {
+        const refreshed = await getAccessToken()
+        if (refreshed && refreshed !== token) {
+          res = await postSync(refreshed)
+        }
       }
-    }
 
-    if (!res.ok) {
-      // Keep local cart; auth blips should not crash the page.
+      if (!res.ok) {
+        // Keep local cart; auth/API blips should not crash the page.
+        syncedForUser.current = null
+        return
+      }
+
+      const data = await res.json()
+      setItems(mapApiCart(data))
+    } catch (err) {
+      // Network errors (API restarting, offline, CORS) — keep local cart.
+      console.warn('[cart] sync failed:', err)
       syncedForUser.current = null
-      return
     }
-
-    const data = await res.json()
-    setItems(mapApiCart(data))
   }, [accessToken, getAccessToken, items])
 
   useEffect(() => {

@@ -1,17 +1,56 @@
-import { useEffect, useState } from 'react'
-import { Search, Filter, ShoppingCart, RefreshCw } from 'lucide-react'
+import { useEffect, useState, Fragment } from 'react'
+import {
+  Search,
+  Filter,
+  ShoppingCart,
+  RefreshCw,
+  ChevronDown,
+  ChevronUp,
+  MapPin,
+  Package,
+  CreditCard,
+  User,
+} from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { api } from '@/lib/api'
 import { formatCurrency } from '@/lib/utils'
 
+function formatAddress(addr: any): string {
+  if (!addr || typeof addr !== 'object') return '—'
+  const line1 = addr.address1 || addr.address_line_1 || addr.street_address || ''
+  const parts = [
+    addr.firstname || addr.full_name,
+    line1,
+    [addr.city, addr.state].filter(Boolean).join(', '),
+    addr.pincode || addr.zipcode || addr.zip_code,
+    addr.country,
+    addr.phone ? `Phone: ${addr.phone}` : null,
+  ].filter(Boolean)
+  return parts.length ? parts.join('\n') : '—'
+}
+
+function paymentLabel(order: any): string {
+  const raw =
+    order.payment_method ||
+    order.shipping_address?._payment_method ||
+    order.payment_mode ||
+    ''
+  if (!raw) return '—'
+  if (raw === 'hosted') return 'PayU hosted (card / NB / wallet)'
+  if (String(raw).startsWith('upi_intent:')) {
+    return `UPI (${String(raw).replace('upi_intent:', '')})`
+  }
+  return String(raw)
+}
+
 export default function Orders() {
   const [orders, setOrders] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
-  // Default: only completed (PayU-paid) orders — status is set by PayU, not admin dropdown.
   const [statusFilter, setStatusFilter] = useState<string>('paid')
   const [dateFilter, setDateFilter] = useState<string>('all')
+  const [expandedId, setExpandedId] = useState<string | null>(null)
 
   useEffect(() => {
     void fetchOrders()
@@ -44,17 +83,22 @@ export default function Orders() {
   }
 
   const filteredOrders = orders.filter((order) => {
-    const matchesSearch =
-      order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.user?.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.user?.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      String(order.payu_txnid || '')
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
-      String(order.payu_mihpayid || '')
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase())
+    const hay = [
+      order.id,
+      order.user?.email,
+      order.user?.full_name,
+      order.user?.phone,
+      order.payu_txnid,
+      order.payu_mihpayid,
+      order.shipping_address?.phone,
+      order.shipping_address?.firstname,
+      ...(order.items || []).map((i: any) => i.product_name),
+    ]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase()
 
+    const matchesSearch = !searchTerm || hay.includes(searchTerm.toLowerCase())
     const matchesStatus = statusFilter === 'all' || order.status === statusFilter
 
     const matchesDate = (() => {
@@ -90,8 +134,7 @@ export default function Orders() {
         <div>
           <h1 className="text-3xl font-bold text-gray-800">Orders</h1>
           <p className="text-sm text-gray-500 mt-1">
-            Payment status updates automatically from PayU after checkout (UPI, cards, net banking,
-            etc.).
+            Click an order to see customer, products, shipping address, and payment details.
           </p>
         </div>
         <Button
@@ -112,7 +155,7 @@ export default function Orders() {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
             <Input
               type="text"
-              placeholder="Search by order ID, customer, PayU txn…"
+              placeholder="Search customer, product, phone, PayU…"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
@@ -165,8 +208,8 @@ export default function Orders() {
             <h3 className="text-lg font-semibold text-gray-900 mb-2">No orders found</h3>
             <p className="text-gray-500 mb-6">
               {searchTerm || statusFilter !== 'paid' || dateFilter !== 'all'
-                ? 'No orders match your current filters. Try “Completed payments” or All statuses.'
-                : 'No completed PayU payments yet. Paid orders appear here after customers finish checkout on PayU.'}
+                ? 'No orders match your current filters.'
+                : 'No completed PayU payments yet.'}
             </p>
           </div>
         ) : (
@@ -174,69 +217,227 @@ export default function Orders() {
             <table className="w-full">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Order ID
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase w-8" />
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    Order
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                     Customer
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    Products
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                     Total
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    PayU txn
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    PayU status
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                     Payment
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                     Date
                   </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {filteredOrders.map((order) => (
-                  <tr key={order.id}>
-                    <td className="px-6 py-4 text-sm font-mono text-gray-500">
-                      {order.id.slice(0, 8)}…
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-900">
-                      {order.user?.email || 'N/A'}
-                    </td>
-                    <td className="px-6 py-4 text-sm font-semibold text-gray-900">
-                      {formatCurrency(order.total_amount)}
-                    </td>
-                    <td className="px-6 py-4 text-xs text-gray-600 font-mono">
-                      <div>{order.payu_txnid || '—'}</div>
-                      {order.payu_mihpayid && (
-                        <div className="text-[10px] text-gray-400 mt-0.5">
-                          mihpayid {order.payu_mihpayid}
-                        </div>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 text-xs text-gray-600">
-                      {order.payu_status || '—'}
-                    </td>
-                    <td className="px-6 py-4 text-sm">
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs ${getStatusColor(order.status)}`}
+                {filteredOrders.map((order) => {
+                  const open = expandedId === order.id
+                  const itemSummary = (order.items || [])
+                    .map((i: any) => `${i.product_name} ×${i.quantity}`)
+                    .join(', ')
+                  return (
+                    <Fragment key={order.id}>
+                      <tr
+                        className="hover:bg-gray-50 cursor-pointer"
+                        onClick={() => setExpandedId(open ? null : order.id)}
                       >
-                        {order.status}
-                      </span>
-                      {order.paid_at && (
-                        <div className="text-[10px] text-gray-400 mt-1">
-                          Paid {new Date(order.paid_at).toLocaleString('en-IN')}
-                        </div>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-500">
-                      {new Date(order.created_at).toLocaleDateString('en-IN')}
-                    </td>
-                  </tr>
-                ))}
+                        <td className="px-4 py-4 text-gray-400">
+                          {open ? (
+                            <ChevronUp className="h-4 w-4" />
+                          ) : (
+                            <ChevronDown className="h-4 w-4" />
+                          )}
+                        </td>
+                        <td className="px-4 py-4 text-sm font-mono text-gray-600">
+                          {order.id.slice(0, 8)}…
+                        </td>
+                        <td className="px-4 py-4 text-sm text-gray-900">
+                          <div className="font-medium">
+                            {order.user?.full_name ||
+                              order.shipping_address?.firstname ||
+                              '—'}
+                          </div>
+                          <div className="text-xs text-gray-500">{order.user?.email || 'N/A'}</div>
+                        </td>
+                        <td className="px-4 py-4 text-sm text-gray-700 max-w-[220px] truncate">
+                          {itemSummary || '—'}
+                        </td>
+                        <td className="px-4 py-4 text-sm font-semibold text-gray-900">
+                          {formatCurrency(order.total_amount)}
+                        </td>
+                        <td className="px-4 py-4 text-sm">
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs ${getStatusColor(order.status)}`}
+                          >
+                            {order.status}
+                          </span>
+                        </td>
+                        <td className="px-4 py-4 text-sm text-gray-500">
+                          {new Date(order.created_at).toLocaleString('en-IN')}
+                        </td>
+                      </tr>
+                      {open ? (
+                        <tr className="bg-[#FAFBF8]">
+                          <td colSpan={7} className="px-6 py-5">
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 text-sm">
+                              <div className="space-y-3">
+                                <h4 className="font-semibold text-gray-800 flex items-center gap-2">
+                                  <User className="h-4 w-4 text-[#5B8C51]" /> Customer
+                                </h4>
+                                <dl className="space-y-1 text-gray-600">
+                                  <div>
+                                    <dt className="text-xs uppercase text-gray-400">Name</dt>
+                                    <dd>
+                                      {order.user?.full_name ||
+                                        order.shipping_address?.firstname ||
+                                        '—'}
+                                    </dd>
+                                  </div>
+                                  <div>
+                                    <dt className="text-xs uppercase text-gray-400">Email</dt>
+                                    <dd>{order.user?.email || '—'}</dd>
+                                  </div>
+                                  <div>
+                                    <dt className="text-xs uppercase text-gray-400">Phone</dt>
+                                    <dd>
+                                      {order.shipping_address?.phone || order.user?.phone || '—'}
+                                    </dd>
+                                  </div>
+                                  <div>
+                                    <dt className="text-xs uppercase text-gray-400">User ID</dt>
+                                    <dd className="font-mono text-xs break-all">
+                                      {order.user_id || '—'}
+                                    </dd>
+                                  </div>
+                                </dl>
+                              </div>
+
+                              <div className="space-y-3">
+                                <h4 className="font-semibold text-gray-800 flex items-center gap-2">
+                                  <MapPin className="h-4 w-4 text-[#5B8C51]" /> Shipping
+                                </h4>
+                                <pre className="whitespace-pre-wrap font-sans text-gray-600 bg-white border border-gray-100 rounded-lg p-3">
+                                  {formatAddress(order.shipping_address)}
+                                </pre>
+                                {order.notes ? (
+                                  <p className="text-xs text-gray-500">
+                                    <span className="font-semibold">Notes:</span> {order.notes}
+                                  </p>
+                                ) : null}
+                              </div>
+
+                              <div className="space-y-3">
+                                <h4 className="font-semibold text-gray-800 flex items-center gap-2">
+                                  <CreditCard className="h-4 w-4 text-[#5B8C51]" /> Payment
+                                </h4>
+                                <dl className="space-y-1 text-gray-600">
+                                  <div>
+                                    <dt className="text-xs uppercase text-gray-400">Method</dt>
+                                    <dd>{paymentLabel(order)}</dd>
+                                  </div>
+                                  <div>
+                                    <dt className="text-xs uppercase text-gray-400">PayU mode</dt>
+                                    <dd>{order.payment_mode || '—'}</dd>
+                                  </div>
+                                  <div>
+                                    <dt className="text-xs uppercase text-gray-400">Txn ID</dt>
+                                    <dd className="font-mono text-xs break-all">
+                                      {order.payu_txnid || '—'}
+                                    </dd>
+                                  </div>
+                                  <div>
+                                    <dt className="text-xs uppercase text-gray-400">Mihpay ID</dt>
+                                    <dd className="font-mono text-xs break-all">
+                                      {order.payu_mihpayid || '—'}
+                                    </dd>
+                                  </div>
+                                  <div>
+                                    <dt className="text-xs uppercase text-gray-400">PayU status</dt>
+                                    <dd>{order.payu_status || '—'}</dd>
+                                  </div>
+                                  <div>
+                                    <dt className="text-xs uppercase text-gray-400">Paid at</dt>
+                                    <dd>
+                                      {order.paid_at
+                                        ? new Date(order.paid_at).toLocaleString('en-IN')
+                                        : '—'}
+                                    </dd>
+                                  </div>
+                                </dl>
+                              </div>
+                            </div>
+
+                            <div className="mt-6">
+                              <h4 className="font-semibold text-gray-800 flex items-center gap-2 mb-3">
+                                <Package className="h-4 w-4 text-[#5B8C51]" /> Products
+                              </h4>
+                              <div className="overflow-x-auto border border-gray-100 rounded-lg bg-white">
+                                <table className="w-full text-sm">
+                                  <thead className="bg-gray-50 text-xs uppercase text-gray-500">
+                                    <tr>
+                                      <th className="px-3 py-2 text-left">Item</th>
+                                      <th className="px-3 py-2 text-right">Qty</th>
+                                      <th className="px-3 py-2 text-right">Price</th>
+                                      <th className="px-3 py-2 text-right">Line total</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody className="divide-y">
+                                    {(order.items || []).map((item: any) => (
+                                      <tr key={item.id || `${item.product_id}-${item.product_name}`}>
+                                        <td className="px-3 py-2">
+                                          <div className="flex items-center gap-3">
+                                            {item.product_image || item.product?.image_url ? (
+                                              <img
+                                                src={item.product_image || item.product?.image_url}
+                                                alt=""
+                                                className="w-10 h-10 object-contain rounded border bg-[#FAF9F5]"
+                                              />
+                                            ) : (
+                                              <div className="w-10 h-10 rounded bg-gray-100" />
+                                            )}
+                                            <span className="font-medium text-gray-800">
+                                              {item.product_name}
+                                            </span>
+                                          </div>
+                                        </td>
+                                        <td className="px-3 py-2 text-right">{item.quantity}</td>
+                                        <td className="px-3 py-2 text-right">
+                                          {formatCurrency(item.price)}
+                                        </td>
+                                        <td className="px-3 py-2 text-right font-semibold">
+                                          {formatCurrency(Number(item.price) * Number(item.quantity))}
+                                        </td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                  <tfoot>
+                                    <tr className="border-t">
+                                      <td colSpan={3} className="px-3 py-2 text-right font-semibold">
+                                        Order total
+                                      </td>
+                                      <td className="px-3 py-2 text-right font-bold text-[#5B8C51]">
+                                        {formatCurrency(order.total_amount)}
+                                      </td>
+                                    </tr>
+                                  </tfoot>
+                                </table>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      ) : null}
+                    </Fragment>
+                  )
+                })}
               </tbody>
             </table>
           </div>

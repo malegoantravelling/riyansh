@@ -152,42 +152,63 @@ router.post('/sync', async (req: AuthRequest, res) => {
   try {
     const userId = await requirePublicUser(req, res)
     if (!userId) return
-    const client = db(req)
+    // Prefer service role for cart writes so sync never fails when anon client is missing
+    // or RLS blocks the user-scoped client. Auth already verified the JWT above.
+    const client = supabase
 
     const items: Array<{ product_id: string; quantity: number }> = Array.isArray(req.body?.items)
       ? req.body.items
       : []
 
+    const uuidRe =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+
     for (const item of items) {
-      if (!item.product_id || !item.quantity || item.quantity < 1) continue
+      const productId = String(item?.product_id || '').trim()
+      const quantity = Number(item?.quantity)
+      if (!productId || !uuidRe.test(productId) || !Number.isFinite(quantity) || quantity < 1) {
+        continue
+      }
+
+      const { data: product, error: productError } = await client
+        .from('products')
+        .select('id')
+        .eq('id', productId)
+        .maybeSingle()
+
+      if (productError || !product) {
+        // Stale local cart entry (deleted product / bad id) — skip, don't fail sync.
+        continue
+      }
 
       const { data: existing, error: existingError } = await client
         .from('cart_items')
         .select('*')
         .eq('user_id', userId)
-        .eq('product_id', item.product_id)
+        .eq('product_id', productId)
         .maybeSingle()
 
       if (existingError) {
-        return res.status(400).json({ error: existingError.message, code: 'cart_lookup_failed' })
+        console.warn('[cart/sync] lookup failed:', existingError.message)
+        continue
       }
 
       if (existing) {
         const { error: updateError } = await client
           .from('cart_items')
-          .update({ quantity: Math.max(existing.quantity, item.quantity) })
+          .update({ quantity: Math.max(existing.quantity, quantity) })
           .eq('id', existing.id)
         if (updateError) {
-          return res.status(400).json({ error: updateError.message, code: 'cart_update_failed' })
+          console.warn('[cart/sync] update failed:', updateError.message)
         }
       } else {
         const { error: insertError } = await client.from('cart_items').insert({
           user_id: userId,
-          product_id: item.product_id,
-          quantity: item.quantity,
+          product_id: productId,
+          quantity,
         })
         if (insertError) {
-          return res.status(400).json({ error: insertError.message, code: 'cart_insert_failed' })
+          console.warn('[cart/sync] insert failed:', insertError.message)
         }
       }
     }
@@ -201,7 +222,7 @@ router.post('/sync', async (req: AuthRequest, res) => {
       return res.status(400).json({ error: error.message })
     }
 
-    res.json(data)
+    res.json(data || [])
   } catch (error: any) {
     res.status(500).json({ error: error.message })
   }

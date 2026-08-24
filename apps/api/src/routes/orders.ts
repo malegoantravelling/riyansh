@@ -18,6 +18,7 @@ import {
 } from '../services/payu'
 import { resolveApiUrl, resolveSiteUrl } from '../config/urls'
 import { ensurePublicUser } from '../lib/ensurePublicUser'
+import { insertPayUTransaction, saveDefaultUserAddress } from '../lib/orderPersistence'
 
 const router = Router()
 
@@ -52,7 +53,7 @@ router.get('/', authenticateToken, async (req: AuthRequest, res) => {
 
     const { data, error } = await supabase
       .from('orders')
-      .select('*, items:order_items(*)')
+      .select('*, items:order_items(*, product:products(id, slug, image_url))')
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
 
@@ -70,7 +71,9 @@ router.get('/all', authenticateAdmin, async (req: AuthRequest, res) => {
   try {
     const { data, error } = await supabase
       .from('orders')
-      .select('*, items:order_items(*), user:users(*)')
+      .select(
+        '*, items:order_items(*, product:products(id, slug, name, image_url)), user:users(*)'
+      )
       .order('created_at', { ascending: false })
 
     if (error) {
@@ -217,10 +220,11 @@ router.post('/create-payu-order', authenticateToken, async (req: AuthRequest, re
         .replace(/[^\w\s.,\-]/g, '')
         .slice(0, 100) || 'Order'
 
+    const paymentMethodLabel = useUpiIntent ? `upi_intent:${upiApp}` : 'hosted'
     const shippingWithReturn = {
       ...shipping_address,
       _return_origin: siteUrl,
-      _payment_method: useUpiIntent ? `upi_intent:${upiApp}` : 'hosted',
+      _payment_method: paymentMethodLabel,
     }
 
     const { data: order, error: orderError } = await userDb
@@ -234,9 +238,20 @@ router.post('/create-payu-order', authenticateToken, async (req: AuthRequest, re
         status: 'pending',
         payu_txnid: txnid,
         payu_status: 'initiated',
+        payment_method: paymentMethodLabel,
       })
       .select()
       .single()
+
+    // Persist address early so reorders / next checkout can prefill even if PayU is abandoned.
+    try {
+      await saveDefaultUserAddress(userId, shippingWithReturn, {
+        preferredUpiApp: useUpiIntent ? upiApp : null,
+        notes: notes || null,
+      })
+    } catch (addrErr) {
+      console.error('Failed to save user address:', addrErr)
+    }
 
     if (orderError || !order) {
       return res.status(400).json({ error: orderError?.message || 'Failed to create order' })
@@ -411,6 +426,11 @@ async function markOrderPaid(
     return { alreadyPaid: true }
   }
 
+  const paymentMethod =
+    order.payment_method ||
+    order.shipping_address?._payment_method ||
+    (details.mode ? `PayU:${details.mode}` : 'PayU')
+
   const { error: updateError } = await supabase
     .from('orders')
     .update({
@@ -418,6 +438,8 @@ async function markOrderPaid(
       payu_mihpayid: details.mihpayid || null,
       payu_status: details.status,
       paid_at: new Date().toISOString(),
+      payment_method: paymentMethod,
+      payment_mode: details.mode || null,
     })
     .eq('id', order.id)
 
@@ -425,25 +447,26 @@ async function markOrderPaid(
     throw new Error(updateError.message)
   }
 
+  await insertPayUTransaction({
+    userId: order.user_id,
+    orderId: order.id,
+    amount: order.total_amount,
+    status: 'success',
+    txnid: details.txnid,
+    mihpayid: details.mihpayid || null,
+    mode: details.mode || null,
+    paymentMethod: paymentMethod,
+    description: `PayU payment for order #${order.id.substring(0, 8)}`,
+    raw: details.raw || (details as any),
+    metadata: { bank_ref_num: details.bank_ref_num },
+  })
+
   try {
-    await supabase.from('transactions').insert({
-      user_id: order.user_id,
-      order_id: order.id,
-      amount: order.total_amount,
-      currency: 'INR',
-      status: 'success',
-      payment_method: 'PayU',
-      description: `PayU payment for order #${order.id.substring(0, 8)}`,
-      payu_txnid: details.txnid,
-      mihpayid: details.mihpayid || null,
-      mode: details.mode || null,
-      raw_response: details.raw || details,
-      metadata: {
-        bank_ref_num: details.bank_ref_num,
-      },
+    await saveDefaultUserAddress(order.user_id, order.shipping_address, {
+      notes: order.notes || null,
     })
-  } catch (txError) {
-    console.error('Failed to create transaction:', txError)
+  } catch (addrErr) {
+    console.error('Failed to save user address after payment:', addrErr)
   }
 
   try {
@@ -623,23 +646,18 @@ async function handlePayUCallback(req: any, res: any, kind: 'success' | 'failure
       })
       .eq('id', order.id)
 
-    try {
-      await supabase.from('transactions').insert({
-        user_id: order.user_id,
-        order_id: order.id,
-        amount: order.total_amount,
-        currency: 'INR',
-        status: status || 'failed',
-        payment_method: 'PayU',
-        description: `PayU payment ${status || 'failed'} for order #${order.id.substring(0, 8)}`,
-        payu_txnid: txnid,
-        mihpayid: verified?.mihpayid || body.mihpayid || null,
-        mode: verified?.mode || body.mode || null,
-        raw_response: verified?.raw || body,
-      })
-    } catch {
-      // ignore
-    }
+    await insertPayUTransaction({
+      userId: order.user_id,
+      orderId: order.id,
+      amount: order.total_amount,
+      status: status || 'failed',
+      txnid,
+      mihpayid: verified?.mihpayid || body.mihpayid || null,
+      mode: verified?.mode || body.mode || null,
+      paymentMethod: order.payment_method || order.shipping_address?._payment_method || 'PayU',
+      description: `PayU payment ${status || 'failed'} for order #${order.id.substring(0, 8)}`,
+      raw: verified?.raw || body,
+    })
 
     return res.redirect(
       `${siteUrl}/orders/failure?order_id=${encodeURIComponent(order.id)}&status=${encodeURIComponent(status || 'failed')}&message=${encodeURIComponent(String(errorMessage))}`
@@ -759,7 +777,7 @@ router.get('/:id', authenticateToken, async (req: AuthRequest, res) => {
 
     const { data, error } = await supabase
       .from('orders')
-      .select('*, items:order_items(*)')
+      .select('*, items:order_items(*, product:products(id, slug, name, image_url, price))')
       .eq('id', id)
       .eq('user_id', userId)
       .single()
@@ -768,7 +786,15 @@ router.get('/:id', authenticateToken, async (req: AuthRequest, res) => {
       return res.status(404).json({ error: 'Order not found' })
     }
 
-    res.json(data)
+    const { data: txn } = await supabase
+      .from('transactions')
+      .select('*')
+      .eq('order_id', id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+
+    res.json({ ...data, transaction: txn || null })
   } catch (error: any) {
     res.status(500).json({ error: error.message })
   }

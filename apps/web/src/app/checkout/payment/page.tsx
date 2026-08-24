@@ -198,7 +198,19 @@ export default function CheckoutPaymentPage() {
         router.replace('/checkout')
         return
       }
-      setShipping(JSON.parse(raw) as ShippingDraft)
+      const draft = JSON.parse(raw) as ShippingDraft
+      setShipping(draft)
+      const preferred = draft.preferred_upi_app
+      if (
+        preferred === 'phonepe' ||
+        preferred === 'googlepay' ||
+        preferred === 'paytm' ||
+        preferred === 'bhim' ||
+        preferred === 'amazonpay' ||
+        preferred === 'genericintent'
+      ) {
+        setPayOption(preferred)
+      }
     } catch {
       router.replace('/checkout')
     }
