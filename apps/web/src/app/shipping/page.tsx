@@ -246,12 +246,12 @@ export default function ShippingPage() {
                   Delivery Issues?
                 </h3>
                 <p className="text-gray-700 leading-relaxed mb-4">
-                  If you experience any delivery issues, please contact us immediately:
+                  If you experience any delivery issues, please reach out to our team:
                 </p>
                 <ul className="space-y-2 text-gray-700">
-                  <li>• Email: riyanshamrit106@gmail.com</li>
-                  <li>• Phone: +91 8605911293</li>
-                  <li>• We respond within 24 hours</li>
+                  <li>• Submit a ticket on our Contact & Support page</li>
+                  <li>• Quick inquiry response within 24 hours</li>
+                  <li>• Complete tracking updates via SMS & Email</li>
                 </ul>
               </div>
 
@@ -270,25 +270,18 @@ export default function ShippingPage() {
             </div>
 
             {/* Contact Section */}
-            <div className="bg-gradient-to-br from-[#013220]/10 to-[#012418]/5 rounded-2xl p-8 border border-[#013220]/20">
+            <div className="bg-gradient-to-br from-[#013220]/10 to-[#012418]/5 rounded-2xl p-8 border border-[#013220]/20 text-center">
               <h3 className="text-2xl font-bold text-gray-900 mb-4">Need Help With Shipping?</h3>
-              <p className="text-gray-700 leading-relaxed mb-6">
-                Our customer support team is here to help you with any shipping-related questions or
-                concerns.
+              <p className="text-gray-700 leading-relaxed mb-6 max-w-xl mx-auto">
+                Our customer support team is here to assist you with any order or shipping inquiries.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <a
-                  href="mailto:riyanshamrit106@gmail.com"
-                  className="px-6 py-3 bg-gradient-to-r from-[#013220] to-[#012418] text-white rounded-lg hover:opacity-90 transition-opacity font-semibold text-center"
+              <div className="flex justify-center">
+                <Link
+                  href="/contact"
+                  className="px-8 py-3 bg-gradient-to-r from-[#013220] to-[#012418] text-white rounded-xl hover:opacity-90 transition-opacity font-semibold text-center"
                 >
-                  Email Us
-                </a>
-                <a
-                  href="tel:+918605911293"
-                  className="px-6 py-3 bg-white text-[#013220] border-2 border-[#013220] rounded-lg hover:bg-[#013220] hover:text-white transition-all font-semibold text-center"
-                >
-                  Call Us
-                </a>
+                  Contact Support
+                </Link>
               </div>
             </div>
           </div>

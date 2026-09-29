@@ -1,8 +1,5 @@
 import Link from 'next/link'
 import {
-  MapPin,
-  Phone,
-  Mail,
   Facebook,
   Twitter,
   Instagram,
@@ -10,7 +7,7 @@ import {
   Send,
   Shield,
   Award,
-  Clock,
+  Sparkles,
 } from 'lucide-react'
 
 export default function Footer() {
@@ -89,7 +86,7 @@ export default function Footer() {
                 { href: '/wellness/immunity', label: 'Immunity' },
                 { href: '/wellness/joint-pain', label: 'Joint care' },
                 { href: '/about', label: 'About Us' },
-                { href: '/contact', label: 'Contact' },
+                { href: '/contact', label: 'E-Consultation' },
               ].map((link) => (
                 <li key={link.label}>
                   <Link
@@ -127,37 +124,17 @@ export default function Footer() {
 
           <div className="space-y-6">
             <div>
-              <h3 className="mb-5 font-display text-lg font-medium">Contact Us</h3>
-              <ul className="space-y-4">
-                <li className="flex items-start gap-3 text-sm">
-                  <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-forest-soft" />
-                  <span className="text-white/55 leading-relaxed">
-                    Jijamata Pride, Sangamner / Malegaon, Maharashtra, 422608, India
-                  </span>
-                </li>
-                <li className="flex items-center gap-3 text-sm">
-                  <Phone className="h-4 w-4 shrink-0 text-forest-soft" />
-                  <a
-                    href="tel:+918605911293"
-                    className="text-white/55 transition-colors hover:text-forest-soft"
-                  >
-                    +91 8605911293
-                  </a>
-                </li>
-                <li className="flex items-center gap-3 text-sm">
-                  <Mail className="h-4 w-4 shrink-0 text-forest-soft" />
-                  <a
-                    href="mailto:riyanshamrit106@gmail.com"
-                    className="break-all text-white/55 transition-colors hover:text-forest-soft"
-                  >
-                    riyanshamrit106@gmail.com
-                  </a>
-                </li>
-                <li className="flex items-center gap-3 text-sm">
-                  <Clock className="h-4 w-4 shrink-0 text-forest-soft" />
-                  <span className="text-white/55">Mon - Sat: 9:00 AM - 8:00 PM</span>
-                </li>
-              </ul>
+              <h3 className="mb-4 font-display text-lg font-medium">Online Support</h3>
+              <p className="text-sm leading-relaxed text-white/55 mb-4">
+                Have questions or need consultation? Reach out through our dedicated online assistance portal.
+              </p>
+              <Link
+                href="/contact"
+                className="inline-flex items-center gap-2 rounded-full border border-forest-soft/30 bg-forest/20 px-4 py-2 text-xs font-semibold text-forest-soft transition-colors hover:bg-forest/40"
+              >
+                <Sparkles className="h-3.5 w-3.5" />
+                <span>Contact Online Support</span>
+              </Link>
             </div>
 
             <div>

@@ -172,21 +172,15 @@ export default function TermsPage() {
             <div className="bg-gradient-to-br from-[#013220]/10 to-[#012418]/5 rounded-2xl p-8 border border-[#013220]/20">
               <h3 className="text-2xl font-bold text-gray-900 mb-4">Questions About Terms?</h3>
               <p className="text-gray-700 leading-relaxed mb-4">
-                If you have any questions regarding these terms, please contact us:
+                If you have any questions regarding these terms, please reach out via our online support form:
               </p>
-              <div className="space-y-2">
-                <p className="text-gray-700">
-                  <strong>Email:</strong>{' '}
-                  <a href="mailto:riyanshamrit106@gmail.com" className="text-[#013220] hover:underline">
-                    riyanshamrit106@gmail.com
-                  </a>
-                </p>
-                <p className="text-gray-700">
-                  <strong>Phone:</strong>{' '}
-                  <a href="tel:+918605911293" className="text-[#013220] hover:underline">
-                    +91 8605911293
-                  </a>
-                </p>
+              <div className="pt-2">
+                <Link
+                  href="/contact"
+                  className="inline-flex items-center gap-2 rounded-xl bg-[#013220] px-6 py-3 font-semibold text-white hover:bg-[#012418] transition-colors"
+                >
+                  Contact Support
+                </Link>
               </div>
             </div>
           </div>

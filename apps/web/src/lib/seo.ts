@@ -4,9 +4,6 @@ export const SITE_URL = 'https://riyanshamrit.com'
 export const SITE_NAME = 'Riyansh'
 export const LEGAL_NAME = 'Riyansh Multitrade Private Limited'
 export const DEFAULT_OG_IMAGE = '/image/riyansh_amrit_juice.png'
-export const CONTACT_PHONE = '+918605911293'
-export const CONTACT_EMAIL = 'riyanshamrit106@gmail.com'
-
 export const DEFAULT_TITLE = 'Ayurvedic Immunity Syrup & Herbal Supplements'
 export const DEFAULT_DESCRIPTION =
   'Shop authentic Ayurvedic supplements from Riyansh — immunity syrup, joint care, and women’s health tonics made in Maharashtra since 2019. Free delivery above ₹500.'
@@ -67,17 +64,7 @@ export const organizationJsonLd = {
   alternateName: SITE_NAME,
   url: SITE_URL,
   logo: absoluteUrl(DEFAULT_OG_IMAGE),
-  email: CONTACT_EMAIL,
-  telephone: CONTACT_PHONE,
   foundingDate: '2019',
-  address: {
-    '@type': 'PostalAddress',
-    streetAddress: 'Jijamata Pride, Sangamner / Malegaon',
-    addressLocality: 'Ahmednagar',
-    addressRegion: 'Maharashtra',
-    postalCode: '422608',
-    addressCountry: 'IN',
-  },
 }
 
 export const websiteJsonLd = {

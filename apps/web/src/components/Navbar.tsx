@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { ShoppingCart, Heart, Phone, Menu, X, User, LogOut, Package } from 'lucide-react'
+import { ShoppingCart, Heart, Menu, X, User, LogOut, Package } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { useCart } from '@/contexts/CartContext'
@@ -102,14 +102,6 @@ export default function Navbar() {
           </nav>
 
           <div className="flex items-center gap-1.5 sm:gap-2">
-            <a
-              href="tel:+918605911293"
-              className="magnetic-cta hidden items-center gap-2 rounded-full border border-forest/15 bg-white/50 px-3 py-1.5 text-xs font-medium text-charcoal transition-colors hover:border-forest/30 xl:inline-flex"
-              aria-label="Call us"
-            >
-              <Phone className="h-3.5 w-3.5 text-forest" strokeWidth={1.5} />
-              <span>+91 8605911293</span>
-            </a>
 
             <Link
               href="/wishlist"
@@ -273,13 +265,6 @@ export default function Navbar() {
                 Login / Sign up
               </Link>
             )}
-            <a
-              href="tel:+918605911293"
-              className="inline-flex items-center gap-2 text-sm font-medium text-forest"
-            >
-              <Phone className="h-4 w-4" />
-              +91 8605911293
-            </a>
           </div>
         </div>
       </div>

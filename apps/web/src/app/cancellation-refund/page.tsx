@@ -284,37 +284,25 @@ export default function CancellationRefundPage() {
             </div>
 
             {/* Contact Section */}
-            <div className="bg-gradient-to-br from-[#013220]/10 to-[#012418]/5 rounded-2xl p-8 border border-[#013220]/20">
-              <h3 className="text-2xl font-bold text-gray-900 mb-4 text-center">
+            <div className="bg-gradient-to-br from-[#013220]/10 to-[#012418]/5 rounded-2xl p-8 border border-[#013220]/20 text-center">
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">
                 Need Help With Returns or Refunds?
               </h3>
-              <p className="text-gray-700 leading-relaxed mb-6 text-center">
+              <p className="text-gray-700 leading-relaxed mb-6 max-w-xl mx-auto">
                 Our customer support team is ready to assist you with any questions or concerns about cancellations,
                 returns, or refunds.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <a
-                  href="mailto:riyanshamrit106@gmail.com"
-                  className="px-8 py-3 bg-gradient-to-r from-[#013220] to-[#012418] text-white rounded-lg hover:opacity-90 transition-opacity font-semibold text-center"
+              <div className="flex justify-center">
+                <Link
+                  href="/contact"
+                  className="px-8 py-3 bg-gradient-to-r from-[#013220] to-[#012418] text-white rounded-xl hover:opacity-90 transition-opacity font-semibold text-center"
                 >
-                  Request Return via Email
-                </a>
-                <a
-                  href="tel:+918605911293"
-                  className="px-8 py-3 bg-white text-[#013220] border-2 border-[#013220] rounded-lg hover:bg-[#013220] hover:text-white transition-all font-semibold text-center"
-                >
-                  Call Us: +91 8605911293
-                </a>
+                  Contact Support Team
+                </Link>
               </div>
               <div className="mt-6 text-center">
                 <p className="text-gray-600">
-                  <strong>Email:</strong>{' '}
-                  <a href="mailto:riyanshamrit106@gmail.com" className="text-[#013220] hover:underline">
-                    riyanshamrit106@gmail.com
-                  </a>
-                </p>
-                <p className="text-gray-600 mt-2">
-                  <strong>Response Time:</strong> Within 24 hours
+                  <strong>Response Time:</strong> Inquiries are processed within 24 hours
                 </p>
               </div>
             </div>

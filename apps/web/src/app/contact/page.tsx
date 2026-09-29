@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Phone, Mail, Send, MessageSquare, ChevronRight, Sparkles } from 'lucide-react'
+import { Send, MessageSquare, ChevronRight, Sparkles, Clock, ShieldCheck } from 'lucide-react'
 import Link from 'next/link'
 import { useToast } from '@/contexts/ToastContext'
 import { useApiClient } from '@/lib/api'
@@ -223,56 +223,50 @@ export default function ContactPage() {
         </div>
       </section>
 
-      {/* Let's Connect */}
+      {/* Support Information */}
       <section className="surface-band py-16 sm:py-20">
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-12 space-y-3">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#013220]/10 rounded-full border border-[#013220]/20">
               <Sparkles className="h-4 w-4 text-[#013220]" />
-              <span className="text-sm font-semibold text-[#013220]">Contact Information</span>
+              <span className="text-sm font-semibold text-[#013220]">Customer Support</span>
             </div>
             <h2 className="text-3xl sm:text-4xl font-extrabold text-[#013220]">
-              Let&apos;s Connect
+              Help & Assistance
             </h2>
             <p className="text-[#80866e] text-base max-w-lg mx-auto">
-              We&apos;re available 24/7 to assist you with any questions or concerns
+              We are dedicated to providing seamless support for all your product and order queries
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Phone */}
+            {/* Quick Response */}
             <div className="surface-glass rounded-2xl border-evergreen/10 p-8 sm:p-10 text-center hover:border-evergreen/30 transition-colors">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-[#013220] rounded-2xl mb-6">
-                <Phone className="h-7 w-7 text-white" />
+                <Clock className="h-7 w-7 text-white" />
               </div>
-              <h3 className="text-xl font-bold text-[#013220] mb-3">Call Us</h3>
-              <a
-                href="tel:+918605911293"
-                className="block text-lg font-semibold text-[#80866e] hover:text-[#013220] transition-colors mb-3"
-              >
-                +91 8605911293
-              </a>
+              <h3 className="text-xl font-bold text-[#013220] mb-3">Prompt Response</h3>
+              <p className="text-sm text-stone leading-relaxed mb-3">
+                All submitted queries and consultation requests are reviewed and responded to within 24 hours.
+              </p>
               <div className="inline-flex items-center gap-2 text-sm text-gray-500">
                 <span className="w-2 h-2 bg-[#013220] rounded-full" />
-                Mon-Sat, 9AM-6PM IST
+                Monday - Saturday Support
               </div>
             </div>
 
-            {/* Email */}
+            {/* Ayurvedic Guidance */}
             <div className="surface-glass rounded-2xl border-evergreen/10 p-8 sm:p-10 text-center hover:border-evergreen/30 transition-colors">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-[#013220] rounded-2xl mb-6">
-                <Mail className="h-7 w-7 text-white" />
+                <ShieldCheck className="h-7 w-7 text-white" />
               </div>
-              <h3 className="text-xl font-bold text-[#013220] mb-3">Email Us</h3>
-              <a
-                href="mailto:riyanshamrit106@gmail.com"
-                className="block text-base sm:text-lg font-semibold text-[#80866e] hover:text-[#013220] transition-colors mb-3 break-all"
-              >
-                riyanshamrit106@gmail.com
-              </a>
+              <h3 className="text-xl font-bold text-[#013220] mb-3">E-Consultation & Care</h3>
+              <p className="text-sm text-stone leading-relaxed mb-3">
+                Need advice on herbal regimens? Send your wellness questions and our team will guide you.
+              </p>
               <div className="inline-flex items-center gap-2 text-sm text-gray-500">
                 <span className="w-2 h-2 bg-[#3B82F6] rounded-full" />
-                24/7 Support
+                Verified Holistic Guidance
               </div>
             </div>
           </div>

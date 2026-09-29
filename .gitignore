@@ -58,3 +58,6 @@ logs/
 
 .env
 apps/api/.env
+
+# Local DB restore scratch
+packages/db/.restore-images/

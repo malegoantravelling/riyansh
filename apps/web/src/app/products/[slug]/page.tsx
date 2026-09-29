@@ -331,7 +331,7 @@ export default function ProductDetailsPage() {
               </li>
               <li className="flex items-center gap-2">
                 <span className="text-forest">•</span>
-                For Shipping Support Contact: +91 8605911293
+                Pan-India Express Delivery & Online Support
               </li>
             </ul>
           </div>
@@ -458,7 +458,7 @@ export default function ProductDetailsPage() {
                 unopened products.
               </p>
               <p>
-                • <strong>Customer Support:</strong> Call +91 8605911293 for tracking assistance.
+                • <strong>Customer Support:</strong> Reach out via our online support team for tracking assistance.
               </p>
             </div>
           )}

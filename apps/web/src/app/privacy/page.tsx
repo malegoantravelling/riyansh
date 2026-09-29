@@ -68,7 +68,7 @@ export default function PrivacyPage() {
         '• Deletion: Request deletion of your personal information',
         '• Objection: Object to processing of your personal information',
         '• Portability: Request transfer of your data',
-        'To exercise these rights, please contact us at riyanshamrit106@gmail.com',
+        'To exercise these rights, please submit a request through our online Contact & Support page.',
       ],
     },
     {
@@ -192,30 +192,18 @@ export default function PrivacyPage() {
 
             {/* Contact Section */}
             <div className="bg-gradient-to-br from-[#013220]/10 to-[#012418]/5 rounded-2xl p-8 border border-[#013220]/20">
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">Contact Us</h3>
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">Contact & Support</h3>
               <p className="text-gray-700 leading-relaxed mb-4">
                 If you have any questions about this Privacy Policy or our privacy practices, please
-                contact us:
+                reach out through our online support form:
               </p>
-              <div className="space-y-2">
-                <p className="text-gray-700">
-                  <strong>Email:</strong>{' '}
-                  <a
-                    href="mailto:riyanshamrit106@gmail.com"
-                    className="text-[#013220] hover:underline"
-                  >
-                    riyanshamrit106@gmail.com
-                  </a>
-                </p>
-                <p className="text-gray-700">
-                  <strong>Phone:</strong>{' '}
-                  <a href="tel:+918605911293" className="text-[#013220] hover:underline">
-                    +91 8605911293
-                  </a>
-                </p>
-                <p className="text-gray-700">
-                  <strong>Address:</strong> Malegaon, Nashik District, Maharashtra, 423200
-                </p>
+              <div className="pt-2">
+                <Link
+                  href="/contact"
+                  className="inline-flex items-center gap-2 rounded-xl bg-[#013220] px-6 py-3 font-semibold text-white hover:bg-[#012418] transition-colors"
+                >
+                  Go to Contact Support
+                </Link>
               </div>
             </div>
           </div>
