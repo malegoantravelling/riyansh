@@ -3,8 +3,12 @@ import * as dotenv from 'dotenv'
 import path from 'path'
 
 // Load order: process env (Vercel) wins — dotenv does not override by default.
+// __dirname = apps/api/src/config → ../../.env = apps/api/.env, ../../../.env = repo root
 dotenv.config({ path: path.resolve(__dirname, '../../.env') })
 dotenv.config({ path: path.resolve(__dirname, '../../../.env') })
+// Dev: reuse web public anon key when API .env omits SUPABASE_ANON_KEY
+dotenv.config({ path: path.resolve(__dirname, '../../../web/.env.local') })
+dotenv.config({ path: path.resolve(__dirname, '../../../web/.env') })
 
 function cleanEnv(value: string | undefined): string {
   return (value || '')

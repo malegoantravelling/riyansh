@@ -198,7 +198,10 @@ export default function AccountOrdersPage() {
               return (
                 <Reveal key={order.id} delay={index * 0.05}>
                   <li className="surface-glass overflow-hidden rounded-2xl transition-shadow duration-300 hover:shadow-lift">
-                    <div className="flex flex-wrap items-start justify-between gap-3 border-b border-evergreen/8 px-5 py-4 sm:px-6">
+                    <Link
+                      href={`/account/orders/${order.id}`}
+                      className="flex flex-wrap items-start justify-between gap-3 border-b border-evergreen/8 px-5 py-4 sm:px-6"
+                    >
                       <div className="min-w-0">
                         <p className="text-[11px] uppercase tracking-[0.16em] text-dusty-olive">Order</p>
                         <p className="mt-1 font-mono text-sm font-medium text-evergreen" title={order.id}>
@@ -217,15 +220,18 @@ export default function AccountOrdersPage() {
                             : ''}
                         </p>
                       </div>
-                      <span
-                        className={cn(
-                          'rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em]',
-                          statusStyles(order.status)
-                        )}
-                      >
-                        {order.status}
-                      </span>
-                    </div>
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={cn(
+                            'rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em]',
+                            statusStyles(order.status)
+                          )}
+                        >
+                          {order.status}
+                        </span>
+                        <ChevronRight className="h-4 w-4 text-dusty-olive" aria-hidden />
+                      </div>
+                    </Link>
 
                     <div className="px-5 py-4 sm:px-6">
                       <p className="mb-3 text-[11px] font-medium uppercase tracking-[0.16em] text-dusty-olive">

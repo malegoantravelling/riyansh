@@ -3,6 +3,7 @@ import { supabase } from '../config/supabase'
 import { authenticateToken, AuthRequest } from '../middleware/auth'
 import { authenticateAdmin } from '../middleware/adminAuth'
 import { ensurePublicUser } from '../lib/ensurePublicUser'
+import { addressRowToShippingDraft, saveDefaultUserAddress } from '../lib/orderPersistence'
 
 const router = Router()
 
@@ -123,6 +124,70 @@ router.put('/me', authenticateToken, async (req: AuthRequest, res) => {
     }
 
     res.json(data)
+  } catch (error: any) {
+    res.status(500).json({ error: error.message })
+  }
+})
+
+/** Saved shipping addresses for checkout prefill */
+router.get('/me/addresses', authenticateToken, async (req: AuthRequest, res) => {
+  try {
+    const userId = req.user?.id
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' })
+
+    const { data, error } = await supabase
+      .from('user_addresses')
+      .select('*')
+      .eq('user_id', userId)
+      .order('is_default', { ascending: false })
+      .order('updated_at', { ascending: false })
+
+    if (error) return res.status(400).json({ error: error.message })
+
+    const defaultRow = (data || []).find((a) => a.is_default) || (data || [])[0] || null
+    res.json({
+      addresses: data || [],
+      default: defaultRow,
+      shipping_draft: addressRowToShippingDraft(defaultRow),
+    })
+  } catch (error: any) {
+    res.status(500).json({ error: error.message })
+  }
+})
+
+router.put('/me/addresses/default', authenticateToken, async (req: AuthRequest, res) => {
+  try {
+    const userId = req.user?.id
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' })
+
+    const body = req.body || {}
+    await saveDefaultUserAddress(
+      userId,
+      {
+        firstname: body.firstname || body.full_name,
+        phone: body.phone,
+        address1: body.address1 || body.address_line_1,
+        city: body.city,
+        state: body.state,
+        pincode: body.pincode || body.zip_code,
+        zipcode: body.zipcode || body.zip_code,
+        notes: body.notes,
+        preferred_upi_app: body.preferred_upi_app,
+      },
+      { preferredUpiApp: body.preferred_upi_app, notes: body.notes }
+    )
+
+    const { data } = await supabase
+      .from('user_addresses')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('is_default', true)
+      .maybeSingle()
+
+    res.json({
+      address: data,
+      shipping_draft: addressRowToShippingDraft(data),
+    })
   } catch (error: any) {
     res.status(500).json({ error: error.message })
   }

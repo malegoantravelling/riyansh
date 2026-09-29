@@ -10,13 +10,15 @@ import { Label } from '@/components/ui/label'
 import { useCart } from '@/contexts/CartContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { useToast } from '@/contexts/ToastContext'
-import { CHECKOUT_SHIPPING_KEY, type ShippingDraft } from '@/lib/checkout'
+import { CHECKOUT_SHIPPING_KEY, writeCheckoutShipping, type ShippingDraft } from '@/lib/checkout'
+import { resolveApiBase } from '@/lib/apiBase'
 
 export default function CheckoutPage() {
   const router = useRouter()
   const toast = useToast()
   const { items, isLoaded } = useCart()
-  const { user, loading: authLoading } = useAuth()
+  const { user, accessToken, loading: authLoading } = useAuth()
+  const [savedNotice, setSavedNotice] = useState(false)
 
   const [firstname, setFirstname] = useState('')
   const [phone, setPhone] = useState('')
@@ -34,20 +36,23 @@ export default function CheckoutPage() {
   }, [user, authLoading, router])
 
   useEffect(() => {
-    if (user?.user_metadata?.full_name) {
-      setFirstname(String(user.user_metadata.full_name).split(' ')[0] || '')
+    if (!user) return
+
+    const applyDraft = (draft: ShippingDraft) => {
+      if (draft.firstname) setFirstname(draft.firstname)
+      if (draft.phone) setPhone(draft.phone)
+      if (draft.address1) setAddress1(draft.address1)
+      if (draft.city) setCity(draft.city)
+      if (draft.state) setState(draft.state)
+      if (draft.pincode) setPincode(draft.pincode)
+      if (draft.notes) setNotes(draft.notes)
     }
+
     try {
       const saved = sessionStorage.getItem(CHECKOUT_SHIPPING_KEY)
       if (saved) {
-        const draft = JSON.parse(saved) as ShippingDraft
-        if (draft.firstname) setFirstname(draft.firstname)
-        if (draft.phone) setPhone(draft.phone)
-        if (draft.address1) setAddress1(draft.address1)
-        if (draft.city) setCity(draft.city)
-        if (draft.state) setState(draft.state)
-        if (draft.pincode) setPincode(draft.pincode)
-        if (draft.notes) setNotes(draft.notes)
+        applyDraft(JSON.parse(saved) as ShippingDraft)
+        setSavedNotice(true)
       }
       const note = sessionStorage.getItem('riyansh_checkout_note')
       if (note) {
@@ -57,7 +62,33 @@ export default function CheckoutPage() {
     } catch {
       // ignore
     }
-  }, [user])
+
+    if (user?.user_metadata?.full_name) {
+      setFirstname((prev) => prev || String(user.user_metadata.full_name).split(' ')[0] || '')
+    }
+
+    // Load last saved address from DB if form still empty / no session draft
+    const loadSaved = async () => {
+      if (!accessToken) return
+      try {
+        const hasSessionDraft = !!sessionStorage.getItem(CHECKOUT_SHIPPING_KEY)
+        if (hasSessionDraft) return
+        const res = await fetch(`${resolveApiBase()}/api/users/me/addresses`, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        })
+        if (!res.ok) return
+        const data = await res.json()
+        const draft = data.shipping_draft as ShippingDraft | null
+        if (draft?.address1) {
+          applyDraft(draft)
+          setSavedNotice(true)
+        }
+      } catch {
+        // ignore
+      }
+    }
+    void loadSaved()
+  }, [user, accessToken])
 
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
 
@@ -80,7 +111,7 @@ export default function CheckoutPage() {
     }
 
     try {
-      sessionStorage.setItem(CHECKOUT_SHIPPING_KEY, JSON.stringify(draft))
+      writeCheckoutShipping(draft)
     } catch {
       toast.error('Could not save address', 'Please try again.')
       return
@@ -125,6 +156,11 @@ export default function CheckoutPage() {
       <div className="max-w-5xl mx-auto px-4 py-10 grid lg:grid-cols-5 gap-8">
         <form onSubmit={onSubmit} className="lg:col-span-3 surface-glass space-y-4 rounded-2xl p-6">
           <h1 className="text-2xl font-bold text-[#013220] mb-2">Shipping details</h1>
+          {savedNotice ? (
+            <p className="text-sm text-[#5B8C51] bg-[#F3F7F0] border border-[#C8E0C0] rounded-lg px-3 py-2 mb-2">
+              We filled your last used address. You can edit it before continuing.
+            </p>
+          ) : null}
           <div className="grid sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="firstname">First name</Label>
